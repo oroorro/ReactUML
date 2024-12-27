@@ -1,0 +1,61 @@
+
+import React, { forwardRef} from 'react';
+import { useCallback, useRef, useEffect } from 'react';
+// import {ReactFlow, 
+// MiniMap,
+// Controls,
+// Background,
+// useNodesState,
+// useEdgesState,
+// addEdge,
+// }  
+
+import { Background } from './background/src';
+import { Controls } from './controls';
+import AlgoFlow from "./container/AlgoFlow";
+import {useNodesState, useEdgesState} from "./hook/useNodesEdgesState";
+
+
+
+// import 'reactflow/dist/style.css';
+
+const initialNodes = [
+{ id: '1', position: { x: 0, y: 0 }, data: { label: '1' } },
+{ id: '2', position: { x: 0, y: 100 }, data: { label: '2' } },
+];
+
+const initialEdges = [{ id: 'e1-2', source: '1', target: '2' }];
+
+function Flow() {
+
+const flowRef = useRef(null);
+
+useEffect(() => {
+    if (flowRef.current) {
+      console.log("Child component's DOM node:", flowRef.current.className);
+    }
+  }, []);
+
+const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
+const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+
+const onConnect = useCallback((params) => setEdges((eds) => addEdge(params, eds)), [setEdges]);
+
+return (
+  <div className='Flow' style={{width:"100vw", height:"100vh"}}>
+  <AlgoFlow
+    ref={flowRef}
+    nodes={nodes}
+    edges={edges}
+    onNodesChange={onNodesChange}
+    onEdgesChange={onEdgesChange}
+    onConnect={onConnect}
+  >
+    <Background /> 
+    <Controls/>
+  </AlgoFlow>
+  </div>  
+);
+}
+
+export default Flow;
