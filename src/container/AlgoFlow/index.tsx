@@ -30,10 +30,12 @@ import SelectionListener from '../../component/SelectionListener';
 import WrapWithStore from '../WrapWithStore';
 import GraphView from '../GraphView';
 
-
+//importing different types of Node 
+import ReactNode from '../../component/Nodes/ReactNode';
 
 const defaultNodeTypes: NodeTypes = {
     default: DefaultNode,
+    ReactNode: ReactNode,
 };
 
 const defaultEdgeTypes: EdgeTypes = {

@@ -6,6 +6,7 @@
 }
 
 .react-flow__node-default,
+.react-flow__node-ReactNode,
 .react-flow__node-input,
 .react-flow__node-output,
 .react-flow__node-group {

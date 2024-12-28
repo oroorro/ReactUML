@@ -1,6 +1,7 @@
 import type { ComponentType } from 'react';
 
 import DefaultNode from '../../component/Nodes/DefaultNode';
+import ReactNode from '../../component/Nodes/ReactNode';
 import wrapNode from '../../component/Nodes/wrapNode';
 import type { NodeTypes, NodeProps, NodeTypesWrapped, NodeOrigin, XYPosition } from '../../types';
 
@@ -12,6 +13,7 @@ export function createNodeTypes(nodeTypes: NodeTypes): NodeTypesWrapped {
     default: wrapNode((nodeTypes.default || DefaultNode) as ComponentType<NodeProps>),
     // output: wrapNode((nodeTypes.output || OutputNode) as ComponentType<NodeProps>),
     // group: wrapNode((nodeTypes.group || GroupNode) as ComponentType<NodeProps>),
+    ReactNode: wrapNode((nodeTypes.ReactNode || ReactNode) as ComponentType<NodeProps>),
   };
 
   const wrappedTypes = {} as NodeTypesWrapped;
