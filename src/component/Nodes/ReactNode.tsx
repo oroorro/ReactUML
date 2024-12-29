@@ -6,15 +6,13 @@ import { Position } from '../../types';
 import type { NodeProps } from '../../types';
 
 const ReactNode = ({
-  data,
   isConnectable,
-  
+  children,
 }: NodeProps) => {
+
+    console.log("children", children);
   return (
-    <>
-     
-      {data?.label}
-      
+    <> 
     </>
   );
 };

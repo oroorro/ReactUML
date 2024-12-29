@@ -41,6 +41,7 @@ export type Node<T = any, U extends string | undefined = string | undefined> = {
     focusable?: boolean;
     resizing?: boolean;
 
+    children?: ReactChild[];
     
     [internalsSymbol]?: {
         z?: number;
@@ -51,7 +52,10 @@ export type Node<T = any, U extends string | undefined = string | undefined> = {
 
 export type WrapNodeProps<T = any> = Pick<
   Node<T>,
-  'id' | 'data' | 'style' | 'className' | 'dragHandle' | 'sourcePosition' | 'targetPosition' | 'hidden' | 'ariaLabel'
+  'id' | 'data' | 'style' | 
+  'className' | 'dragHandle' | 
+  'sourcePosition' | 'targetPosition' | 
+  'hidden' | 'ariaLabel' | 'children'
 > &
   Required<Pick<Node<T>, 'selected' | 'type' | 'zIndex'>> & {
     isConnectable: boolean;
@@ -82,11 +86,15 @@ export type WrapNodeProps<T = any> = Pick<
 // props that get passed to a custom node
 export type NodeProps<T = any> = Pick<
   WrapNodeProps<T>,
-  'id' | 'data' | 'dragHandle' | 'type' | 'selected' | 'isConnectable' | 'xPos' | 'yPos' | 'zIndex'
+  'id' | 'data' | 'dragHandle' | 'type' | 'selected' | 'isConnectable' | 'xPos' | 'yPos' | 'zIndex' | 'children'
 > & {
   dragging: boolean;
   targetPosition?: Position;
   sourcePosition?: Position;
+  //children?: ReactChild[]; // Include children
+  color?: string; // Include color
+  title?: string; // Include title
+  isPropsInboundShared?: boolean;
 };
 
 
@@ -117,3 +125,32 @@ export type NodeDragItem = {
   };
 
 export type NodeOrigin = [number, number];
+
+
+//ReactNode
+// export type ReactNodeProps<T = any> = Pick<WrapNodeProps<T>,
+// 'id' | 'dragHandle' | 'type' | 'selected' | 'isConnectable' | 'xPos' | 'yPos' | 'zIndex'
+// > & {
+//   dragging: boolean; 
+//   children: ReactChild[], //nested array 
+//   color: string,
+//   title: string, 
+//   isPropsInboundShared: boolean,
+//   type: string,
+// };
+
+export type ReactChild = {
+  title: string,
+  numbersOfPropsGoingIn: number,
+  pipes: Pipe[],
+}
+
+export type Pipe = {
+  color: string,
+  numbersOfProps: number // number of props that is associated with current pipe color
+  name?: string //name of prop that is associated with current pipe color
+}
+
+export type ReactNodeType = {
+
+}
