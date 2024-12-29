@@ -143,6 +143,7 @@ export type ReactChild = {
   title: string,
   numbersOfPropsGoingIn: number,
   pipes: Pipe[],
+  children?: ReactChild[]; 
 }
 
 export type Pipe = {

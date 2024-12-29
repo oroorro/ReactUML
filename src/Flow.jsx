@@ -21,38 +21,79 @@ import { type } from '@testing-library/user-event/dist/type';
 // import 'reactflow/dist/style.css';
 
 const initialNodes = [
-{ id: '1', position: { x: 0, y: 0 }, data: { label: '1' } },
-{ id: '2', position: { x: 0, y: 100 }, data: { label: '2' } },
-{ id: '3', position: { x: 50, y: 50 }, data: { label: '3' }, type: 'ReactNode', 
-  children: [
-    {
-      title: "Child 1",
-      numbersOfPropsGoingIn: 3,
-      pipes: [
+  {
+    id: '1',
+    position: { x: 0, y: 0 },
+    data: { label: '1' },
+  },
+  {
+    id: '2',
+    position: { x: 0, y: 100 },
+    data: { label: '2' },
+  },
+  {
+    id: '3',
+    position: { x: 50, y: 50 },
+    type: 'ReactNode',
+    
+    data: {
+      label: '3',
+      title: 'WrapNode',
+      children: [
         {
-          color: "red",
-          numbersOfProps: 2,
-          name: "Prop A",
+          title: "Child 1",
+          numbersOfPropsGoingIn: 3,
+          pipes: [
+            {
+              color: "red",
+              numbersOfProps: 2,
+              name: "Prop A",
+            },
+          ],
+          children: [
+            {
+              title: "Grandchild 1",
+              numbersOfPropsGoingIn: 1,
+              pipes: [
+                {
+                  color: "blue",
+                  numbersOfProps: 1,
+                  name: "Prop B",
+                },
+              ],
+              children: [
+                {
+                  title: "GrandGrandchild 1",
+                  numbersOfPropsGoingIn: 1,
+                  pipes: [
+                    {
+                      color: "blue",
+                      numbersOfProps: 1,
+                      name: "Prop B",
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
         },
         {
-          color: "blue",
-          numbersOfProps: 1,
+          title: "Child 2",
+          numbersOfPropsGoingIn: 2,
+          pipes: [
+            {
+              color: "green",
+              numbersOfProps: 2,
+              name: "Prop C",
+            },
+          ],
         },
       ],
     },
-    {
-      title: "Child 2",
-      numbersOfPropsGoingIn: 2,
-      pipes: [
-        {
-          color: "green",
-          numbersOfProps: 2,
-          name: "Prop B",
-        },
-      ],
-    },
- ] },
+  },
 ];
+
+
 
 const initialEdges = [{ id: 'e1-2', source: '1', target: '2' }];
 
