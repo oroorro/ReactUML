@@ -43,24 +43,29 @@ const initialNodes = [
       children: [
         {
           title: "NodeRenderer",
-          numbersOfPropsGoingIn: 3,
+          numbersOfPropsGoingIn: 18,
           color: '#ffa8d5',
           pipes: [
             {
-              color: "red",
-              numbersOfProps: 2,
+              color: '#dfe7f5',
+              numbersOfProps: 18,
               name: "Node",
             },
           ],
           children: [
             {
               title: "EdgeRenderer",
-              numbersOfPropsGoingIn: 1,
+              numbersOfPropsGoingIn: 15,
               color: '#f26d1f',
               pipes: [
                 {
-                  color: "blue",
-                  numbersOfProps: 1,
+                  color: '#dfe7f5',
+                  numbersOfProps: 8,
+                  name: "Node",
+                },
+                {
+                  color: '#ffa8d5',
+                  numbersOfProps: 7,
                   name: "Edge",
                 },
               ],
@@ -71,7 +76,17 @@ const initialNodes = [
                   color: '#49abf5',
                   pipes: [
                     {
-                      color: "blue",
+                      color: '#dfe7f5',
+                      numbersOfProps: 1,
+                      name: "Node",
+                    },
+                    {
+                      color: '#ffa8d5',
+                      numbersOfProps: 1,
+                      name: "Edge",
+                    },
+                    {
+                      color: '#f26d1f',
                       numbersOfProps: 1,
                       name: "ZoomScale",
                     },
@@ -87,7 +102,7 @@ const initialNodes = [
           color: '#ffdc6b',
           pipes: [
             {
-              color: "green",
+              color: '#dfe7f5',
               numbersOfProps: 2,
               name: "InitialNodes[]",
             },
