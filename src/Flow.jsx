@@ -38,38 +38,42 @@ const initialNodes = [
     
     data: {
       label: '3',
-      title: 'WrapNode',
+      title: 'ZoomPane',
+      color: '#dfe7f5',
       children: [
         {
-          title: "Child 1",
+          title: "NodeRenderer",
           numbersOfPropsGoingIn: 3,
+          color: '#ffa8d5',
           pipes: [
             {
               color: "red",
               numbersOfProps: 2,
-              name: "Prop A",
+              name: "Node",
             },
           ],
           children: [
             {
-              title: "Grandchild 1",
+              title: "EdgeRenderer",
               numbersOfPropsGoingIn: 1,
+              color: '#f26d1f',
               pipes: [
                 {
                   color: "blue",
                   numbersOfProps: 1,
-                  name: "Prop B",
+                  name: "Edge",
                 },
               ],
               children: [
                 {
-                  title: "GrandGrandchild 1",
+                  title: "Pane",
                   numbersOfPropsGoingIn: 1,
+                  color: '#49abf5',
                   pipes: [
                     {
                       color: "blue",
                       numbersOfProps: 1,
-                      name: "Prop B",
+                      name: "ZoomScale",
                     },
                   ],
                 },
@@ -78,13 +82,14 @@ const initialNodes = [
           ],
         },
         {
-          title: "Child 2",
+          title: "Store",
           numbersOfPropsGoingIn: 2,
+          color: '#ffdc6b',
           pipes: [
             {
               color: "green",
               numbersOfProps: 2,
-              name: "Prop C",
+              name: "InitialNodes[]",
             },
           ],
         },

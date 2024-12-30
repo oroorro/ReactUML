@@ -204,6 +204,7 @@ export default (NodeComponent: ComponentType<NodeProps>) => {
           transform: `translate(${xPosOrigin}px,${yPosOrigin}px)`,
           pointerEvents: hasPointerEvents ? 'all' : 'none',
           visibility: initialized ? 'visible' : 'hidden',
+          backgroundColor: data.color, 
           ...style,
         }}
         data-id={id}

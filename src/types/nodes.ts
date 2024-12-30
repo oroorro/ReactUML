@@ -142,6 +142,7 @@ export type NodeOrigin = [number, number];
 export type ReactChild = {
   title: string,
   numbersOfPropsGoingIn: number,
+  color: string,
   pipes: Pipe[],
   children?: ReactChild[]; 
 }
