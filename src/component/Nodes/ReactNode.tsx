@@ -68,25 +68,46 @@ const ReactNode = ({
                                     <h4>{child.title}</h4>
                                     <p>Props Going In: {child.numbersOfPropsGoingIn}</p>
 
-                                    <div style={{ position: 'absolute', top: '0px', left: '0px', display: 'flex', flexDirection: 'column', }}>
+                                    <div 
+                                        style={{ 
+                                            position: 'absolute', 
+                                            top: '0px', 
+                                            left: '0px', 
+                                            display: 'flex', 
+                                            flexDirection: 'column', 
+                                            overflow: 'visible',
+                                            filter: 'drop-shadow(3px 4px 2.5px rgba(0, 0, 0, 0.8))',
+                                            }}>
                                         {child.pipes.map((pipe, i) => {
                                             //console.log("pipe", i , child.pipes.length, child.pipes);
                                             return (
                                                 <div >
 
                                                     {i != child.pipes.length - 1 &&
-                                                        <div style={{ height: '15px', width: '5px', backgroundColor: pipe.color, border: '1px solid black' }}>
+                                                        <div style={{ 
+                                                            height: '15px', 
+                                                            width: '5px', 
+                                                            backgroundColor: pipe.color, 
+                                                            border: '1px solid black',
+                                                            boxShadow: '0 -5px 5px -5px #333',
+                                                        }}>
                                                         </div>
                                                     }
                                                     {i == child.pipes.length - 1 &&
                                                         <div
-                                                            style={{
-                                                                width: '15px',
-                                                                height: '15px',
-                                                                backgroundColor: pipe.color,
-                                                                clipPath: 'polygon(0 0, 0 100%, 100% 100%, 100% 60%, 40% 60%, 40% 0%)',
-                                                                border: '1px solid black',
-                                                            }}>
+                                                            style={{ filter: 'drop-shadow(2px 4px 3px rgba(0, 0, 0, 0.5))',}}
+                                                        >
+                                                            <div
+                                                                style={{
+                                                                    position: 'relative', 
+                                                                    width: '15px',
+                                                                    height: '15px',
+                                                                    backgroundColor: pipe.color,
+                                                                    clipPath: 'polygon(0 0, 0 100%, 100% 100%, 100% 60%, 40% 60%, 40% 0%)',
+                                                                    border: '1px solid black',
+                                                                   
+                                                                }}>
+                                                            </div>
                                                         </div>
                                                     }
                                                 </div>
