@@ -40,11 +40,55 @@ const initialNodes = [
       label: '3',
       title: 'ZoomPane',
       color: '#dfe7f5',
+      attributes: [
+        {
+          nameOfAttribute: 'import',
+          totalNumberOfAttribute: 15,
+          AttributeContents: [
+            {
+              name: 'initialNodes',
+              belongsTo: 'X2D',
+            }
+          ]
+        },
+        {
+          nameOfAttribute: 'React_InBuilt',
+          totalNumberOfAttribute: 5,
+          AttributeContents: [
+            {
+              name: 'UseEffect',
+              belongsTo: 'X2D',
+            }
+          ]
+        },
+      ],
       children: [
         {
           title: "NodeRenderer",
           numbersOfPropsGoingIn: 18,
           color: '#ffa8d5',
+          attributes: [
+            {
+              nameOfAttribute: 'import',
+              totalNumberOfAttribute: 15,
+              AttributeContents: [
+                {
+                  name: 'initialNodes',
+                  belongsTo: 'X2D',
+                }
+              ]
+            },
+            {
+              nameOfAttribute: 'React_InBuilt',
+              totalNumberOfAttribute: 5,
+              AttributeContents: [
+                {
+                  name: 'UseEffect',
+                  belongsTo: 'X2D',
+                }
+              ]
+            },
+          ],
           pipes: [
             {
               color: '#dfe7f5',

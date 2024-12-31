@@ -144,7 +144,8 @@ export type ReactChild = {
   numbersOfPropsGoingIn: number,
   color: string,
   pipes: Pipe[],
-  children?: ReactChild[]; 
+  attributes: Attribute[],
+  children?: ReactChild[], 
 }
 
 export type Pipe = {
@@ -155,4 +156,15 @@ export type Pipe = {
 
 export type ReactNodeType = {
 
+}
+
+export type Attribute = {
+  nameOfAttribute: string,
+  totalNumberOfAttribute: number,
+  AttributeContents: AttributeContent[],
+}
+
+export type AttributeContent = {
+  name: string, 
+  belongsTo: string, //id of Node that created props for the first time 
 }

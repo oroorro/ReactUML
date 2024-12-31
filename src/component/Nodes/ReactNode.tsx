@@ -3,7 +3,7 @@ import React, { memo } from 'react';
 
 import Handle from '../../component/Handle';
 import { Position } from '../../types';
-import type { NodeProps, ReactChild } from '../../types';
+import type { NodeProps, ReactChild, Attribute } from '../../types';
 
 function darkenHexColor(hex: string, amount = 10) {
     // Ensure the hex value starts with '#'
@@ -32,7 +32,7 @@ const ReactNode = ({
 
 }: NodeProps) => {
 
-    const { children, title, color } = data;
+    const { children, title, color, attributes } = data;
     // Recursive function to render children
     const renderChildren = (children: ReactChild[] | undefined, level: number, parentColor: string): JSX.Element | null => {
         if (!children || children.length === 0) {
@@ -49,66 +49,90 @@ const ReactNode = ({
                             key={index}
                             style={{
                                 marginLeft: '20px',
-                                border: '1px black solid',
+
+                                padding: '1px',
                                 backgroundColor: darkerColor,
+                                boxShadow: 'inset 0 0 5px',
 
                             }}
                         > {/* parent's inner boundary where return statement goes */}
 
+
+
                             <div id='pipe_sticky_wrapper' style={{ position: 'relative' }}>
                                 <div
+                                    id="child_Node"
                                     style={{
                                         backgroundColor: child.color,
                                         marginLeft: '20px',
                                         marginRight: '10px',
                                         marginBottom: '5px',
                                         marginTop: '5px',
-                                        border: 'dashed 2px green',
-                                    }}>  {/*child's outer boundary*/}
-                                    <h4>{child.title}</h4>
-                                    <p>Props Going In: {child.numbersOfPropsGoingIn}</p>
 
-                                    <div 
-                                        style={{ 
-                                            position: 'absolute', 
-                                            top: '0px', 
-                                            left: '0px', 
-                                            display: 'flex', 
-                                            flexDirection: 'column', 
+                                        minWidth: '100px',
+                                        minHeight: '70px',
+                                    }}>  {/*child's outer boundary*/}
+
+
+                                    {/** Child's boundary */}
+                                    <div style={{ marginLeft: '20px', marginRight: '20px', boxShadow: 'inset 0 -5px 5px -5px #333, inset -5px 0 5px -5px #333, inset 5px 0 5px -5px #333' }}>
+                                        <h4>{child.title}</h4>
+                                    </div>
+                                    <div style={{display: 'flex'}}>
+                                            {child.attributes && child.attributes.map((attr: Attribute) => (
+                                                <div>
+                                                    <div>{attr.nameOfAttribute}</div>
+                                                    <div>{attr.totalNumberOfAttribute}</div>
+                                                </div>
+                                            ))}
+                                    </div>
+
+
+
+                                    <div
+                                        style={{
+                                            position: 'absolute',
+                                            top: '0px',
+                                            left: '0px',
+                                            display: 'flex',
+                                            flexDirection: 'column',
                                             overflow: 'visible',
                                             filter: 'drop-shadow(3px 4px 2.5px rgba(0, 0, 0, 0.8))',
-                                            }}>
+                                        }}>
+
+                                        <div style={{ width: '18px', height: '18px', backgroundColor: "white" }}> {/** rendering numbers of props going in to child*/}
+                                            {child.numbersOfPropsGoingIn}
+                                        </div>
+
                                         {child.pipes.map((pipe, i) => {
                                             //console.log("pipe", i , child.pipes.length, child.pipes);
                                             return (
-                                                <div >
+                                                <div key={i}>
 
                                                     {i != child.pipes.length - 1 &&
-                                                        <div style={{ 
-                                                            height: '15px', 
-                                                            width: '5px', 
-                                                            backgroundColor: pipe.color, 
+                                                        <div style={{
+                                                            height: '15px',
+                                                            width: '5px',
+                                                            backgroundColor: pipe.color,
                                                             border: '1px solid black',
                                                             boxShadow: '0 -5px 5px -5px #333',
                                                         }}>
                                                         </div>
                                                     }
                                                     {i == child.pipes.length - 1 &&
+
                                                         <div
-                                                            style={{ filter: 'drop-shadow(2px 4px 3px rgba(0, 0, 0, 0.5))',}}
-                                                        >
-                                                            <div
-                                                                style={{
-                                                                    position: 'relative', 
-                                                                    width: '15px',
-                                                                    height: '15px',
-                                                                    backgroundColor: pipe.color,
-                                                                    clipPath: 'polygon(0 0, 0 100%, 100% 100%, 100% 60%, 40% 60%, 40% 0%)',
-                                                                    border: '1px solid black',
-                                                                   
-                                                                }}>
-                                                            </div>
+                                                            style={{
+                                                                position: 'relative',
+                                                                width: '15px',
+                                                                height: '15px',
+                                                                backgroundColor: pipe.color,
+                                                                clipPath: 'polygon(0 0, 0 100%, 100% 100%, 100% 60%, 40% 60%, 40% 0%)',
+                                                                border: '1px solid black',
+
+                                                            }}>
                                                         </div>
+
                                                     }
                                                 </div>
                                             )
@@ -126,11 +150,20 @@ const ReactNode = ({
         );
     };
 
-    console.log("children", children.color, "title", title);
+    console.log("children", children, "attribute", attributes);
 
-    return (
+    
+    return ( 
         <div style={{ backgroundColor: color }}>
             <h3>{title}</h3>
+            <div style={{display: 'flex'}}>
+                {attributes.map((attr: Attribute) => (
+                    <div>
+                        <div>{attr.nameOfAttribute}</div>
+                        <div>{attr.totalNumberOfAttribute}</div>
+                    </div>
+                ))}
+            </div>
             {renderChildren(children, 1, color)}
         </div>
     );
