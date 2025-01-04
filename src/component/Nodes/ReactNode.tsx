@@ -1,9 +1,11 @@
 
+
+
 import React, { memo } from 'react';
 
 import Handle from '../../component/Handle';
 import { Position } from '../../types';
-import type { NodeProps, ReactChild, Attribute } from '../../types';
+import type { NodeProps, ReactChild, Attribute, Pipe } from '../../types';
 
 function darkenHexColor(hex: string, amount = 10) {
     // Ensure the hex value starts with '#'
@@ -33,6 +35,14 @@ const ReactNode = ({
 }: NodeProps) => {
 
     const { children, title, color, attributes } = data;
+
+    
+
+
+    const handlePropGoingInToChild = (pipe: Pipe) => {
+        console.log("pipe clicked ", pipe)
+    }
+
     // Recursive function to render children
     const renderChildren = (children: ReactChild[] | undefined, level: number, parentColor: string): JSX.Element | null => {
         if (!children || children.length === 0) {
@@ -40,7 +50,9 @@ const ReactNode = ({
         }
 
         return (
-            <div id='parents_InnerBoundary_Box' >
+            <div id='parents_InnerBoundary_Box' 
+                style={{boxShadow: '3px 4px 15px inset', padding: '3px'}}
+            >
                 {children.map((child, index) => {
 
                     const darkerColor = darkenHexColor(parentColor, 20);
@@ -51,8 +63,8 @@ const ReactNode = ({
                                 marginLeft: '20px',
 
                                 padding: '1px',
-                                backgroundColor: darkerColor,
-                                boxShadow: 'inset 0 0 5px',
+                                // backgroundColor: darkerColor,
+                                // boxShadow: 'inset 0 0 5px',
 
                             }}
                         > {/* parent's inner boundary where return statement goes */}
@@ -71,16 +83,19 @@ const ReactNode = ({
 
                                         minWidth: '100px',
                                         minHeight: '70px',
+                                        padding: '0px 5px',
                                     }}>  {/*child's outer boundary*/}
 
 
                                     {/** Child's boundary */}
                                     <div style={{ marginLeft: '20px', marginRight: '20px', boxShadow: 'inset 0 -5px 5px -5px #333, inset -5px 0 5px -5px #333, inset 5px 0 5px -5px #333' }}>
-                                        <h4>{child.title}</h4>
+                                        <div style={{ height: '30px', fontSize: 'x-large', fontWeight: '900'}}>
+                                            {child.title}
+                                        </div>
                                     </div>
-                                    <div style={{display: 'flex'}}>
+                                    <div style={{display: 'flex'}}> {/** displaying attributes */}
                                             {child.attributes && child.attributes.map((attr: Attribute) => (
-                                                <div>
+                                                <div style={{border: '1px solid black'}}>
                                                     <div>{attr.nameOfAttribute}</div>
                                                     <div>{attr.totalNumberOfAttribute}</div>
                                                 </div>
@@ -108,19 +123,33 @@ const ReactNode = ({
                                             //console.log("pipe", i , child.pipes.length, child.pipes);
                                             return (
                                                 <div key={i}>
-
                                                     {i != child.pipes.length - 1 &&
                                                         <div style={{
-                                                            height: '15px',
+                                                            height: '13px',
                                                             width: '5px',
                                                             backgroundColor: pipe.color,
-                                                            border: '1px solid black',
+                                                            // border: '1px solid black',
                                                             boxShadow: '0 -5px 5px -5px #333',
-                                                        }}>
+                                                        }}
+                                                            onClick={(e)=>{handlePropGoingInToChild(pipe)}}
+                                                        >
                                                         </div>
                                                     }
-                                                    {i == child.pipes.length - 1 &&
-
+                                                    {/** when pipe's number are odd and bigger than 1, render -- vertical arrow of parent's color pipe  */}
+                                                    {i == child.pipes.length - 1 && child.pipes.length > 1 && child.pipes.length % 2 == 0 &&
+                                                        <div style={{
+                                                            height: '5px',
+                                                            width: '13px',
+                                                            backgroundColor: pipe.color,
+                                                            // border: '1px solid black',
+                                                            boxShadow: '0 -5px 5px -5px #333',
+                                                        }}
+                                                            onClick={(e)=>{handlePropGoingInToChild(pipe)}}
+                                                        >
+                                                        </div>
+                                                    }
+                                                    {/** when pipe's number are even, render |_ corner type arrow of parent's color pipe  */}
+                                                    {i == child.pipes.length - 1 && child.pipes.length % 2 != 0 &&
                                                         <div
                                                             style={{
                                                                 position: 'relative',
@@ -132,7 +161,6 @@ const ReactNode = ({
 
                                                             }}>
                                                         </div>
-
                                                     }
                                                 </div>
                                             )

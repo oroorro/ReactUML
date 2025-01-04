@@ -130,6 +130,11 @@ const initialNodes = [
                       name: "Edge",
                     },
                     {
+                      color: 'blue',
+                      numbersOfProps: 1,
+                      name: "Edge",
+                    },
+                    {
                       color: '#f26d1f',
                       numbersOfProps: 1,
                       name: "ZoomScale",
