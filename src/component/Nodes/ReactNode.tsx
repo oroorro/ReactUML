@@ -12,6 +12,14 @@ const PIPE_HEIGHT_VERTICAL = 5;
 const PIPE_WIDTH_HORIZONTAL = 5;
 const PIPE_HEIGHT_HORIZONTAL = 13;
 
+// setting attribute colors for different icons
+const attributeColors: Record<string, string> = {
+    import: "#00bfff",
+    reactInBuilt: "#ffcc00",
+    vars: "#ff5733",
+    functions: "#8e44ad",
+    hooks: "#ffb0fe", 
+};
 
 
 const ReactNode = ({
@@ -21,7 +29,7 @@ const ReactNode = ({
 
     const { children, title, color, attributes } = data;
 
-    
+
     const handlePropGoingInToChild = (pipe: Pipe) => {
         console.log("pipe clicked ", pipe)
     }
@@ -33,7 +41,7 @@ const ReactNode = ({
         }
 
         return (
-            <div className='returnScope' 
+            <div className='returnScope'
                 style={{
                     // boxShadow: 'rgba(0,0,0,0.7) 5px 5px 30px inset', 
                     boxShadow: 'inset 0px 48px 66px 0px rgba(72, 72, 72, 0.59)',
@@ -54,7 +62,7 @@ const ReactNode = ({
 
                             <div className='pipeStickyWrapper' style={{ position: 'relative' }}>
 
-                                <div className='NodePositionWrapper' style={{paddingTop: `${(PIPE_HEIGHT_HORIZONTAL * child.pipes.length) - 10}px`}}>
+                                <div className='NodePositionWrapper' style={{ paddingTop: `${(PIPE_HEIGHT_HORIZONTAL * child.pipes.length) - 10}px` }}>
                                     <div
                                         className="childNode"
                                         style={{
@@ -72,100 +80,109 @@ const ReactNode = ({
 
 
                                         {/** Child's boundary */}
-                                        <div 
-                                            style={{ 
-                                                marginLeft: '20px', 
-                                                marginRight: '20px', 
+                                        <div
+                                            style={{
+                                                marginLeft: '20px',
+                                                marginRight: '20px',
                                                 marginBottom: '5px',
-                                                boxShadow: 'inset 0 -5px 5px -5px #333, inset -5px 0 5px -5px #333, inset 5px 0 5px -5px #333' 
-                                                }}
-                                        >
-                                            <div className='NodeTitle' 
-                                            style={{ 
-                                                height: '30px', 
-                                                fontSize: 'x-large', 
-                                                fontWeight: '900',
-                                                padding: '0px 5px',
-                                                maxWidth: '200px'
+                                                boxShadow: 'inset 0 -5px 5px -5px #333, inset -5px 0 5px -5px #333, inset 5px 0 5px -5px #333'
                                             }}
+                                        >
+                                            <div className='NodeTitle'
+                                                style={{
+                                                    height: '30px',
+                                                    fontSize: 'x-large',
+                                                    fontWeight: '900',
+                                                    padding: '0px 5px',
+                                                    maxWidth: '200px'
+                                                }}
                                             >
                                                 {child.title}
                                             </div>
                                         </div>
-                                        <div style={{display: 'flex'}}> {/** displaying attributes */}
-                                                {child.attributes && child.attributes.map((attr: Attribute) => (
-                                                    <div style={{border: '1px solid black'}}>
-                                                        <div>{attr.nameOfAttribute}</div>
-                                                        <div>{attr.totalNumberOfAttribute}</div>
-                                                        <AttributeIcon color={''} nameOfIcon={'Import'}/>
+                                        <div style={{ display: 'flex', gap: '5px' }}> {/** displaying attributes */}
+                                            {child.attributes && child.attributes.map((attr: Attribute) => {
+                                                console.log("attributeColors", attr.nameOfAttribute, attributeColors[attr.nameOfAttribute])
+
+                                                return(
+                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: '40px', minHeight: '25px', backgroundColor: 'white', borderRadius: '5px', padding: '1px' }}>
+                                                    {/* <div>{attr.nameOfAttribute}</div> */}
+                                                    <div className='attributeIconWrapper' style={{display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                                                        
+                                                        <AttributeIcon  color={attributeColors[attr.nameOfAttribute]} nameOfIcon={attr.nameOfAttribute} />
+                                                        <span style={{ marginLeft: '3px', fontSize: '18px', fontWeight: '500' }}>{attr.totalNumberOfAttribute}</span>
                                                     </div>
-                                                ))}
+                                                </div>
+                                                )
+                                                
+
+                                            })}
                                         </div>
                                         {renderChildren(child.children, level + 1, child.color)}
                                     </div>
                                 </div>
                                 <div
-                                        style={{
-                                            position: 'absolute',
-                                            top: '0px',
-                                            left: '0px',
-                                            display: 'flex',
-                                            flexDirection: 'column',
-                                            overflow: 'visible',
-                                            filter: 'drop-shadow(rgba(0, 0, 0, 0.9) 6px 4px 2.5px)',
-                                        }}>
+                                    style={{
+                                        position: 'absolute',
+                                        top: '0px',
+                                        left: '0px',
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        overflow: 'visible',
+                                        filter: 'drop-shadow(rgba(0, 0, 0, 0.9) 6px 4px 2.5px)',
+                                    }}>
 
-                                        <div style={{ width: '18px', height: '18px', backgroundColor: "white", position: 'relative', left: '-5px' }}> {/** rendering numbers of props going in to child*/}
-                                            {child.numbersOfPropsGoingIn}
-                                        </div>
+                                    <div style={{ width: '18px', height: '18px', backgroundColor: "white", position: 'relative', left: '-5px' }}> {/** rendering numbers of props going in to child*/}
+                                        {child.numbersOfPropsGoingIn}
+                                    </div>
 
-                                        {child.pipes.map((pipe, i) => {
-                                            //console.log("pipe", i , child.pipes.length, child.pipes);
-                                            return (
-                                                <div key={i}>
-                                                    {/** rendering each pipes except the tail */}
-                                                    {i != child.pipes.length - 1 &&
-                                                        <div style={{
-                                                            height: `${PIPE_HEIGHT_HORIZONTAL}px`,
-                                                            width: `${PIPE_WIDTH_HORIZONTAL}px`,
-                                                            position: 'relative',
-                                                            backgroundColor: pipe.color,
-                                                            boxShadow: '0 -5px 5px -5px #333',
-                                                        }}
-                                                            onClick={(e)=>{handlePropGoingInToChild(pipe)}}
-                                                        >
-                                                        </div>
-                                                    }
-                                                    {/** redering tail 
+                                    {child.pipes.map((pipe, i) => {
+                                        //console.log("pipe", i , child.pipes.length, child.pipes);
+                                        return (
+                                            <div key={i}>
+                                                {/** rendering each pipes except the tail */}
+                                                {i != child.pipes.length - 1 &&
+                                                    <div style={{
+                                                        height: `${PIPE_HEIGHT_HORIZONTAL}px`,
+                                                        width: `${PIPE_WIDTH_HORIZONTAL}px`,
+                                                        position: 'relative',
+                                                        backgroundColor: pipe.color,
+                                                        boxShadow: '0 -5px 5px -5px #333',
+                                                    }}
+                                                        onClick={(e) => { handlePropGoingInToChild(pipe) }}
+                                                    >
+                                                    </div>
+                                                }
+                                                {/** redering tail 
                                                      * when pipe's number are odd and bigger than 1, render -- vertical arrow of parent's color pipe  */}
-                                                    {i == child.pipes.length - 1 && child.pipes.length > 1 && child.pipes.length % 2 == 0 &&
-                                                        <div style={{
-                                                            height: `${PIPE_HEIGHT_VERTICAL}px`,
-                                                            width: `${PIPE_WIDTH_VERTICAL}px`,
+                                                {i == child.pipes.length - 1 && child.pipes.length > 1 && child.pipes.length % 2 == 0 &&
+                                                    <div style={{
+                                                        height: `${PIPE_HEIGHT_VERTICAL}px`,
+                                                        width: `${PIPE_WIDTH_VERTICAL}px`,
+                                                        backgroundColor: pipe.color,
+                                                        boxShadow: '0 -5px 5px -5px #333',
+                                                    }}
+                                                        onClick={(e) => { handlePropGoingInToChild(pipe) }}
+                                                    >
+                                                    </div>
+                                                }
+                                                {/** when pipe's number are even, render |_ corner type arrow of parent's color pipe  */}
+                                                {i == child.pipes.length - 1 && child.pipes.length % 2 != 0 &&
+                                                    <div
+                                                        style={{
+                                                            position: 'relative',
+                                                            height: `${PIPE_HEIGHT_HORIZONTAL}px`,
+                                                            width: `${PIPE_HEIGHT_HORIZONTAL}px`,
                                                             backgroundColor: pipe.color,
-                                                            boxShadow: '0 -5px 5px -5px #333',
-                                                        }}
-                                                            onClick={(e)=>{handlePropGoingInToChild(pipe)}}
-                                                        >
-                                                        </div>
-                                                    }
-                                                    {/** when pipe's number are even, render |_ corner type arrow of parent's color pipe  */}
-                                                    {i == child.pipes.length - 1 && child.pipes.length % 2 != 0 &&
-                                                        <div
-                                                            style={{
-                                                                position: 'relative',
-                                                                height: `${PIPE_HEIGHT_HORIZONTAL}px`,
-                                                                width: `${PIPE_HEIGHT_HORIZONTAL}px`,
-                                                                backgroundColor: pipe.color,
-                                                                clipPath: 'polygon(0 0, 0 100%, 100% 100%, 100% 60%, 40% 60%, 40% 0%)',
+                                                            clipPath: 'polygon(0 0, 0 100%, 100% 100%, 100% 60%, 40% 60%, 40% 0%)',
 
-                                                            }}>
-                                                        </div>
-                                                    }
-                                                </div>
-                                            )
+                                                        }}>
+                                                    </div>
+                                                }
+                                            </div>
+                                        )
 
-                                        })}
+                                    })}
                                 </div>
                             </div>
                         </div>
@@ -177,11 +194,11 @@ const ReactNode = ({
 
     console.log("children", children, "attribute", attributes);
 
-    
-    return ( 
+
+    return (
         <div style={{ backgroundColor: color }}>
             <h3>{title}</h3>
-            <div style={{display: 'flex'}}>
+            <div style={{ display: 'flex' }}>
                 {attributes.map((attr: Attribute) => (
                     <div>
                         <div>{attr.nameOfAttribute}</div>

@@ -2,12 +2,14 @@ import './AttributeIconStyle.css'
 
 type AttributeIconProps = {
     color: string,
-    nameOfIcon: string
+    nameOfIcon: string,
+    size?: number,
 }
 
 
 const AttributeIcon = (props: AttributeIconProps) => {
 
+    const iconFirstLetter = props.nameOfIcon.charAt(0).toUpperCase();
 
     function changeHexColorByReferenceDifference(
         hex: string,
@@ -53,21 +55,19 @@ const AttributeIcon = (props: AttributeIconProps) => {
         return rgbToHex(modifiedRgb);
       }
       
-
-      const originalColor: string = '#ffdc6b'; // The color that we want to modify 
       const modifiedColor: string = changeHexColorByReferenceDifference(
-        originalColor,
+        props.color,
         '#00bfff', //ref color that we are changing from 
         '#acf4fa' //ref color that we are changing to 
       );
       
-    console.log(modifiedColor);
+    //console.log("modifiedColor", props.color, modifiedColor);
       
     return (
         <div className="icon-container">
-            <div className="circle">
-                <div className="inner-circle" style={{backgroundColor: '#00bfff'}}>
-                    <span className="icon">i</span>
+            <div className="circle" style={{width: '20px', height: '20px'}}>
+                <div className="inner-circle" style={{backgroundColor: props.color, width: '17px', height: '17px', boxShadow: `0px 4.5px 2px ${modifiedColor} inset`}}>
+                    <span className="icon" style={{fontSize:'15px', transform: 'scaleX(1.2)'}}>{iconFirstLetter}</span>
                 </div>
             </div>
         </div>
