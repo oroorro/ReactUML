@@ -141,6 +141,38 @@ const initialNodes = [
                     },
                   ],
                 },
+                {
+                  title: "Zoom",
+                  numbersOfPropsGoingIn: 4,
+                  color: '#e8c390',
+                  pipes: [
+                    {
+                      color: '#dfe7f5',
+                      numbersOfProps: 1,
+                      name: "Node",
+                    },
+                    {
+                      color: '#ffa8d5',
+                      numbersOfProps: 1,
+                      name: "Edge",
+                    },
+                    {
+                      color: 'green',
+                      numbersOfProps: 1,
+                      name: "Edge",
+                    },
+                    {
+                      color: 'blue',
+                      numbersOfProps: 1,
+                      name: "Edge",
+                    },
+                    {
+                      color: '#f26d1f',
+                      numbersOfProps: 1,
+                      name: "ZoomScale",
+                    },
+                  ],
+                },
               ],
             },
           ],
