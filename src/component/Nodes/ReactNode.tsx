@@ -5,10 +5,13 @@ import Handle from '../../component/Handle';
 import { Position } from '../../types';
 import type { NodeProps, ReactChild, Attribute, Pipe } from '../../types';
 
+import { AttributeIcon, AttributeIconProps } from '../NodeAttribute/AttributeIcon';
+
 const PIPE_WIDTH_VERTICAL = 13;
 const PIPE_HEIGHT_VERTICAL = 5;
 const PIPE_WIDTH_HORIZONTAL = 5;
 const PIPE_HEIGHT_HORIZONTAL = 13;
+
 
 
 const ReactNode = ({
@@ -94,6 +97,7 @@ const ReactNode = ({
                                                     <div style={{border: '1px solid black'}}>
                                                         <div>{attr.nameOfAttribute}</div>
                                                         <div>{attr.totalNumberOfAttribute}</div>
+                                                        <AttributeIcon color={''} nameOfIcon={'Import'}/>
                                                     </div>
                                                 ))}
                                         </div>
