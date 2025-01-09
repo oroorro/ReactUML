@@ -66,7 +66,34 @@ const initialNodes = [
           totalNumberOfAttribute: 9,
           AttributeContents: [
             {
-              name: 'UseEffect',
+              name: 'names',
+              type: 'string[]',
+              belongsTo: 'X2D',
+            },
+            {
+              name: 'users',
+              type: 'User[]',
+              belongsTo: 'X2D',
+            },
+            {
+              name: 'userLocation',
+              type: '[string, number, number]',
+              belongsTo: 'X2D',
+            },
+            {
+              name: 'buttonColor',
+              type: "red | green | blue",
+              belongsTo: 'XW2',
+            },
+            {
+              name: 'userId',
+              type: 'string | number',
+              belongsTo: 'X2D',
+            },
+            {
+              name: 'currentUserRole',
+              type: 'UserRole',
+              //nestedType: {string 'nameOfType': object 'typeDef'}
               belongsTo: 'X2D',
             }
           ]
@@ -93,7 +120,34 @@ const initialNodes = [
               totalNumberOfAttribute: 12,
               AttributeContents: [
                 {
-                  name: 'UseEffect',
+                  name: 'names',
+                  type: 'string[]',
+                  belongsTo: 'X2D',
+                },
+                {
+                  name: 'users',
+                  type: 'User[]',
+                  belongsTo: 'X2D',
+                },
+                {
+                  name: 'userLocation',
+                  type: '[string, number, number]',
+                  belongsTo: 'X2D',
+                },
+                {
+                  name: 'buttonColor',
+                  type: "red | green | blue",
+                  belongsTo: 'XW2',
+                },
+                {
+                  name: 'userId',
+                  type: 'string | number',
+                  belongsTo: 'X2D',
+                },
+                {
+                  name: 'currentUserRole',
+                  type: 'UserRole',
+                  //nestedType: {string 'nameOfType': object 'typeDef'}
                   belongsTo: 'X2D',
                 }
               ]
@@ -144,8 +198,13 @@ const initialNodes = [
                       totalNumberOfAttribute: 5,
                       AttributeContents: [
                         {
-                          name: 'UseEffect',
-                          belongsTo: 'X2D',
+                          typeOfReactInbuilt: 'UseEffect',
+                          reactInbuiltAttributes: [
+                            {
+                              name: '[Strarray, numArray]',
+                              belongsTo: '2X',
+                            }
+                          ],
                         }
                       ]
                     },

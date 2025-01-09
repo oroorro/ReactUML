@@ -1,9 +1,9 @@
 
-import React, { memo } from 'react';
+import React, { memo, useState } from 'react';
 
 import Handle from '../../component/Handle';
 import { Position } from '../../types';
-import type { NodeProps, ReactChild, Attribute, Pipe } from '../../types';
+import type { NodeProps, ReactChild, Attribute, Pipe, AttributeContent, ReactInBuiltAttributeContent } from '../../types';
 
 import { AttributeIcon, AttributeIconProps } from '../NodeAttribute/AttributeIcon';
 
@@ -18,7 +18,7 @@ const attributeColors: Record<string, string> = {
     reactInBuilt: "#ffcc00",
     vars: "#ff5733",
     functions: "#8e44ad",
-    hooks: "#ffb0fe", 
+    hooks: "#ffb0fe",
 };
 
 
@@ -28,11 +28,23 @@ const ReactNode = ({
 }: NodeProps) => {
 
     const { children, title, color, attributes } = data;
+    const [expandedAttributes, setExpandedAttributes] = useState<string[]>([]);
 
 
     const handlePropGoingInToChild = (pipe: Pipe) => {
         console.log("pipe clicked ", pipe)
     }
+
+    const handleClickOnAttribute = (attributeName: string) => {
+        setExpandedAttributes((prev) => {
+            // If already expanded, remove it from the array
+            if (prev.includes(attributeName)) {
+                return prev.filter((name) => name !== attributeName);
+            }
+            // Otherwise, add it to the array
+            return [...prev, attributeName];
+        });
+    };
 
     // Recursive function to render children
     const renderChildren = (children: ReactChild[] | undefined, level: number, parentColor: string): JSX.Element | null => {
@@ -104,17 +116,61 @@ const ReactNode = ({
                                             {child.attributes && child.attributes.map((attr: Attribute) => {
                                                 console.log("attributeColors", attr.nameOfAttribute, attributeColors[attr.nameOfAttribute])
 
-                                                return(
-                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: '40px', minHeight: '25px', backgroundColor: 'white', borderRadius: '5px', padding: '1px' }}>
-                                                    {/* <div>{attr.nameOfAttribute}</div> */}
-                                                    <div className='attributeIconWrapper' style={{display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                                                const isExpanded = expandedAttributes.includes(attr.nameOfAttribute);
+                                                return (
+                                                    <div
+                                                        className='attributeIconWrapper'
+                                                        style={{
+                                                            display: 'flex',
+                                                            alignItems: 'baseline',
+                                                            minWidth: isExpanded ? '200px' : '40px',
+                                                            height: isExpanded ? '100px' : '28px',
+                                                            backgroundColor: 'white',
+                                                            borderRadius: '5px',
+                                                            padding: '2px',
+                                                            transition: 'all 0.3s ease',
+                                                            flexDirection: 'column', 
+                                                            gap: '2px',
+                                                            overflow: isExpanded ? 'scroll' : '',
+
+                                                        }}
+                                                        onClick={() => handleClickOnAttribute(attr.nameOfAttribute)}
+                                                    >
                                                         
-                                                        <AttributeIcon  color={attributeColors[attr.nameOfAttribute]} nameOfIcon={attr.nameOfAttribute} />
-                                                        <span style={{ marginLeft: '3px', fontSize: '18px', fontWeight: '500' }}>{attr.totalNumberOfAttribute}</span>
-                                                    </div>
-                                                </div>
+                                                        {/* <div className='attributeIconWrapper'
+                                                            title={attr.nameOfAttribute}
+                                                            style={{ 
+                                                                backgroundColor: 'white', 
+                                                                display: 'flex', 
+                                                                alignItems: 'baseline', 
+                                                                justifyContent: 'center', 
+                                                                flexDirection: 'column', gap: '2px', padding: '2px' }}
+                                                            onClick={() => handleClickOnAttribute(attr.nameOfAttribute)}
+                                                        > */}
+
+                                                            <div>
+                                                                {/** Logo of the Icon */}
+                                                                <AttributeIcon color={attributeColors[attr.nameOfAttribute]} nameOfIcon={attr.nameOfAttribute} />
+
+                                                                {/** numbers of attribute for this  Icon */}
+                                                                <span style={{ marginLeft: '3px', fontSize: '18px', fontWeight: '500' }}>{attr.totalNumberOfAttribute}</span>
+                                                            </div>
+
+                                                            {isExpanded && attr.AttributeContents && attr.AttributeContents.map((content: AttributeContent | ReactInBuiltAttributeContent) => (
+                                                                <div>
+                                                                    {"name" in content &&
+                                                                        <div className='attributeContentWrapper relative inline-block p-2 border-2 border-transparent hover:border-blue-500 transition duration-300' style={{ border: '1px solid black', padding: '0px 3px', borderRadius: '5px' }}>
+                                                                            <span className="hover:bg-[#ebebeb] transition duration-300 rounded-md px-1">{content.name}</span>
+                                                                            <span>: </span>
+                                                                            <span className="hover:bg-[#ebebeb] transition duration-300 rounded-md px-1">{content.type ?? "N/A"}</span>
+                                                                        </div>
+                                                                    }
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    
                                                 )
-                                                
+
 
                                             })}
                                         </div>
