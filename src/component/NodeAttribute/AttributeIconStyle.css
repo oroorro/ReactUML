@@ -1,0 +1,27 @@
+.icon-container {
+    position: relative;
+    display: inline-block;
+    margin-left: auto;
+}
+
+.circle {
+    background-color: black;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.inner-circle {
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.icon {
+    font-family: "Times New Roman", Times, serif;
+    color: black;
+    font-weight: 900;
+
+}

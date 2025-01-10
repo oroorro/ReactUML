@@ -159,12 +159,24 @@ export type ReactNodeType = {
 }
 
 export type Attribute = {
-  nameOfAttribute: string,
+  nameOfAttribute: string, // can be Hook, var, function, reactInbuilt (API, Hook), import, export 
   totalNumberOfAttribute: number,
-  AttributeContents: AttributeContent[],
+  AttributeContents: AttributeContent[] | ReactInBuiltAttributeContent[],
 }
 
 export type AttributeContent = {
   name: string, 
+  type?: string, // type of the attribute 
   belongsTo: string, //id of Node that created props for the first time 
+}
+
+export type ReactInBuiltAttributeContent = {
+  typeOfReactInbuilt: string, //can be useEffect, useRef(Hook), cache(API) ... 
+  reactInbuiltAttributes: ReactInbuiltAttributes[], //ex for useEffect)name of useEffect would be showing dependecny array [var1, array2],
+}                                                   //type would be [var1:string, array2:number[]]
+
+type ReactInbuiltAttributes = {
+  name: string,
+  type?: string,
+  belongsTo: string //id of Node that created props for the first time 
 }

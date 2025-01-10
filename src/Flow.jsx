@@ -52,11 +52,48 @@ const initialNodes = [
           ]
         },
         {
-          nameOfAttribute: 'React_InBuilt',
+          nameOfAttribute: 'reactInBuilt',
           totalNumberOfAttribute: 5,
           AttributeContents: [
             {
               name: 'UseEffect',
+              belongsTo: 'X2D',
+            }
+          ]
+        },
+        {
+          nameOfAttribute: 'vars',
+          totalNumberOfAttribute: 9,
+          AttributeContents: [
+            {
+              name: 'names',
+              type: 'string[]',
+              belongsTo: 'X2D',
+            },
+            {
+              name: 'users',
+              type: 'User[]',
+              belongsTo: 'X2D',
+            },
+            {
+              name: 'userLocation',
+              type: '[string, number, number]',
+              belongsTo: 'X2D',
+            },
+            {
+              name: 'buttonColor',
+              type: "red | green | blue",
+              belongsTo: 'XW2',
+            },
+            {
+              name: 'userId',
+              type: 'string | number',
+              belongsTo: 'X2D',
+            },
+            {
+              name: 'currentUserRole',
+              type: 'UserRole',
+              //nestedType: {string 'nameOfType': object 'typeDef'}
               belongsTo: 'X2D',
             }
           ]
@@ -79,11 +116,38 @@ const initialNodes = [
               ]
             },
             {
-              nameOfAttribute: 'React_InBuilt',
-              totalNumberOfAttribute: 5,
+              nameOfAttribute: 'vars',
+              totalNumberOfAttribute: 12,
               AttributeContents: [
                 {
-                  name: 'UseEffect',
+                  name: 'names',
+                  type: 'string[]',
+                  belongsTo: 'X2D',
+                },
+                {
+                  name: 'users',
+                  type: 'User[]',
+                  belongsTo: 'X2D',
+                },
+                {
+                  name: 'userLocation',
+                  type: '[string, number, number]',
+                  belongsTo: 'X2D',
+                },
+                {
+                  name: 'buttonColor',
+                  type: "red | green | blue",
+                  belongsTo: 'XW2',
+                },
+                {
+                  name: 'userId',
+                  type: 'string | number',
+                  belongsTo: 'X2D',
+                },
+                {
+                  name: 'currentUserRole',
+                  type: 'UserRole',
+                  //nestedType: {string 'nameOfType': object 'typeDef'}
                   belongsTo: 'X2D',
                 }
               ]
@@ -118,6 +182,33 @@ const initialNodes = [
                   title: "Pane",
                   numbersOfPropsGoingIn: 1,
                   color: '#49abf5',
+                  attributes: [
+                    {
+                      nameOfAttribute: 'import',
+                      totalNumberOfAttribute: 15,
+                      AttributeContents: [
+                        {
+                          name: 'initialNodes',
+                          belongsTo: 'X2D',
+                        }
+                      ]
+                    },
+                    {
+                      nameOfAttribute: 'reactInBuilt',
+                      totalNumberOfAttribute: 5,
+                      AttributeContents: [
+                        {
+                          typeOfReactInbuilt: 'UseEffect',
+                          reactInbuiltAttributes: [
+                            {
+                              name: '[Strarray, numArray]',
+                              belongsTo: '2X',
+                            }
+                          ],
+                        }
+                      ]
+                    },
+                  ],
                   pipes: [
                     {
                       color: '#dfe7f5',
