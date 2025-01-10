@@ -122,11 +122,11 @@ const ReactNode = ({
 
 
                                                     <div
-                                                        className='attributeIconWrapper  bg-gray-100 hover:bg-gray-200'
+                                                        className={isExpanded ? 'attributeIconWrapper bg-white' : 'attributeIconWrapper bg-white hover:bg-gray-300' }
                                                         style={{
                                                             // display: 'flex',
                                                             alignItems: 'baseline',     
-                                                            backgroundColor: 'white',
+                                                            
                                                             borderRadius: '5px',
                                                             flexDirection: 'column',
                                                             gap: '2px',
