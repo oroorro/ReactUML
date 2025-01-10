@@ -112,46 +112,77 @@ const ReactNode = ({
                                                 {child.title}
                                             </div>
                                         </div>
-                                        <div style={{ display: 'flex', gap: '5px' }}> {/** displaying attributes */}
+                                        <div className='AttributeContainer' style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', alignItems: 'flex-start', padding: '4px 2px' }}> {/** displaying attributes */}
                                             {child.attributes && child.attributes.map((attr: Attribute) => {
-                                                console.log("attributeColors", attr.nameOfAttribute, attributeColors[attr.nameOfAttribute])
+                                                //console.log("attributeColors", attr.nameOfAttribute, attributeColors[attr.nameOfAttribute])
 
                                                 const isExpanded = expandedAttributes.includes(attr.nameOfAttribute);
+                                                //console.log("isExpanded", isExpanded)
                                                 return (
+
+
                                                     <div
-                                                        className='attributeIconWrapper'
+                                                        className='attributeIconWrapper  bg-gray-100 hover:bg-gray-200'
                                                         style={{
-                                                            display: 'flex',
+                                                            // display: 'flex',
                                                             alignItems: 'baseline',     
                                                             backgroundColor: 'white',
                                                             borderRadius: '5px',
                                                             flexDirection: 'column',
                                                             gap: '2px',
+                                                            padding: isExpanded ? '1px 6px' : '0px 2px',
+                                                           
                                                         }}
-                                                        onClick={() => handleClickOnAttribute(attr.nameOfAttribute)}
+                                                        onClick={!isExpanded ? () => handleClickOnAttribute(attr.nameOfAttribute) : undefined} // Disable onClick if isExpanded
                                                     >
-                                                        <div >
+                                                        <div className={isExpanded ? 'attributeIconWrapperTitle flex justify-center p-1 border-b border-black' : 'attributeIconWrapperTitle flex justify-center'} >
+                                                           <div className={isExpanded ? 'flex justify-center ml-auto px-3 gap-3' : 'flex items-center'}>
                                                             {/** Logo of the Icon */}
-                                                            <AttributeIcon color={attributeColors[attr.nameOfAttribute]} nameOfIcon={attr.nameOfAttribute} />
+                                                            <AttributeIcon 
+                                                                color={attributeColors[attr.nameOfAttribute]} 
+                                                                nameOfIcon={attr.nameOfAttribute} 
+                                                                isExpanded={isExpanded}
+                                                            />
 
                                                             {/** numbers of attribute for this  Icon */}
-                                                            <span style={{ marginLeft: '3px', fontSize: '18px', fontWeight: '500' }}>{attr.totalNumberOfAttribute}</span>
-                                                            {isExpanded && <button className="bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold  px-4 rounded-xl"><span className='text-2xl'>-</span></button>}
+                                                            {isExpanded && 
+                                                            <div>
+                                                                <span
+                                                                    className='align-middle relative text-base whitespace-nowrap top-0.5'
+                                                                >
+                                                                    {'in total '}
+                                                                </span>
+                                                            </div>}
+
+                                                            <div>
+                                                                <span style={{ marginLeft: '3px', fontSize: '18px', fontWeight: '500' }}>{attr.totalNumberOfAttribute}</span>
+                                                            </div>
+                                                            </div>
+
+                                                            {/** showing button to minimize AttributeWrapper */}
+                                                            {isExpanded && 
+                                                            <button className="bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold  px-4 rounded-xl ml-auto"
+                                                                onClick={isExpanded ? () => handleClickOnAttribute(attr.nameOfAttribute) : undefined} // Disable onClick if isExpanded
+                                                            >
+                                                                <span className='text-2xl'> - </span>
+                                                            </button>}
+                                                            
                                                         </div>
 
                                                         <div
                                                             style={{
                                                                 display: 'flex',
-                                                            alignItems: 'baseline',
-                                                            minWidth: isExpanded ? '200px' : '0px',
-                                                            height: isExpanded ? '100px' : '0px',
-                                                            backgroundColor: 'white',
-                                                            borderRadius: '5px',
-                                                            padding: isExpanded ? '2px 16px 2px 2px' : '2px',
-                                                            transition: 'all 0.3s ease',
-                                                            flexDirection: 'column',
-                                                            gap: '2px',
-                                                            overflow: isExpanded ? 'scroll' : '',
+                                                                alignItems: 'baseline',
+                                                                minWidth: isExpanded ? '200px' : '0px',
+                                                                height: isExpanded ? '100px' : '0px',
+                                                                backgroundColor: 'white',
+                                                                borderRadius: '5px',
+                                                                padding: isExpanded ? '2px 16px 2px 2px' : '0px',
+                                                                transition: 'all 0.3s ease',
+                                                                flexDirection: 'column',
+                                                                gap: '2px',
+                                                                overflow: isExpanded ? 'scroll' : '',
+                                                                marginTop: isExpanded ? '3px' : '',
                                                             }}
                                                         
                                                         >

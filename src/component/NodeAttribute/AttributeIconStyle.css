@@ -1,6 +1,7 @@
 .icon-container {
     position: relative;
     display: inline-block;
+    margin-left: auto;
 }
 
 .circle {
