@@ -122,53 +122,53 @@ const ReactNode = ({
                                                         className='attributeIconWrapper'
                                                         style={{
                                                             display: 'flex',
-                                                            alignItems: 'baseline',
-                                                            minWidth: isExpanded ? '200px' : '40px',
-                                                            height: isExpanded ? '100px' : '28px',
+                                                            alignItems: 'baseline',     
                                                             backgroundColor: 'white',
                                                             borderRadius: '5px',
-                                                            padding: '2px',
-                                                            transition: 'all 0.3s ease',
-                                                            flexDirection: 'column', 
+                                                            flexDirection: 'column',
                                                             gap: '2px',
-                                                            overflow: isExpanded ? 'scroll' : '',
-
                                                         }}
                                                         onClick={() => handleClickOnAttribute(attr.nameOfAttribute)}
                                                     >
-                                                        
-                                                        {/* <div className='attributeIconWrapper'
-                                                            title={attr.nameOfAttribute}
-                                                            style={{ 
-                                                                backgroundColor: 'white', 
-                                                                display: 'flex', 
-                                                                alignItems: 'baseline', 
-                                                                justifyContent: 'center', 
-                                                                flexDirection: 'column', gap: '2px', padding: '2px' }}
-                                                            onClick={() => handleClickOnAttribute(attr.nameOfAttribute)}
-                                                        > */}
+                                                        <div >
+                                                            {/** Logo of the Icon */}
+                                                            <AttributeIcon color={attributeColors[attr.nameOfAttribute]} nameOfIcon={attr.nameOfAttribute} />
 
-                                                            <div>
-                                                                {/** Logo of the Icon */}
-                                                                <AttributeIcon color={attributeColors[attr.nameOfAttribute]} nameOfIcon={attr.nameOfAttribute} />
-
-                                                                {/** numbers of attribute for this  Icon */}
-                                                                <span style={{ marginLeft: '3px', fontSize: '18px', fontWeight: '500' }}>{attr.totalNumberOfAttribute}</span>
-                                                            </div>
-
-                                                            {isExpanded && attr.AttributeContents && attr.AttributeContents.map((content: AttributeContent | ReactInBuiltAttributeContent) => (
-                                                                <div>
-                                                                    {"name" in content &&
-                                                                        <div className='attributeContentWrapper relative inline-block p-2 border-2 border-transparent hover:border-blue-500 transition duration-300' style={{ border: '1px solid black', padding: '0px 3px', borderRadius: '5px' }}>
-                                                                            <span className="hover:bg-[#ebebeb] transition duration-300 rounded-md px-1">{content.name}</span>
-                                                                            <span>: </span>
-                                                                            <span className="hover:bg-[#ebebeb] transition duration-300 rounded-md px-1">{content.type ?? "N/A"}</span>
-                                                                        </div>
-                                                                    }
-                                                                </div>
-                                                            ))}
+                                                            {/** numbers of attribute for this  Icon */}
+                                                            <span style={{ marginLeft: '3px', fontSize: '18px', fontWeight: '500' }}>{attr.totalNumberOfAttribute}</span>
+                                                            {isExpanded && <button className="bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold  px-4 rounded-xl"><span className='text-2xl'>-</span></button>}
                                                         </div>
-                                                    
+
+                                                        <div
+                                                            style={{
+                                                                display: 'flex',
+                                                            alignItems: 'baseline',
+                                                            minWidth: isExpanded ? '200px' : '0px',
+                                                            height: isExpanded ? '100px' : '0px',
+                                                            backgroundColor: 'white',
+                                                            borderRadius: '5px',
+                                                            padding: isExpanded ? '2px 16px 2px 2px' : '2px',
+                                                            transition: 'all 0.3s ease',
+                                                            flexDirection: 'column',
+                                                            gap: '2px',
+                                                            overflow: isExpanded ? 'scroll' : '',
+                                                            }}
+                                                        
+                                                        >
+                                                        {isExpanded && attr.AttributeContents && attr.AttributeContents.map((content: AttributeContent | ReactInBuiltAttributeContent) => (
+                                                            <div>
+                                                                {"name" in content &&
+                                                                    <div className='attributeContentWrapper relative inline-block p-2 border-2 border-transparent hover:border-blue-500 transition duration-300' style={{ border: '1px solid black', padding: '0px 3px', borderRadius: '5px' }}>
+                                                                        <span className="hover:bg-[#ebebeb] transition duration-300 rounded-md px-1">{content.name}</span>
+                                                                        <span>: </span>
+                                                                        <span className="hover:bg-[#ebebeb] transition duration-300 rounded-md px-1">{content.type ?? "N/A"}</span>
+                                                                    </div>
+                                                                }
+                                                            </div>
+                                                        ))}
+                                                        </div>
+                                                    </div>
+
                                                 )
 
 
