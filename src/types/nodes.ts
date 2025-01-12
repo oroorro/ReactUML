@@ -152,6 +152,9 @@ export type Pipe = {
   color: string,
   numbersOfProps: number // number of props that is associated with current pipe color
   name?: string //name of prop that is associated with current pipe color
+  id: string //unique id that each pipe has 
+  props: AttributeContent[], //will be using AttributeContent type since, it has all of necessary data type, we may change the name of AttributeContent in the future 
+  //props = {name:string, type:string, belongsTo:string }
 }
 
 export type ReactNodeType = {

@@ -6,6 +6,7 @@ import { Position } from '../../types';
 import type { NodeProps, ReactChild, Attribute, Pipe, AttributeContent, ReactInBuiltAttributeContent } from '../../types';
 
 import { AttributeIcon, AttributeIconProps } from '../NodeAttribute/AttributeIcon';
+import './ReactNodeStyle.css';
 
 const PIPE_WIDTH_VERTICAL = 13;
 const PIPE_HEIGHT_VERTICAL = 5;
@@ -32,8 +33,18 @@ const ReactNode = ({
 
 
     const handlePropGoingInToChild = (pipe: Pipe) => {
-        console.log("pipe clicked ", pipe)
+        console.log("pipe clicked ", pipe);
+        setExpandedAttributes((prev) => {
+            // If already expanded, remove it from the array
+            if (prev.includes(pipe.id)) {
+                return prev.filter((name) => name !== pipe.id);
+            }
+            // Otherwise, add it to the array
+            return [...prev, pipe.id];
+        });
     }
+
+    
 
     const handleClickOnAttribute = (attributeName: string) => {
         setExpandedAttributes((prev) => {
@@ -225,21 +236,42 @@ const ReactNode = ({
 
                                     {child.pipes.map((pipe, i) => {
                                         //console.log("pipe", i , child.pipes.length, child.pipes);
+                                        const isExpanded = expandedAttributes.includes(pipe.id);
+
                                         return (
-                                            <div key={i}>
-                                                {/** rendering each pipes except the tail */}
-                                                {i != child.pipes.length - 1 &&
-                                                    <div style={{
-                                                        height: `${PIPE_HEIGHT_HORIZONTAL}px`,
-                                                        width: `${PIPE_WIDTH_HORIZONTAL}px`,
-                                                        position: 'relative',
-                                                        backgroundColor: pipe.color,
-                                                        boxShadow: '0 -5px 5px -5px #333',
-                                                    }}
-                                                        onClick={(e) => { handlePropGoingInToChild(pipe) }}
-                                                    >
+                                            <div id="pipes" className="flex -left-2 relative gap-0.5" key={i}>
+
+                                                { // circle data when pipe is clicked 
+                                                    isExpanded && 
+                                                    <div 
+                                                    className='pipeElement'
+                                                    style={{"--bg-color": pipe.color, width: '13px', height: '13px', borderRadius: '15px', lineHeight: '13px'}as React.CSSProperties & { [key: string]: any }} >
+                                                        {pipe.numbersOfProps}
+                                                    
                                                     </div>
                                                 }
+
+                                                {/** rendering each pipes except the tail */}
+                                                {i != child.pipes.length - 1 &&
+                                                    <div 
+                                                        style={{
+                                                            height: `${PIPE_HEIGHT_HORIZONTAL}px`,
+                                                            width: `${PIPE_WIDTH_HORIZONTAL}px`,
+                                                            position: 'relative',
+                                                            // backgroundColor: pipe.color,
+                                                            "--bg-color": pipe.color,
+                                                            boxShadow: '0 -5px 5px -5px #333',
+                                                        }as React.CSSProperties & { [key: string]: any }}
+                                                        onClick={(e) => { handlePropGoingInToChild(pipe) }}
+                                                        className='pipeElement'
+                                                    >
+
+                                                    </div>
+                                                  
+
+                        
+                                                }
+                                                
                                                 {/** redering tail 
                                                      * when pipe's number are odd and bigger than 1, render -- vertical arrow of parent's color pipe  */}
                                                 {i == child.pipes.length - 1 && child.pipes.length > 1 && child.pipes.length % 2 == 0 &&
@@ -279,7 +311,7 @@ const ReactNode = ({
         );
     };
 
-    console.log("children", children, "attribute", attributes);
+    //console.log("children", children, "attribute", attributes);
 
 
     return (
