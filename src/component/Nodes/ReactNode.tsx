@@ -30,7 +30,7 @@ const ReactNode = ({
 
     const { children, title, color, attributes } = data;
     const [expandedAttributes, setExpandedAttributes] = useState<string[]>([]);
-
+    const [expandedprops, setExpandedProps] = useState<string[]>([]);
 
     const handlePropGoingInToChild = (pipe: Pipe) => {
         console.log("pipe clicked ", pipe);
@@ -44,7 +44,16 @@ const ReactNode = ({
         });
     }
 
-    
+    const displayPropsData = (pipe: Pipe) => {
+        setExpandedProps((prev) => {
+            // If already expanded, remove it from the array
+            if (prev.includes(pipe.id)) {
+                return prev.filter((name) => name !== pipe.id);
+            }
+            // Otherwise, add it to the array
+            return [...prev, pipe.id];
+        });
+    }
 
     const handleClickOnAttribute = (attributeName: string) => {
         setExpandedAttributes((prev) => {
@@ -85,143 +94,11 @@ const ReactNode = ({
 
                             <div className='pipeStickyWrapper' style={{ position: 'relative' }}>
 
-                                <div className='NodePositionWrapper' style={{ paddingTop: `${(PIPE_HEIGHT_HORIZONTAL * child.pipes.length) - 10}px` }}>
-                                    <div
-                                        className="childNode"
-                                        style={{
-                                            backgroundColor: child.color,
-                                            marginLeft: '20px',
-                                            marginRight: '10px',
-                                            marginBottom: '5px',
-                                            marginTop: '5px',
-
-                                            minWidth: '100px',
-                                            minHeight: '70px',
-                                            padding: '0px 5px 5px 5px',
-                                            boxShadow: '5px 5px 10px'
-                                        }}>  {/*child's outer boundary*/}
 
 
-                                        {/** Child's boundary */}
-                                        <div
-                                            style={{
-                                                marginLeft: '20px',
-                                                marginRight: '20px',
-                                                marginBottom: '5px',
-                                                boxShadow: 'inset 0 -5px 5px -5px #333, inset -5px 0 5px -5px #333, inset 5px 0 5px -5px #333'
-                                            }}
-                                        >
-                                            <div className='NodeTitle'
-                                                style={{
-                                                    height: '30px',
-                                                    fontSize: 'x-large',
-                                                    fontWeight: '900',
-                                                    padding: '0px 5px',
-                                                    maxWidth: '200px'
-                                                }}
-                                            >
-                                                {child.title}
-                                            </div>
-                                        </div>
-                                        <div className='AttributeContainer' style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', alignItems: 'flex-start', padding: '4px 2px' }}> {/** displaying attributes */}
-                                            {child.attributes && child.attributes.map((attr: Attribute) => {
-                                                //console.log("attributeColors", attr.nameOfAttribute, attributeColors[attr.nameOfAttribute])
-
-                                                const isExpanded = expandedAttributes.includes(attr.nameOfAttribute);
-                                                //console.log("isExpanded", isExpanded)
-                                                return (
-
-
-                                                    <div
-                                                        className={isExpanded ? 'attributeIconWrapper bg-white' : 'attributeIconWrapper bg-white hover:bg-gray-300' }
-                                                        style={{
-                                                            // display: 'flex',
-                                                            alignItems: 'baseline',     
-                                                            
-                                                            borderRadius: '5px',
-                                                            flexDirection: 'column',
-                                                            gap: '2px',
-                                                            padding: isExpanded ? '1px 6px' : '0px 2px',
-                                                           
-                                                        }}
-                                                        onClick={!isExpanded ? () => handleClickOnAttribute(attr.nameOfAttribute) : undefined} // Disable onClick if isExpanded
-                                                    >
-                                                        <div className={isExpanded ? 'attributeIconWrapperTitle flex justify-center p-1 border-b border-black' : 'attributeIconWrapperTitle flex justify-center'} >
-                                                           <div className={isExpanded ? 'flex justify-center ml-auto px-3 gap-3' : 'flex items-center'}>
-                                                            {/** Logo of the Icon */}
-                                                            <AttributeIcon 
-                                                                color={attributeColors[attr.nameOfAttribute]} 
-                                                                nameOfIcon={attr.nameOfAttribute} 
-                                                                isExpanded={isExpanded}
-                                                            />
-
-                                                            {/** numbers of attribute for this  Icon */}
-                                                            {isExpanded && 
-                                                            <div>
-                                                                <span
-                                                                    className='align-middle relative text-base whitespace-nowrap top-0.5'
-                                                                >
-                                                                    {'in total '}
-                                                                </span>
-                                                            </div>}
-
-                                                            <div>
-                                                                <span style={{ marginLeft: '3px', fontSize: '18px', fontWeight: '500' }}>{attr.totalNumberOfAttribute}</span>
-                                                            </div>
-                                                            </div>
-
-                                                            {/** showing button to minimize AttributeWrapper */}
-                                                            {isExpanded && 
-                                                            <button className="bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold  px-4 rounded-xl ml-auto"
-                                                                onClick={isExpanded ? () => handleClickOnAttribute(attr.nameOfAttribute) : undefined} // Disable onClick if isExpanded
-                                                            >
-                                                                <span className='text-2xl'> - </span>
-                                                            </button>}
-                                                            
-                                                        </div>
-
-                                                        <div
-                                                            style={{
-                                                                display: 'flex',
-                                                                alignItems: 'baseline',
-                                                                minWidth: isExpanded ? '200px' : '0px',
-                                                                height: isExpanded ? '100px' : '0px',
-                                                                backgroundColor: 'white',
-                                                                borderRadius: '5px',
-                                                                padding: isExpanded ? '2px 16px 2px 2px' : '0px',
-                                                                transition: 'all 0.3s ease',
-                                                                flexDirection: 'column',
-                                                                gap: '2px',
-                                                                overflow: isExpanded ? 'scroll' : '',
-                                                                marginTop: isExpanded ? '3px' : '',
-                                                            }}
-                                                        
-                                                        >
-                                                        {isExpanded && attr.AttributeContents && attr.AttributeContents.map((content: AttributeContent | ReactInBuiltAttributeContent) => (
-                                                            <div>
-                                                                {"name" in content &&
-                                                                    <div className='attributeContentWrapper relative inline-block p-2 border-2 border-transparent hover:border-blue-500 transition duration-300' style={{ border: '1px solid black', padding: '0px 3px', borderRadius: '5px' }}>
-                                                                        <span className="hover:bg-[#ebebeb] transition duration-300 rounded-md px-1">{content.name}</span>
-                                                                        <span>: </span>
-                                                                        <span className="hover:bg-[#ebebeb] transition duration-300 rounded-md px-1">{content.type ?? "N/A"}</span>
-                                                                    </div>
-                                                                }
-                                                            </div>
-                                                        ))}
-                                                        </div>
-                                                    </div>
-
-                                                )
-
-
-                                            })}
-                                        </div>
-                                        {renderChildren(child.children, level + 1, child.color)}
-                                    </div>
-                                </div>
                                 <div
                                     style={{
-                                        position: 'absolute',
+                                        // position: 'absolute',
                                         top: '0px',
                                         left: '0px',
                                         display: 'flex',
@@ -237,65 +114,376 @@ const ReactNode = ({
                                     {child.pipes.map((pipe, i) => {
                                         //console.log("pipe", i , child.pipes.length, child.pipes);
                                         const isExpanded = expandedAttributes.includes(pipe.id);
+                                        const showProps = expandedprops.includes(pipe.id);
 
                                         return (
-                                            <div id="pipes" className="flex -left-2 relative gap-0.5" key={i}>
+                                            <div id="pipes" className="flex -left-2 relative gap-0.5" key={i}
+                                                style={{transition: 'all 0.3s ease'}}
+                                            >
 
                                                 { // circle data when pipe is clicked 
-                                                    isExpanded && 
-                                                    <div 
-                                                    className='pipeElement'
-                                                    style={{"--bg-color": pipe.color, width: '13px', height: '13px', borderRadius: '15px', lineHeight: '13px'}as React.CSSProperties & { [key: string]: any }} >
+                                                    isExpanded &&
+                                                    <div
+                                                        className='pipeElement circle'
+                                                        style={{
+                                                            "--bg-color": pipe.color,
+                                                            width: !showProps ? '13px' : '',
+                                                            height: !showProps ? '13px' : '',
+                                                            borderRadius: '15px',
+                                                            lineHeight: '13px', //ease
+                                                            transition: 'all 0.3s ease'
+                                                        } as React.CSSProperties & { [key: string]: any }}
+                                                        onClick={(e) => { displayPropsData(pipe) }}
+                                                    >
                                                         {pipe.numbersOfProps}
-                                                    
+
                                                     </div>
                                                 }
 
                                                 {/** rendering each pipes except the tail */}
                                                 {i != child.pipes.length - 1 &&
-                                                    <div 
+                                                    <div
                                                         style={{
-                                                            height: `${PIPE_HEIGHT_HORIZONTAL}px`,
-                                                            width: `${PIPE_WIDTH_HORIZONTAL}px`,
+                                                            height: !showProps ? `${PIPE_HEIGHT_HORIZONTAL}px` : '',
+                                                            width: !showProps ? `${PIPE_WIDTH_HORIZONTAL}px` : '',
                                                             position: 'relative',
                                                             // backgroundColor: pipe.color,
                                                             "--bg-color": pipe.color,
                                                             boxShadow: '0 -5px 5px -5px #333',
-                                                        }as React.CSSProperties & { [key: string]: any }}
+                                                        } as React.CSSProperties & { [key: string]: any }}
                                                         onClick={(e) => { handlePropGoingInToChild(pipe) }}
                                                         className='pipeElement'
                                                     >
 
                                                     </div>
-                                                  
-
-                        
                                                 }
-                                                
+
+                                                { // circle data when pipe is clicked 
+                                                    showProps &&
+                                                    <div
+                                                        className='pipeElement'
+                                                        style={{
+                                                            "--bg-color": pipe.color,
+                                                            // width: '13px', 
+                                                            // height: '13px', 
+                                                            borderRadius: '15px',
+                                                            lineHeight: '13px'
+                                                        } as React.CSSProperties & {
+                                                            [key: string]: any
+                                                        }}
+                                                    >
+                                                        {pipe.props && pipe.props.map(prop => (
+                                                            <div>
+                                                                <span>{prop.name}</span>
+                                                                <span>{prop.type}</span>
+
+                                                            </div>
+                                                        ))}
+
+                                                    </div>
+                                                }
+
                                                 {/** redering tail 
                                                      * when pipe's number are odd and bigger than 1, render -- vertical arrow of parent's color pipe  */}
                                                 {i == child.pipes.length - 1 && child.pipes.length > 1 && child.pipes.length % 2 == 0 &&
-                                                    <div style={{
-                                                        height: `${PIPE_HEIGHT_VERTICAL}px`,
-                                                        width: `${PIPE_WIDTH_VERTICAL}px`,
-                                                        backgroundColor: pipe.color,
-                                                        boxShadow: '0 -5px 5px -5px #333',
-                                                    }}
-                                                        onClick={(e) => { handlePropGoingInToChild(pipe) }}
-                                                    >
+
+                                                    <div>
+                                                        <div style={{
+                                                            height: `${PIPE_HEIGHT_VERTICAL}px`,
+                                                            width: `${PIPE_WIDTH_VERTICAL}px`,
+                                                            backgroundColor: pipe.color,
+                                                            boxShadow: '0 -5px 5px -5px #333',
+                                                        }}
+                                                            onClick={(e) => { handlePropGoingInToChild(pipe) }}
+                                                        >
+                                                        </div>
+                                                        <div className='NodePositionWrapper'
+                                                            
+                                                        >
+                                                            <div
+                                                                className="childNode"
+                                                                style={{
+                                                                    backgroundColor: child.color,
+                                                                    marginLeft: '20px',
+                                                                    marginRight: '10px',
+                                                                    marginBottom: '5px',
+                                                                    marginTop: '5px',
+
+                                                                    minWidth: '100px',
+                                                                    minHeight: '70px',
+                                                                    padding: '0px 5px 5px 5px',
+                                                                    boxShadow: '5px 5px 10px'
+                                                                }}>  {/*child's outer boundary*/}
+
+
+                                                                {/** Child's boundary */}
+                                                                <div
+                                                                    style={{
+                                                                        marginLeft: '20px',
+                                                                        marginRight: '20px',
+                                                                        marginBottom: '5px',
+                                                                        boxShadow: 'inset 0 -5px 5px -5px #333, inset -5px 0 5px -5px #333, inset 5px 0 5px -5px #333'
+                                                                    }}
+                                                                >
+                                                                    <div className='NodeTitle'
+                                                                        style={{
+                                                                            height: '30px',
+                                                                            fontSize: 'x-large',
+                                                                            fontWeight: '900',
+                                                                            padding: '0px 5px',
+                                                                            maxWidth: '200px'
+                                                                        }}
+                                                                    >
+                                                                        {child.title}
+                                                                    </div>
+                                                                </div>
+                                                                <div className='AttributeContainer' style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', alignItems: 'flex-start', padding: '4px 2px' }}> {/** displaying attributes */}
+                                                                    {child.attributes && child.attributes.map((attr: Attribute) => {
+                                                                        //console.log("attributeColors", attr.nameOfAttribute, attributeColors[attr.nameOfAttribute])
+
+                                                                        const isExpanded = expandedAttributes.includes(attr.nameOfAttribute);
+                                                                        //console.log("isExpanded", isExpanded)
+                                                                        return (
+
+
+                                                                            <div
+                                                                                className={isExpanded ? 'attributeIconWrapper bg-white' : 'attributeIconWrapper bg-white hover:bg-gray-300'}
+                                                                                style={{
+                                                                                    // display: 'flex',
+                                                                                    alignItems: 'baseline',
+
+                                                                                    borderRadius: '5px',
+                                                                                    flexDirection: 'column',
+                                                                                    gap: '2px',
+                                                                                    padding: isExpanded ? '1px 6px' : '0px 2px',
+
+                                                                                }}
+                                                                                onClick={!isExpanded ? () => handleClickOnAttribute(attr.nameOfAttribute) : undefined} // Disable onClick if isExpanded
+                                                                            >
+                                                                                <div className={isExpanded ? 'attributeIconWrapperTitle flex justify-center p-1 border-b border-black' : 'attributeIconWrapperTitle flex justify-center'} >
+                                                                                    <div className={isExpanded ? 'flex justify-center ml-auto px-3 gap-3' : 'flex items-center'}>
+                                                                                        {/** Logo of the Icon */}
+                                                                                        <AttributeIcon
+                                                                                            color={attributeColors[attr.nameOfAttribute]}
+                                                                                            nameOfIcon={attr.nameOfAttribute}
+                                                                                            isExpanded={isExpanded}
+                                                                                        />
+
+                                                                                        {/** numbers of attribute for this  Icon */}
+                                                                                        {isExpanded &&
+                                                                                            <div>
+                                                                                                <span
+                                                                                                    className='align-middle relative text-base whitespace-nowrap top-0.5'
+                                                                                                >
+                                                                                                    {'in total '}
+                                                                                                </span>
+                                                                                            </div>}
+
+                                                                                        <div>
+                                                                                            <span style={{ marginLeft: '3px', fontSize: '18px', fontWeight: '500' }}>{attr.totalNumberOfAttribute}</span>
+                                                                                        </div>
+                                                                                    </div>
+
+                                                                                    {/** showing button to minimize AttributeWrapper */}
+                                                                                    {isExpanded &&
+                                                                                        <button className="bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold  px-4 rounded-xl ml-auto"
+                                                                                            onClick={isExpanded ? () => handleClickOnAttribute(attr.nameOfAttribute) : undefined} // Disable onClick if isExpanded
+                                                                                        >
+                                                                                            <span className='text-2xl'> - </span>
+                                                                                        </button>}
+
+                                                                                </div>
+
+                                                                                <div
+                                                                                    style={{
+                                                                                        display: 'flex',
+                                                                                        alignItems: 'baseline',
+                                                                                        minWidth: isExpanded ? '200px' : '0px',
+                                                                                        height: isExpanded ? '100px' : '0px',
+                                                                                        backgroundColor: 'white',
+                                                                                        borderRadius: '5px',
+                                                                                        padding: isExpanded ? '2px 16px 2px 2px' : '0px',
+                                                                                        transition: 'all 0.3s ease',
+                                                                                        flexDirection: 'column',
+                                                                                        gap: '2px',
+                                                                                        overflow: isExpanded ? 'scroll' : '',
+                                                                                        marginTop: isExpanded ? '3px' : '',
+                                                                                    }}
+
+                                                                                >
+                                                                                    {isExpanded && attr.AttributeContents && attr.AttributeContents.map((content: AttributeContent | ReactInBuiltAttributeContent) => (
+                                                                                        <div>
+                                                                                            {"name" in content &&
+                                                                                                <div className='attributeContentWrapper relative inline-block p-2 border-2 border-transparent hover:border-blue-500 transition duration-300' style={{ border: '1px solid black', padding: '0px 3px', borderRadius: '5px' }}>
+                                                                                                    <span className="hover:bg-[#ebebeb] transition duration-300 rounded-md px-1">{content.name}</span>
+                                                                                                    <span>: </span>
+                                                                                                    <span className="hover:bg-[#ebebeb] transition duration-300 rounded-md px-1">{content.type ?? "N/A"}</span>
+                                                                                                </div>
+                                                                                            }
+                                                                                        </div>
+                                                                                    ))}
+                                                                                </div>
+                                                                            </div>
+
+                                                                        )
+
+
+                                                                    })}
+                                                                </div>
+                                                                {renderChildren(child.children, level + 1, child.color)}
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 }
                                                 {/** when pipe's number are even, render |_ corner type arrow of parent's color pipe  */}
                                                 {i == child.pipes.length - 1 && child.pipes.length % 2 != 0 &&
-                                                    <div
-                                                        style={{
-                                                            position: 'relative',
-                                                            height: `${PIPE_HEIGHT_HORIZONTAL}px`,
-                                                            width: `${PIPE_HEIGHT_HORIZONTAL}px`,
-                                                            backgroundColor: pipe.color,
-                                                            clipPath: 'polygon(0 0, 0 100%, 100% 100%, 100% 60%, 40% 60%, 40% 0%)',
+                                                    <div>
+                                                        <div
+                                                            style={{
+                                                                position: 'relative',
+                                                                height: `${PIPE_HEIGHT_HORIZONTAL}px`,
+                                                                width: `${PIPE_HEIGHT_HORIZONTAL}px`,
+                                                                backgroundColor: pipe.color,
+                                                                clipPath: 'polygon(0 0, 0 100%, 100% 100%, 100% 60%, 40% 60%, 40% 0%)',
 
-                                                        }}>
+                                                            }}>
+                                                        </div>
+                                                        <div className='NodePositionWrapper'
+                                                        
+                                                        >
+                                                            <div
+                                                                className="childNode"
+                                                                style={{
+                                                                    backgroundColor: child.color,
+                                                                    marginLeft: '20px',
+                                                                    marginRight: '10px',
+                                                                    marginBottom: '5px',
+                                                                    marginTop: '5px',
+
+                                                                    minWidth: '100px',
+                                                                    minHeight: '70px',
+                                                                    padding: '0px 5px 5px 5px',
+                                                                    boxShadow: '5px 5px 10px'
+                                                                }}>  {/*child's outer boundary*/}
+
+
+                                                                {/** Child's boundary */}
+                                                                <div
+                                                                    style={{
+                                                                        marginLeft: '20px',
+                                                                        marginRight: '20px',
+                                                                        marginBottom: '5px',
+                                                                        boxShadow: 'inset 0 -5px 5px -5px #333, inset -5px 0 5px -5px #333, inset 5px 0 5px -5px #333'
+                                                                    }}
+                                                                >
+                                                                    <div className='NodeTitle'
+                                                                        style={{
+                                                                            height: '30px',
+                                                                            fontSize: 'x-large',
+                                                                            fontWeight: '900',
+                                                                            padding: '0px 5px',
+                                                                            maxWidth: '200px'
+                                                                        }}
+                                                                    >
+                                                                        {child.title}
+                                                                    </div>
+                                                                </div>
+                                                                <div className='AttributeContainer' style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', alignItems: 'flex-start', padding: '4px 2px' }}> {/** displaying attributes */}
+                                                                    {child.attributes && child.attributes.map((attr: Attribute) => {
+                                                                        //console.log("attributeColors", attr.nameOfAttribute, attributeColors[attr.nameOfAttribute])
+
+                                                                        const isExpanded = expandedAttributes.includes(attr.nameOfAttribute);
+                                                                        //console.log("isExpanded", isExpanded)
+                                                                        return (
+
+
+                                                                            <div
+                                                                                className={isExpanded ? 'attributeIconWrapper bg-white' : 'attributeIconWrapper bg-white hover:bg-gray-300'}
+                                                                                style={{
+                                                                                    // display: 'flex',
+                                                                                    alignItems: 'baseline',
+
+                                                                                    borderRadius: '5px',
+                                                                                    flexDirection: 'column',
+                                                                                    gap: '2px',
+                                                                                    padding: isExpanded ? '1px 6px' : '0px 2px',
+
+                                                                                }}
+                                                                                onClick={!isExpanded ? () => handleClickOnAttribute(attr.nameOfAttribute) : undefined} // Disable onClick if isExpanded
+                                                                            >
+                                                                                <div className={isExpanded ? 'attributeIconWrapperTitle flex justify-center p-1 border-b border-black' : 'attributeIconWrapperTitle flex justify-center'} >
+                                                                                    <div className={isExpanded ? 'flex justify-center ml-auto px-3 gap-3' : 'flex items-center'}>
+                                                                                        {/** Logo of the Icon */}
+                                                                                        <AttributeIcon
+                                                                                            color={attributeColors[attr.nameOfAttribute]}
+                                                                                            nameOfIcon={attr.nameOfAttribute}
+                                                                                            isExpanded={isExpanded}
+                                                                                        />
+
+                                                                                        {/** numbers of attribute for this  Icon */}
+                                                                                        {isExpanded &&
+                                                                                            <div>
+                                                                                                <span
+                                                                                                    className='align-middle relative text-base whitespace-nowrap top-0.5'
+                                                                                                >
+                                                                                                    {'in total '}
+                                                                                                </span>
+                                                                                            </div>}
+
+                                                                                        <div>
+                                                                                            <span style={{ marginLeft: '3px', fontSize: '18px', fontWeight: '500' }}>{attr.totalNumberOfAttribute}</span>
+                                                                                        </div>
+                                                                                    </div>
+
+                                                                                    {/** showing button to minimize AttributeWrapper */}
+                                                                                    {isExpanded &&
+                                                                                        <button className="bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold  px-4 rounded-xl ml-auto"
+                                                                                            onClick={isExpanded ? () => handleClickOnAttribute(attr.nameOfAttribute) : undefined} // Disable onClick if isExpanded
+                                                                                        >
+                                                                                            <span className='text-2xl'> - </span>
+                                                                                        </button>}
+
+                                                                                </div>
+
+                                                                                <div
+                                                                                    style={{
+                                                                                        display: 'flex',
+                                                                                        alignItems: 'baseline',
+                                                                                        minWidth: isExpanded ? '200px' : '0px',
+                                                                                        height: isExpanded ? '100px' : '0px',
+                                                                                        backgroundColor: 'white',
+                                                                                        borderRadius: '5px',
+                                                                                        padding: isExpanded ? '2px 16px 2px 2px' : '0px',
+                                                                                        transition: 'all 0.3s ease',
+                                                                                        flexDirection: 'column',
+                                                                                        gap: '2px',
+                                                                                        overflow: isExpanded ? 'scroll' : '',
+                                                                                        marginTop: isExpanded ? '3px' : '',
+                                                                                    }}
+
+                                                                                >
+                                                                                    {isExpanded && attr.AttributeContents && attr.AttributeContents.map((content: AttributeContent | ReactInBuiltAttributeContent) => (
+                                                                                        <div>
+                                                                                            {"name" in content &&
+                                                                                                <div className='attributeContentWrapper relative inline-block p-2 border-2 border-transparent hover:border-blue-500 transition duration-300' style={{ border: '1px solid black', padding: '0px 3px', borderRadius: '5px' }}>
+                                                                                                    <span className="hover:bg-[#ebebeb] transition duration-300 rounded-md px-1">{content.name}</span>
+                                                                                                    <span>: </span>
+                                                                                                    <span className="hover:bg-[#ebebeb] transition duration-300 rounded-md px-1">{content.type ?? "N/A"}</span>
+                                                                                                </div>
+                                                                                            }
+                                                                                        </div>
+                                                                                    ))}
+                                                                                </div>
+                                                                            </div>
+
+                                                                        )
+
+
+                                                                    })}
+                                                                </div>
+                                                                {renderChildren(child.children, level + 1, child.color)}
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 }
                                             </div>
