@@ -17,22 +17,17 @@ import { useNodesState, useEdgesState } from "./hook/useNodesEdgesState";
 import { type } from '@testing-library/user-event/dist/type';
 
 
-
-// import 'reactflow/dist/style.css';
-
+const NodeIndexInArray = {
+  '#dfe7f5': '0', //ZoomPane
+  '#ffa8d5': '0-0',  //NodeRenderer
+  '#f26d1f': '0-0-0', //EdgeRenderer
+  '#49abf5': '0-0-0-0', //Pane
+  '#e8c390': '0-0-0-1',  //Zoom
+  '#ffdc6b': '0-1', //Store
+}
 
 
 const initialNodes = [
-  {
-    id: '1',
-    position: { x: 0, y: 0 },
-    data: { label: '1' },
-  },
-  {
-    id: '2',
-    position: { x: 0, y: 100 },
-    data: { label: '2' },
-  },
   {
     id: '3',
     position: { x: 50, y: 50 },
@@ -340,20 +335,74 @@ const initialNodes = [
   },
 ];
 
-
-
 const initialEdges = [{ id: 'e1-2', source: '1', target: '2' }];
+
+function addChildToReactChild(root, id, newChild) {
+
+  //console.log("addChildToReactChild", root, id, newChild);
+  const path = NodeIndexInArray[id].split('-').map(Number); // Convert the path to array of indices
+  const updatedRoot = { ...root }; // Create a shallow copy of the root for immutability
+
+  // Recursive function to traverse and update the structure
+  function traverseAndAdd(node, currentPath) {
+    if (currentPath.length === 1) {
+      // Base case: Add the new child to the target node's children
+      if (!node.children) {
+        node.children = [];
+      }
+      node.children = [...node.children, newChild]; // Immutable update
+      return node;
+    }
+
+    const [currentIndex, ...restPath] = currentPath;
+    const updatedChildren = [...node.children ]; // Copy children array
+
+    // Update the relevant child recursively
+    updatedChildren[currentIndex] = traverseAndAdd(updatedChildren[currentIndex], restPath);
+    return { ...node, children: updatedChildren }; // Return updated node
+  }
+
+  return traverseAndAdd(updatedRoot, path);
+}
+
+const newChild = {
+  title: 'NewNode',
+  numbersOfPropsGoingIn: 1,
+  color: '#abcdef',
+  pipes: [
+    {
+      color: '#dfe7f5',
+      numbersOfProps: 18,
+      name: "Node",
+      id: 'X2'
+    },
+  ],
+  attributes: [],
+};
 
 function Flow() {
 
   const flowRef = useRef(null);
   const [contextMenu, setContextMenu] = useState(null)
+ 
 
   useEffect(() => {
     if (flowRef.current) {
       console.log("Child component's DOM node:", flowRef.current.className);
     }
   }, []);
+
+
+  const updateNode = () =>{
+    //note that we have updated initialNodes[0].data part
+    const updatedReactChild  = addChildToReactChild(initialNodes[0].data, contextMenu.nodeId, newChild);
+    //applying updated part to original initialNodes[0].data
+    initialNodes[0].data = updatedReactChild;
+    console.log("updatedReactChild WITH DATA", initialNodes)
+    //update node
+    setNodes(initialNodes);
+    setContextMenu(null)
+  }
 
   const FlowContextMenuHandler = (event) => {
 
@@ -364,21 +413,19 @@ function Flow() {
     const nodeDataId = target.getAttribute('data-id') ? target.getAttribute('data-id') : target.parentElement?.getAttribute('data-id');
     const nodeDataType = target.getAttribute('datatype') ? target.getAttribute('datatype') : target.parentElement?.getAttribute('datatype');
 
-    console.log("target context", target, nodeDataId);
-    console.log("nodeDataType", nodeDataType);
+    //console.log("target context", nodeDataId);
+    //console.log("nodeDataType", nodeDataType);
 
     if (nodeDataType === 'Node') {
 
-      console.log("Node", event.clientX, event.clientY)
+      console.log("target context", nodeDataId);
       setContextMenu({
-        nodeId: target.getAttribute('data-id'),
+        nodeId: nodeDataId,
         nodeType: 'Node',
         left: event.clientX,
         top: event.clientY
       })
     }
-
-
   }
 
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
@@ -417,7 +464,7 @@ function Flow() {
         }}
         id={contextMenu.nodeId}
         >
-          <button datatype="contextMenu">create</button>
+          <button datatype="contextMenu" onClick={()=>updateNode()}>create</button>
         </div>}
       <AlgoFlow
         ref={flowRef}
