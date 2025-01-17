@@ -1,6 +1,6 @@
 
 import React, { forwardRef } from 'react';
-import { useCallback, useRef, useEffect } from 'react';
+import { useCallback, useRef, useEffect, useState } from 'react';
 // import {ReactFlow, 
 // MiniMap,
 // Controls,
@@ -19,6 +19,8 @@ import { type } from '@testing-library/user-event/dist/type';
 
 
 // import 'reactflow/dist/style.css';
+
+
 
 const initialNodes = [
   {
@@ -345,6 +347,7 @@ const initialEdges = [{ id: 'e1-2', source: '1', target: '2' }];
 function Flow() {
 
   const flowRef = useRef(null);
+  const [contextMenu, setContextMenu] = useState(null)
 
   useEffect(() => {
     if (flowRef.current) {
@@ -352,13 +355,70 @@ function Flow() {
     }
   }, []);
 
+  const FlowContextMenuHandler = (event) => {
+
+    //get the type of element; which will be either 1. 1-Node other than return scope, 2-Node's return scope   2. pipe  3. Attribute
+
+    event.preventDefault();
+    const target = event.target;
+    const nodeDataId = target.getAttribute('data-id') ? target.getAttribute('data-id') : target.parentElement?.getAttribute('data-id');
+    const nodeDataType = target.getAttribute('datatype') ? target.getAttribute('datatype') : target.parentElement?.getAttribute('datatype');
+
+    console.log("target context", target, nodeDataId);
+    console.log("nodeDataType", nodeDataType);
+
+    if (nodeDataType === 'Node') {
+
+      console.log("Node", event.clientX, event.clientY)
+      setContextMenu({
+        nodeId: target.getAttribute('data-id'),
+        nodeType: 'Node',
+        left: event.clientX,
+        top: event.clientY
+      })
+    }
+
+
+  }
+
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
   const onConnect = useCallback((params) => setEdges((eds) => addEdge(params, eds)), [setEdges]);
 
+  function FlowClickHandler(event){
+
+    let target = event.target ;
+    let targetParent = target.parentElement
+    console.log("target click", target.getAttribute('datatype'))
+  
+    if(target.getAttribute('datatype') !== 'contextMenu' ){
+      setContextMenu(
+        null
+      )
+    }
+  }
+
   return (
-    <div className='Flow' style={{ width: "100vw", height: "100vh" }}>
+    <div className='Flow' style={{ width: "100vw", height: "100vh" }}
+    onClick={(e)=>FlowClickHandler(e)}
+    onMouseDown={(e)=>FlowClickHandler(e)}
+    >
+      {contextMenu && contextMenu.nodeType === 'Node' &&
+        <div
+        style={{
+          backgroundColor: 'tomato', 
+          width: '50px', 
+          height: '50px', 
+          position: 'absolute',
+          left: `${contextMenu.left}px`,
+          top: `${contextMenu.top}px`,
+          zIndex: '9999'
+        }}
+        id={contextMenu.nodeId}
+        >
+          <button datatype="contextMenu">create</button>
+        </div>}
       <AlgoFlow
         ref={flowRef}
         nodes={nodes}
@@ -366,6 +426,8 @@ function Flow() {
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
+        onContextMenu={(e) => { FlowContextMenuHandler(e) }}
+
       >
         <Background />
         <Controls />

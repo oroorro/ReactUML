@@ -80,6 +80,7 @@ const ReactNode = ({
                     paddingTop: '10px',
                     overflow: 'hidden',
                 }}
+                datatype='returnScope'
             >
                 {children.map((child, index) => {
 
@@ -119,6 +120,7 @@ const ReactNode = ({
                                         return (
                                             <div id="pipes" className="flex -left-2 relative gap-0.5" key={i}
                                                 style={{transition: 'all 0.3s ease'}}
+                                                datatype='pipe'
                                             >
 
                                                 { // circle data when pipe is clicked 
@@ -198,7 +200,8 @@ const ReactNode = ({
                                                         >
                                                         </div>
                                                         <div className='NodePositionWrapper'
-                                                            
+                                                            datatype='Node'
+                                                            data-id={child.color}
                                                         >
                                                             <div
                                                                 className="childNode"
@@ -237,7 +240,10 @@ const ReactNode = ({
                                                                         {child.title}
                                                                     </div>
                                                                 </div>
-                                                                <div className='AttributeContainer' style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', alignItems: 'flex-start', padding: '4px 2px' }}> {/** displaying attributes */}
+                                                                <div className='AttributeContainer' 
+                                                                    style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', alignItems: 'flex-start', padding: '4px 2px' }}
+                                                                    
+                                                                    > {/** displaying attributes */}
                                                                     {child.attributes && child.attributes.map((attr: Attribute) => {
                                                                         //console.log("attributeColors", attr.nameOfAttribute, attributeColors[attr.nameOfAttribute])
 
@@ -258,6 +264,7 @@ const ReactNode = ({
                                                                                     padding: isExpanded ? '1px 6px' : '0px 2px',
 
                                                                                 }}
+                                                                                datatype='AttributeContainer'
                                                                                 onClick={!isExpanded ? () => handleClickOnAttribute(attr.nameOfAttribute) : undefined} // Disable onClick if isExpanded
                                                                             >
                                                                                 <div className={isExpanded ? 'attributeIconWrapperTitle flex justify-center p-1 border-b border-black' : 'attributeIconWrapperTitle flex justify-center'} >
