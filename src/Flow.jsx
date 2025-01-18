@@ -459,9 +459,10 @@ function Flow() {
     >
       {contextMenu && contextMenu.nodeType === 'Node' &&
         <div
+        className='flex flex-col'
         style={{
           backgroundColor: 'tomato', 
-          width: '50px', 
+           
           height: '50px', 
           position: 'absolute',
           left: `${contextMenu.left}px`,
@@ -470,6 +471,7 @@ function Flow() {
         }}
         id={contextMenu.nodeId}
         >
+          {contextMenu.nodeId}
           <button datatype="contextMenu" onClick={()=>updateNode()}>create</button>
         </div>}
         {contextMenu && contextMenu.nodeType === 'pipe' &&

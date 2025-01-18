@@ -93,7 +93,9 @@ const ReactNode = ({
                             }}
                         > {/* parent's inner boundary where return statement goes */}
 
-                            <div className='pipeStickyWrapper' style={{ position: 'relative' }}>
+                            <div className='pipeStickyWrapper' 
+                                style={{ position: 'relative' }}
+                            >
                                 <div
                                     style={{
                                         // position: 'absolute',
@@ -105,7 +107,8 @@ const ReactNode = ({
                                         filter: 'drop-shadow(rgba(0, 0, 0, 0.9) 6px 4px 2.5px)',
                                     }}
                                     datatype='Node'
-                                    >
+                                    data-id={parentColor}  //HERE id of Node(parent)
+                                >
 
                                     {/** rendering numbers of props going in to child*/}
                                     <div 
@@ -196,6 +199,7 @@ const ReactNode = ({
                                                     <div>
                                                         <div 
                                                         className='pipeElement'
+                                                        datatype='pipe'
                                                         style={{
                                                             height: `${PIPE_HEIGHT_VERTICAL}px`,
                                                             width: `${PIPE_WIDTH_VERTICAL}px`,
@@ -206,7 +210,8 @@ const ReactNode = ({
                                                         >
                                                         </div>
                                                         <div className='NodePositionWrapper'
-                                                        
+                                                            datatype='Node'
+                                                            data-id={`${pipe.color}`}
                                                         >
                                                             <div
                                                                 className="childNode"
@@ -356,6 +361,7 @@ const ReactNode = ({
                                                 {i == child.pipes.length - 1 && child.pipes.length  == 1 &&
                                                     <div>
                                                         <div
+                                                            datatype='pipe'
                                                             style={{
                                                                 position: 'relative',
                                                                 height: `${PIPE_HEIGHT_HORIZONTAL}px`,
