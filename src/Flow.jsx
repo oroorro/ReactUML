@@ -337,32 +337,45 @@ const initialNodes = [
 
 const initialEdges = [{ id: 'e1-2', source: '1', target: '2' }];
 
-function addChildToReactChild(root, id, newChild) {
-
-  //console.log("addChildToReactChild", root, id, newChild);
-  const path = NodeIndexInArray[id].split('-').map(Number); // Convert the path to array of indices
+function addChildToReactChildIterative(root, id, newChild) {
+  const path = NodeIndexInArray[id].split('-').map(Number); // Convert the path to an array of indices
   const updatedRoot = { ...root }; // Create a shallow copy of the root for immutability
 
-  // Recursive function to traverse and update the structure
-  function traverseAndAdd(node, currentPath) {
-    if (currentPath.length === 1) {
-      // Base case: Add the new child to the target node's children
-      if (!node.children) {
-        node.children = [];
-      }
-      node.children = [...node.children, newChild]; // Immutable update
-      return node;
+  let currentNode = updatedRoot; // Start from the root node
+
+  for (let i = 0; i < path.length; i++) {
+    const currentIndex = path[i];
+
+    // Ensure children array exists
+    if (!currentNode.children) {
+      currentNode.children = [];
     }
 
-    const [currentIndex, ...restPath] = currentPath;
-    const updatedChildren = [...node.children ]; // Copy children array
+    // If the child at the current index doesn't exist, create a placeholder node
+    if (!currentNode.children[currentIndex]) {
+      currentNode.children[currentIndex] = {
+        title: '',
+        numbersOfPropsGoingIn: 0,
+        color: '',
+        pipes: [],
+        attributes: [],
+        children: [],
+      };
+    }
 
-    // Update the relevant child recursively
-    updatedChildren[currentIndex] = traverseAndAdd(updatedChildren[currentIndex], restPath);
-    return { ...node, children: updatedChildren }; // Return updated node
+    // If this is the last index, add the new child to the current node's children
+    if (i === path.length - 1) {
+      currentNode.children[currentIndex].children = [
+        ...(currentNode.children[currentIndex].children || []),
+        newChild,
+      ];
+    }
+
+    // Move to the next node in the path
+    currentNode = currentNode.children[currentIndex];
   }
 
-  return traverseAndAdd(updatedRoot, path);
+  return updatedRoot; // Return the updated tree
 }
 
 const newChild = {
@@ -394,11 +407,16 @@ function Flow() {
 
 
   const updateNode = () =>{
-    //note that we have updated initialNodes[0].data part
-    const updatedReactChild  = addChildToReactChild(initialNodes[0].data, contextMenu.nodeId, newChild);
+    //we need to format data in order to add Node correctly,
+    //making data to be the root 
+    const format = {
+      children : [initialNodes[0].data],
+    }
+
+    const updatedReactChild  = addChildToReactChildIterative(format, contextMenu.nodeId, newChild);
     //applying updated part to original initialNodes[0].data
-    initialNodes[0].data = updatedReactChild;
-    console.log("updatedReactChild WITH DATA", initialNodes)
+    initialNodes[0].data = {...updatedReactChild.children[0]}; 
+    //console.log("updatedReactChild WITH DATA", initialNodes)
     //update node
     setNodes(initialNodes);
     setContextMenu(null)
