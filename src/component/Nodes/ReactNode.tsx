@@ -80,7 +80,7 @@ const ReactNode = ({
                     paddingTop: '10px',
                     overflow: 'hidden',
                 }}
-                datatype='returnScope'
+                datatype='Node'
             >
                 {children.map((child, index) => {
 
@@ -94,9 +94,6 @@ const ReactNode = ({
                         > {/* parent's inner boundary where return statement goes */}
 
                             <div className='pipeStickyWrapper' style={{ position: 'relative' }}>
-
-
-
                                 <div
                                     style={{
                                         // position: 'absolute',
@@ -106,9 +103,15 @@ const ReactNode = ({
                                         flexDirection: 'column',
                                         overflow: 'visible',
                                         filter: 'drop-shadow(rgba(0, 0, 0, 0.9) 6px 4px 2.5px)',
-                                    }}>
+                                    }}
+                                    datatype='Node'
+                                    >
 
-                                    <div style={{ width: '18px', height: '18px', backgroundColor: "white", position: 'relative', left: '-5px' }}> {/** rendering numbers of props going in to child*/}
+                                    {/** rendering numbers of props going in to child*/}
+                                    <div 
+                                    datatype='pipe'
+                                    className='bg-white hover:bg-gray-300'
+                                    style={{ width: '18px', height: '18px', position: 'relative', left: '-5px' }}> 
                                         {child.numbersOfPropsGoingIn}
                                     </div>
 
@@ -120,7 +123,7 @@ const ReactNode = ({
                                         return (
                                             <div id="pipes" className="flex -left-2 relative gap-0.5" key={i}
                                                 style={{transition: 'all 0.3s ease'}}
-                                                datatype='pipe'
+                                                
                                             >
 
                                                 { // circle data when pipe is clicked 
@@ -155,6 +158,7 @@ const ReactNode = ({
                                                         } as React.CSSProperties & { [key: string]: any }}
                                                         onClick={(e) => { handlePropGoingInToChild(pipe) }}
                                                         className='pipeElement'
+                                                        datatype='pipe'
                                                     >
 
                                                     </div>
@@ -201,10 +205,11 @@ const ReactNode = ({
                                                         </div>
                                                         <div className='NodePositionWrapper'
                                                             datatype='Node'
-                                                            data-id={child.color}
                                                         >
                                                             <div
                                                                 className="childNode"
+                                                                datatype='Node'
+                                                                data-id={child.color}
                                                                 style={{
                                                                     backgroundColor: child.color,
                                                                     marginLeft: '20px',
@@ -236,6 +241,8 @@ const ReactNode = ({
                                                                             padding: '0px 5px',
                                                                             maxWidth: '200px'
                                                                         }}
+                                                                        //contentEditable='true'
+                                                                        datatype='Node'
                                                                     >
                                                                         {child.title}
                                                                     </div>
@@ -356,7 +363,7 @@ const ReactNode = ({
                                                             }}>
                                                         </div>
                                                         <div className='NodePositionWrapper'
-                                                        
+                                                            datatype='Node'
                                                         >
                                                             <div
                                                                 className="childNode"

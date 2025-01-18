@@ -417,11 +417,17 @@ function Flow() {
     //console.log("nodeDataType", nodeDataType);
 
     if (nodeDataType === 'Node') {
-
       console.log("target context", nodeDataId);
       setContextMenu({
         nodeId: nodeDataId,
         nodeType: 'Node',
+        left: event.clientX,
+        top: event.clientY
+      })
+    }else if(nodeDataType === 'pipe'){
+      setContextMenu({
+        nodeId: nodeDataId,
+        nodeType: 'pipe',
         left: event.clientX,
         top: event.clientY
       })
@@ -455,6 +461,21 @@ function Flow() {
         <div
         style={{
           backgroundColor: 'tomato', 
+          width: '50px', 
+          height: '50px', 
+          position: 'absolute',
+          left: `${contextMenu.left}px`,
+          top: `${contextMenu.top}px`,
+          zIndex: '9999'
+        }}
+        id={contextMenu.nodeId}
+        >
+          <button datatype="contextMenu" onClick={()=>updateNode()}>create</button>
+        </div>}
+        {contextMenu && contextMenu.nodeType === 'pipe' &&
+        <div
+        style={{
+          backgroundColor: 'grey', 
           width: '50px', 
           height: '50px', 
           position: 'absolute',
