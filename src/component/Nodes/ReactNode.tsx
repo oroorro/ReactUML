@@ -189,22 +189,24 @@ const ReactNode = ({
                                                     </div>
                                                 }
 
-                                                {/** redering tail 
-                                                     * when pipe's number are odd and bigger than 1, render -- vertical arrow of parent's color pipe  */}
-                                                {i == child.pipes.length - 1 && child.pipes.length > 1 && child.pipes.length % 2 == 0 &&
-
+                                                {/** redering tail: 
+                                                 *    when pipe's number is bigger than 1, render -- vertical arrow of parent's color pipe
+                                                 */}
+                                                {i == child.pipes.length - 1 && child.pipes.length > 1 &&
                                                     <div>
-                                                        <div style={{
+                                                        <div 
+                                                        className='pipeElement'
+                                                        style={{
                                                             height: `${PIPE_HEIGHT_VERTICAL}px`,
                                                             width: `${PIPE_WIDTH_VERTICAL}px`,
-                                                            backgroundColor: pipe.color,
+                                                            "--bg-color": pipe.color,
                                                             boxShadow: '0 -5px 5px -5px #333',
-                                                        }}
+                                                        }as React.CSSProperties & { [key: string]: any }}
                                                             onClick={(e) => { handlePropGoingInToChild(pipe) }}
                                                         >
                                                         </div>
                                                         <div className='NodePositionWrapper'
-                                                            datatype='Node'
+                                                        
                                                         >
                                                             <div
                                                                 className="childNode"
@@ -349,8 +351,9 @@ const ReactNode = ({
                                                         </div>
                                                     </div>
                                                 }
-                                                {/** when pipe's number are even, render |_ corner type arrow of parent's color pipe  */}
-                                                {i == child.pipes.length - 1 && child.pipes.length % 2 != 0 &&
+                                                {/** redering tail: 
+                                                 * when pipe's length is one, render |_ corner type arrow of parent's color pipe  */}
+                                                {i == child.pipes.length - 1 && child.pipes.length  == 1 &&
                                                     <div>
                                                         <div
                                                             style={{
