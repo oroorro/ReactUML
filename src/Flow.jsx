@@ -1,6 +1,6 @@
 
 import React, { forwardRef } from 'react';
-import { useCallback, useRef, useEffect } from 'react';
+import { useCallback, useRef, useEffect, useState } from 'react';
 // import {ReactFlow, 
 // MiniMap,
 // Controls,
@@ -17,20 +17,17 @@ import { useNodesState, useEdgesState } from "./hook/useNodesEdgesState";
 import { type } from '@testing-library/user-event/dist/type';
 
 
+const NodeIndexInArray = {
+  '#dfe7f5': '0', //ZoomPane
+  '#ffa8d5': '0-0',  //NodeRenderer
+  '#f26d1f': '0-0-0', //EdgeRenderer
+  '#49abf5': '0-0-0-0', //Pane
+  '#e8c390': '0-0-0-1',  //Zoom
+  '#ffdc6b': '0-1', //Store
+}
 
-// import 'reactflow/dist/style.css';
 
 const initialNodes = [
-  {
-    id: '1',
-    position: { x: 0, y: 0 },
-    data: { label: '1' },
-  },
-  {
-    id: '2',
-    position: { x: 0, y: 100 },
-    data: { label: '2' },
-  },
   {
     id: '3',
     position: { x: 50, y: 50 },
@@ -338,13 +335,69 @@ const initialNodes = [
   },
 ];
 
-
-
 const initialEdges = [{ id: 'e1-2', source: '1', target: '2' }];
+
+function addChildToReactChildIterative(root, id, newChild) {
+  const path = NodeIndexInArray[id].split('-').map(Number); // Convert the path to an array of indices
+  const updatedRoot = { ...root }; // Create a shallow copy of the root for immutability
+
+  let currentNode = updatedRoot; // Start from the root node
+
+  for (let i = 0; i < path.length; i++) {
+    const currentIndex = path[i];
+
+    // Ensure children array exists
+    if (!currentNode.children) {
+      currentNode.children = [];
+    }
+
+    // If the child at the current index doesn't exist, create a placeholder node
+    if (!currentNode.children[currentIndex]) {
+      currentNode.children[currentIndex] = {
+        title: '',
+        numbersOfPropsGoingIn: 0,
+        color: '',
+        pipes: [],
+        attributes: [],
+        children: [],
+      };
+    }
+
+    // If this is the last index, add the new child to the current node's children
+    if (i === path.length - 1) {
+      currentNode.children[currentIndex].children = [
+        ...(currentNode.children[currentIndex].children || []),
+        newChild,
+      ];
+    }
+
+    // Move to the next node in the path
+    currentNode = currentNode.children[currentIndex];
+  }
+
+  return updatedRoot; // Return the updated tree
+}
+
+const newChild = {
+  title: 'NewNode',
+  numbersOfPropsGoingIn: 1,
+  color: '#abcdef',
+  pipes: [
+    {
+      color: '#dfe7f5',
+      numbersOfProps: 18,
+      name: "Node",
+      id: 'X2'
+    },
+  ],
+  attributes: [],
+};
 
 function Flow() {
 
   const flowRef = useRef(null);
+  const [contextMenu, setContextMenu] = useState(null)
+ 
 
   useEffect(() => {
     if (flowRef.current) {
@@ -352,13 +405,108 @@ function Flow() {
     }
   }, []);
 
+
+  const updateNode = () =>{
+    //we need to format data in order to add Node correctly,
+    //making data to be the root 
+    const format = {
+      children : [initialNodes[0].data],
+    }
+
+    const updatedReactChild  = addChildToReactChildIterative(format, contextMenu.nodeId, newChild);
+    //applying updated part to original initialNodes[0].data
+    initialNodes[0].data = {...updatedReactChild.children[0]}; 
+    //console.log("updatedReactChild WITH DATA", initialNodes)
+    //update node
+    setNodes(initialNodes);
+    setContextMenu(null)
+  }
+
+  const FlowContextMenuHandler = (event) => {
+
+    //get the type of element; which will be either 1. 1-Node other than return scope, 2-Node's return scope   2. pipe  3. Attribute
+
+    event.preventDefault();
+    const target = event.target;
+    const nodeDataId = target.getAttribute('data-id') ? target.getAttribute('data-id') : target.parentElement?.getAttribute('data-id');
+    const nodeDataType = target.getAttribute('datatype') ? target.getAttribute('datatype') : target.parentElement?.getAttribute('datatype');
+
+    //console.log("target context", nodeDataId);
+    //console.log("nodeDataType", nodeDataType);
+
+    if (nodeDataType === 'Node') {
+      console.log("target context", nodeDataId);
+      setContextMenu({
+        nodeId: nodeDataId,
+        nodeType: 'Node',
+        left: event.clientX,
+        top: event.clientY
+      })
+    }else if(nodeDataType === 'pipe'){
+      setContextMenu({
+        nodeId: nodeDataId,
+        nodeType: 'pipe',
+        left: event.clientX,
+        top: event.clientY
+      })
+    }
+  }
+
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
   const onConnect = useCallback((params) => setEdges((eds) => addEdge(params, eds)), [setEdges]);
 
+  function FlowClickHandler(event){
+
+    let target = event.target ;
+    let targetParent = target.parentElement
+    console.log("target click", target.getAttribute('datatype'))
+  
+    if(target.getAttribute('datatype') !== 'contextMenu' ){
+      setContextMenu(
+        null
+      )
+    }
+  }
+
   return (
-    <div className='Flow' style={{ width: "100vw", height: "100vh" }}>
+    <div className='Flow' style={{ width: "100vw", height: "100vh" }}
+    onClick={(e)=>FlowClickHandler(e)}
+    onMouseDown={(e)=>FlowClickHandler(e)}
+    >
+      {contextMenu && contextMenu.nodeType === 'Node' &&
+        <div
+        className='flex flex-col'
+        style={{
+          backgroundColor: 'tomato', 
+           
+          height: '50px', 
+          position: 'absolute',
+          left: `${contextMenu.left}px`,
+          top: `${contextMenu.top}px`,
+          zIndex: '9999'
+        }}
+        id={contextMenu.nodeId}
+        >
+          {contextMenu.nodeId}
+          <button datatype="contextMenu" onClick={()=>updateNode()}>create</button>
+        </div>}
+        {contextMenu && contextMenu.nodeType === 'pipe' &&
+        <div
+        style={{
+          backgroundColor: 'grey', 
+          width: '50px', 
+          height: '50px', 
+          position: 'absolute',
+          left: `${contextMenu.left}px`,
+          top: `${contextMenu.top}px`,
+          zIndex: '9999'
+        }}
+        id={contextMenu.nodeId}
+        >
+          <button datatype="contextMenu" onClick={()=>updateNode()}>create</button>
+        </div>}
       <AlgoFlow
         ref={flowRef}
         nodes={nodes}
@@ -366,6 +514,8 @@ function Flow() {
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
+        onContextMenu={(e) => { FlowContextMenuHandler(e) }}
+
       >
         <Background />
         <Controls />
