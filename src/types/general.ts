@@ -24,7 +24,8 @@ import type {
     SelectionDragHandler,
     NodeInternals,
     NodeProps,
-    WrapNodeProps
+    WrapNodeProps, 
+    InteractionData //added
 } from './nodes';
 
 
@@ -231,6 +232,7 @@ export type ReactFlowActions = {
     connectionRadius: number;
   
     isValidConnection?: IsValidConnection;
+    interactingObject?: InteractionData | null; //added 
   }; 
   
   export type ReactFlowState = ReactFlowStore & ReactFlowActions;  

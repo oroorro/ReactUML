@@ -4,7 +4,7 @@ import React, { memo, useState } from 'react';
 import Handle from '../../component/Handle';
 import { Position } from '../../types';
 import { useStoreApi } from '../../hook/useStore';
-import type { NodeProps, ReactChild, Attribute, Pipe, AttributeContent, ReactInBuiltAttributeContent } from '../../types';
+import type { NodeProps, ReactChild, Attribute, Pipe, AttributeContent, ReactInBuiltAttributeContent, Node } from '../../types';
 
 import { AttributeIcon, AttributeIconProps } from '../NodeAttribute/AttributeIcon';
 import './ReactNodeStyle.css';
@@ -30,12 +30,51 @@ const ReactNode = ({
 }: NodeProps) => {
 
     const store = useStoreApi();
-    const {setNodes} = store.getState();
+    const {setNodes, getNodes} = store.getState();
     const { children, title, color, attributes } = data;
     const [expandedAttributes, setExpandedAttributes] = useState<string[]>([]);
     const [expandedprops, setExpandedProps] = useState<string[]>([]);
 
+    const handleUnmute = (id:string) => {
 
+        
+
+        console.log("handleUnmute", getNodes)
+
+        const nodes:Node[] = getNodes();
+
+
+
+        //setNodes(nodes);
+
+        // setNodes((prevNode: Node[]) => {
+        //     console.log("prevNode", prevNode);
+        //     // Example: Adding a new node to the array
+        //     const updatedNodes = [...prevNode, { id: 'newNode', data: 'example' }];
+        //     return updatedNodes;
+        // });
+        
+        // setNodes((prevNode:ReactNode[])=>{
+
+        //     const path = NodeIndexInArray[id].split('-').map(Number);
+        //     const updatedRoot = { ...prevNode }; 
+        //     let currentNode = updatedRoot;
+        //     for (let i = 0; i < path.length; i++) {
+        //         const currentIndex = path[i];
+        
+        //         if (i === path.length - 1) {
+        //         currentNode.children[currentIndex].muteAll = true;
+        //         }
+        
+        //         currentNode = currentNode.children[currentIndex];
+        //     }
+
+        //     return{
+
+        //     }
+
+        // })
+    }
     
 
     const handlePropGoingInToChild = (pipe: Pipe) => {
@@ -377,7 +416,7 @@ const ReactNode = ({
 
                                                                     })}
                                                                 </div>}
-                                                                {child.muteAll && <button>...</button>}
+                                                                {child.muteAll && <button onClick={()=>handleUnmute(child.color)}>...</button>}
                                                                 {!child.muteAll && renderChildren(child.children, level + 1, child.color)}
                                                             </div>
                                                         </div>

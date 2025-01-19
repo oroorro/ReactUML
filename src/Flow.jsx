@@ -16,6 +16,7 @@ import AlgoFlow from "./container/AlgoFlow";
 import { useNodesState, useEdgesState } from "./hook/useNodesEdgesState";
 import { type } from '@testing-library/user-event/dist/type';
 
+import { useStoreApi } from './hook/useStore';  // does not work since it is above the store level 
 
 const NodeIndexInArray = {
   '#dfe7f5': '0', //ZoomPane

@@ -69,6 +69,7 @@ const initialState: ReactFlowStore = {
   connectionRadius: 20,
   onError: devWarn,
   isValidConnection: undefined,
+  interactingObject: null, //added 
 };
 
 export default initialState;

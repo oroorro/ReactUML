@@ -186,3 +186,8 @@ type ReactInbuiltAttributes = {
   type?: string,
   belongsTo: string //id of Node that created props for the first time 
 }
+
+export type InteractionData = {
+  type?: 'mute' | 'muteAll' | null;
+  id?: string
+}
