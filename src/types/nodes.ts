@@ -147,6 +147,7 @@ export type ReactChild = {
   attributes: Attribute[],
   children?: ReactChild[], 
   muteAll?: boolean,
+  indexMap?: { [key: string]: string };
 }
 
 export type Pipe = {

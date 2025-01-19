@@ -25,7 +25,6 @@ import type {
     NodeInternals,
     NodeProps,
     WrapNodeProps, 
-    InteractionData //added
 } from './nodes';
 
 
@@ -232,7 +231,7 @@ export type ReactFlowActions = {
     connectionRadius: number;
   
     isValidConnection?: IsValidConnection;
-    interactingObject?: InteractionData | null; //added 
+    indexMap?: { [key: string]: string };
   }; 
   
   export type ReactFlowState = ReactFlowStore & ReactFlowActions;  

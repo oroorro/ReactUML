@@ -147,6 +147,7 @@ export type AlgoFlowProps = Omit<HTMLAttributes<HTMLDivElement>, 'onError'> & {
   onError?: OnError;
   isValidConnection?: ValidConnectionFunc;
   nodeDragThreshold?: number;
+  indexMap?: { [key: string]: string };
 };
 
 export type AlgoFlowRefType = HTMLDivElement;

@@ -35,6 +35,7 @@ const initialNodes = [
     type: 'ReactNode',
 
     data: {
+      indexMap: NodeIndexInArray,
       label: '3',
       title: 'ZoomPane',
       color: '#dfe7f5',
@@ -552,6 +553,7 @@ function Flow() {
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
         onContextMenu={(e) => { FlowContextMenuHandler(e) }}
+        indexMap={NodeIndexInArray}
 
       >
         <Background />

@@ -30,7 +30,7 @@ const ReactNode = ({
 }: NodeProps) => {
 
     const store = useStoreApi();
-    const {setNodes, getNodes} = store.getState();
+    const {setNodes, getNodes, indexMap} = store.getState();
     const { children, title, color, attributes } = data;
     const [expandedAttributes, setExpandedAttributes] = useState<string[]>([]);
     const [expandedprops, setExpandedProps] = useState<string[]>([]);
@@ -40,10 +40,21 @@ const ReactNode = ({
         
 
         console.log("handleUnmute", getNodes)
-
+        console.log("indexMap: ", indexMap)
         const nodes:Node[] = getNodes();
 
-
+        // const path = NodeIndexInArray[id].split('-').map(Number);
+        // const updatedRoot = { ...prevNode }; 
+        // let currentNode = updatedRoot;
+        // for (let i = 0; i < path.length; i++) {
+        //     const currentIndex = path[i];
+    
+        //     if (i === path.length - 1) {
+        //     currentNode.children[currentIndex].muteAll = true;
+        //     }
+    
+        //     currentNode = currentNode.children[currentIndex];
+        // }
 
         //setNodes(nodes);
 
@@ -54,26 +65,7 @@ const ReactNode = ({
         //     return updatedNodes;
         // });
         
-        // setNodes((prevNode:ReactNode[])=>{
 
-        //     const path = NodeIndexInArray[id].split('-').map(Number);
-        //     const updatedRoot = { ...prevNode }; 
-        //     let currentNode = updatedRoot;
-        //     for (let i = 0; i < path.length; i++) {
-        //         const currentIndex = path[i];
-        
-        //         if (i === path.length - 1) {
-        //         currentNode.children[currentIndex].muteAll = true;
-        //         }
-        
-        //         currentNode = currentNode.children[currentIndex];
-        //     }
-
-        //     return{
-
-        //     }
-
-        // })
     }
     
 
