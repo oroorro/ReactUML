@@ -146,6 +146,7 @@ export type ReactChild = {
   pipes: Pipe[],
   attributes: Attribute[],
   children?: ReactChild[], 
+  muteAll?: boolean,
 }
 
 export type Pipe = {
@@ -155,6 +156,7 @@ export type Pipe = {
   id: string //unique id that each pipe has 
   props: AttributeContent[], //will be using AttributeContent type since, it has all of necessary data type, we may change the name of AttributeContent in the future 
   //props = {name:string, type:string, belongsTo:string }
+  mute?: boolean,
 }
 
 export type ReactNodeType = {
@@ -165,6 +167,7 @@ export type Attribute = {
   nameOfAttribute: string, // can be Hook, var, function, reactInbuilt (API, Hook), import, export 
   totalNumberOfAttribute: number,
   AttributeContents: AttributeContent[] | ReactInBuiltAttributeContent[],
+  mute?: boolean,
 }
 
 export type AttributeContent = {

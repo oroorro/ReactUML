@@ -3,6 +3,7 @@ import React, { memo, useState } from 'react';
 
 import Handle from '../../component/Handle';
 import { Position } from '../../types';
+import { useStoreApi } from '../../hook/useStore';
 import type { NodeProps, ReactChild, Attribute, Pipe, AttributeContent, ReactInBuiltAttributeContent } from '../../types';
 
 import { AttributeIcon, AttributeIconProps } from '../NodeAttribute/AttributeIcon';
@@ -28,9 +29,14 @@ const ReactNode = ({
     data,
 }: NodeProps) => {
 
+    const store = useStoreApi();
+    const {setNodes} = store.getState();
     const { children, title, color, attributes } = data;
     const [expandedAttributes, setExpandedAttributes] = useState<string[]>([]);
     const [expandedprops, setExpandedProps] = useState<string[]>([]);
+
+
+    
 
     const handlePropGoingInToChild = (pipe: Pipe) => {
         console.log("pipe clicked ", pipe);
@@ -84,7 +90,7 @@ const ReactNode = ({
             >
                 {children.map((child, index) => {
 
-                    return (
+                    return (  
                         <div
                             key={index}
                             style={{
@@ -227,7 +233,7 @@ const ReactNode = ({
                                                             }}>
                                                             </div>
                                                         }
-
+                                                        {/** rendering Node  */}
                                                         <div className='NodePositionWrapper'
                                                             datatype='Node'
                                                             data-id={`${pipe.color}`}
@@ -274,7 +280,7 @@ const ReactNode = ({
                                                                         {child.title}
                                                                     </div>
                                                                 </div>
-                                                                <div className='AttributeContainer'
+                                                                {!child.muteAll && <div className='AttributeContainer'
                                                                     style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', alignItems: 'flex-start', padding: '4px 2px' }}
 
                                                                 > {/** displaying attributes */}
@@ -370,15 +376,13 @@ const ReactNode = ({
 
 
                                                                     })}
-                                                                </div>
-                                                                {renderChildren(child.children, level + 1, child.color)}
+                                                                </div>}
+                                                                {child.muteAll && <button>...</button>}
+                                                                {!child.muteAll && renderChildren(child.children, level + 1, child.color)}
                                                             </div>
                                                         </div>
                                                     </div>
                                                 } 
-                                                {/** redering tail: 
-                                                 * when pipe's length is one, render |_ corner type arrow of parent's color pipe  */}
-                                                
                                             </div>
                                         )
 
@@ -387,6 +391,7 @@ const ReactNode = ({
                             </div>
                         </div>
                     )
+
                 })}
             </div>
         );

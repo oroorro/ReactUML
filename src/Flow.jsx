@@ -396,6 +396,7 @@ const newChild = {
 function Flow() {
 
   const flowRef = useRef(null);
+  const interactingIdRef = useRef(null);
   const [contextMenu, setContextMenu] = useState(null)
  
 
@@ -405,6 +406,23 @@ function Flow() {
     }
   }, []);
 
+  //returns Node from nodes array for given id 
+  const muteNode = (root, id) =>{
+    const path = NodeIndexInArray[id].split('-').map(Number);
+    const updatedRoot = { ...root }; 
+    let currentNode = updatedRoot;
+
+    for (let i = 0; i < path.length; i++) {
+      const currentIndex = path[i];
+
+      if (i === path.length - 1) {
+        currentNode.children[currentIndex].muteAll = true;
+      }
+
+      currentNode = currentNode.children[currentIndex];
+    }
+    return updatedRoot;
+  }
 
   const updateNode = () =>{
     //we need to format data in order to add Node correctly,
@@ -431,6 +449,7 @@ function Flow() {
     const nodeDataId = target.getAttribute('data-id') ? target.getAttribute('data-id') : target.parentElement?.getAttribute('data-id');
     const nodeDataType = target.getAttribute('datatype') ? target.getAttribute('datatype') : target.parentElement?.getAttribute('datatype');
 
+    interactingIdRef.current = nodeDataId;
     //console.log("target context", nodeDataId);
     //console.log("nodeDataType", nodeDataType);
 
@@ -464,33 +483,50 @@ function Flow() {
     console.log("target click", target.getAttribute('datatype'))
   
     if(target.getAttribute('datatype') !== 'contextMenu' ){
-      setContextMenu(
-        null
-      )
+      setContextMenu(null)
     }
+  }
+
+  const muteHandler = () => {
+    //get id of Node , interactingIdRef.current
+
+    //access that Node in 
+    const format = {
+      children : [nodes[0].data],
+    }
+
+    //console.log("nodes nodes", nodes[0].data);
+    setContextMenu(null);
+    const updatedReactChild = muteNode(format, interactingIdRef.current);
+    console.log("returned node: ", updatedReactChild);
+    initialNodes[0].data = {...updatedReactChild.children[0]}; 
+
+    setNodes(initialNodes);
+
   }
 
   return (
     <div className='Flow' style={{ width: "100vw", height: "100vh" }}
-    onClick={(e)=>FlowClickHandler(e)}
-    onMouseDown={(e)=>FlowClickHandler(e)}
+    // onClick={(e)=>FlowClickHandler(e)}
+    // onMouseDown={(e)=>FlowClickHandler(e)}
     >
       {contextMenu && contextMenu.nodeType === 'Node' &&
         <div
         className='flex flex-col'
         style={{
           backgroundColor: 'tomato', 
-           
-          height: '50px', 
           position: 'absolute',
           left: `${contextMenu.left}px`,
           top: `${contextMenu.top}px`,
           zIndex: '9999'
         }}
         id={contextMenu.nodeId}
+        datatype="contextMenu"
         >
           {contextMenu.nodeId}
-          <button datatype="contextMenu" onClick={()=>updateNode()}>create</button>
+          <button  onClick={()=>updateNode()}>create</button>
+          <button  onClick={()=>muteHandler()}> mute </button>
+
         </div>}
         {contextMenu && contextMenu.nodeType === 'pipe' &&
         <div
