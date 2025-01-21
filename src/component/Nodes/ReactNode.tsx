@@ -4,7 +4,9 @@ import React, { memo, useState } from 'react';
 import Handle from '../../component/Handle';
 import { Position } from '../../types';
 import { useStoreApi } from '../../hook/useStore';
-import type { NodeProps, ReactChild, Attribute, Pipe, AttributeContent, ReactInBuiltAttributeContent, Node } from '../../types';
+import useUpdateNodeInternals from '../../hook/useUpdateNodeInternals';
+
+import type { NodeProps, ReactChild, Attribute, Pipe, AttributeContent, ReactInBuiltAttributeContent, Node, NodeDimensionChange } from '../../types';
 
 import { AttributeIcon, AttributeIconProps } from '../NodeAttribute/AttributeIcon';
 import './ReactNodeStyle.css';
@@ -28,44 +30,48 @@ const ReactNode = ({
     isConnectable,
     data,
 }: NodeProps) => {
-
     const store = useStoreApi();
-    const {setNodes, getNodes, indexMap} = store.getState();
+    const updateNodeInternals = useUpdateNodeInternals();
+    const {setNodes, getNodes, indexMap, onNodesChange} = store.getState();
     const { children, title, color, attributes } = data;
     const [expandedAttributes, setExpandedAttributes] = useState<string[]>([]);
     const [expandedprops, setExpandedProps] = useState<string[]>([]);
 
     const handleUnmute = (id:string) => {
 
-        
+        const nodes:Node[] = getNodes();    
+ 
+        //get the id of node 
+        const path = indexMap![id].split('-').map(Number);
 
-        console.log("handleUnmute", getNodes)
-        console.log("indexMap: ", indexMap)
-        const nodes:Node[] = getNodes();
+        //update mute flag then setNode to update the display 
+        let format = {
+            children : [nodes[0].data],
+        }
 
-        // const path = NodeIndexInArray[id].split('-').map(Number);
-        // const updatedRoot = { ...prevNode }; 
-        // let currentNode = updatedRoot;
-        // for (let i = 0; i < path.length; i++) {
-        //     const currentIndex = path[i];
+        const updatedRoot = {...format}; 
+        let currentNode = updatedRoot;
+  
+        for (let i = 0; i < path.length; i++) {
+            const currentIndex = path[i];
     
-        //     if (i === path.length - 1) {
-        //     currentNode.children[currentIndex].muteAll = true;
-        //     }
+            if (i === path.length - 1) {
+                currentNode.children[currentIndex].muteAll = false;
+            }
     
-        //     currentNode = currentNode.children[currentIndex];
-        // }
+            currentNode = currentNode.children[currentIndex];
+        }
 
-        //setNodes(nodes);
-
-        // setNodes((prevNode: Node[]) => {
-        //     console.log("prevNode", prevNode);
-        //     // Example: Adding a new node to the array
-        //     const updatedNodes = [...prevNode, { id: 'newNode', data: 'example' }];
-        //     return updatedNodes;
-        // });
-        
-
+        nodes[0].data = updatedRoot.children[0];
+        //let newNode:Node[] = [...nodes];
+        let newNode:Node[] = nodes.map(node => ({ ...node }));
+        //console.log("Are nodes and newNode the same reference?", nodes === newNode);
+        newNode[0].data = updatedRoot.children[0];
+      
+        const changes = newNode.map((node) => ({id: node.id, item: node, type: 'dimensions'} as NodeDimensionChange));
+  
+        setNodes(newNode);
+        //onNodesChange!(changes);
     }
     
 
@@ -120,7 +126,6 @@ const ReactNode = ({
                 datatype='Node'
             >
                 {children.map((child, index) => {
-
                     return (  
                         <div
                             key={index}
@@ -311,7 +316,7 @@ const ReactNode = ({
                                                                         {child.title}
                                                                     </div>
                                                                 </div>
-                                                                {!child.muteAll && <div className='AttributeContainer'
+                                                                {!child.muteAll  && <div className='AttributeContainer'
                                                                     style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', alignItems: 'flex-start', padding: '4px 2px' }}
 
                                                                 > {/** displaying attributes */}
@@ -408,7 +413,7 @@ const ReactNode = ({
 
                                                                     })}
                                                                 </div>}
-                                                                {child.muteAll && <button onClick={()=>handleUnmute(child.color)}>...</button>}
+                                                                {child.muteAll == true&& <button onClick={()=>handleUnmute(child.color)}>...</button>}
                                                                 {!child.muteAll && renderChildren(child.children, level + 1, child.color)}
                                                             </div>
                                                         </div>
@@ -452,4 +457,4 @@ const ReactNode = ({
 
 ReactNode.displayName = 'ReactNode';
 
-export default memo(ReactNode);
+export default ReactNode;

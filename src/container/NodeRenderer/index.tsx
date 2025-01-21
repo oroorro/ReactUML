@@ -151,4 +151,4 @@ const NodeRenderer = (props: NodeRendererProps) => {
 
 NodeRenderer.displayName = 'NodeRenderer';
 
-export default memo(NodeRenderer);
+export default NodeRenderer;

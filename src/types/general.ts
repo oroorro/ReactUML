@@ -304,3 +304,5 @@ export enum SelectionMode {
   Partial = 'partial',
   Full = 'full',
 }
+
+export type UpdateNodeInternals = (nodeId: string | string[]) => void;

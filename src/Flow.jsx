@@ -399,8 +399,7 @@ function Flow() {
 
   const flowRef = useRef(null);
   const interactingIdRef = useRef(null);
-  const [contextMenu, setContextMenu] = useState(null)
- 
+  const [contextMenu, setContextMenu] = useState(null);
 
   useEffect(() => {
     if (flowRef.current) {
@@ -554,7 +553,6 @@ function Flow() {
         onConnect={onConnect}
         onContextMenu={(e) => { FlowContextMenuHandler(e) }}
         indexMap={NodeIndexInArray}
-
       >
         <Background />
         <Controls />
