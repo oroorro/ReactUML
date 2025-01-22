@@ -115,6 +115,13 @@ const initialNodes = [
               ]
             },
             {
+              nameOfAttribute: 'import',
+              totalNumberOfAttribute: 15,
+              AttributeContents: [
+                
+              ]
+            },
+            {
               nameOfAttribute: 'vars',
               totalNumberOfAttribute: 12,
               AttributeContents: [
@@ -315,6 +322,18 @@ const initialNodes = [
                     },
                   ],
                 },
+                {
+                  title: 'ghost',
+                  type: 'ghost',
+                  pipes:[
+                    {
+                      color: '#dfe7f5',
+                      numbersOfProps: 5,
+                      name: "Node",
+                      id: 'E3'
+                    },
+                  ]
+                }
               ],
             },
           ],
@@ -407,6 +426,10 @@ function Flow() {
     }
   }, []);
 
+  useEffect(()=>{
+    console.log("contextMenu changed:", JSON.parse(JSON.stringify(contextMenu))); 
+  },[contextMenu])
+
   //returns Node from nodes array for given id 
   const muteNode = (root, id) =>{
     const path = NodeIndexInArray[id].split('-').map(Number);
@@ -439,6 +462,28 @@ function Flow() {
     //update node
     setNodes(initialNodes);
     setContextMenu(null)
+  }
+
+  const moveToSubMenu = (type) => {
+
+    switch (type) {
+      case "createOnElement":
+
+        setContextMenu(prev=>{
+          return {
+            nodeId: prev.nodeId,
+            nodeType: 'Node',
+            left: prev.left,
+            top: prev.top,
+            detail: 'create',
+          }
+        })
+
+        break;
+    
+      default:
+        break;
+    }
   }
 
   const FlowContextMenuHandler = (event) => {
@@ -483,7 +528,7 @@ function Flow() {
     let targetParent = target.parentElement
     console.log("target click", target.getAttribute('datatype'))
   
-    if(target.getAttribute('datatype') !== 'contextMenu' ){
+    if(targetParent.getAttribute('datatype') !== 'contextMenu' ){
       setContextMenu(null)
     }
   }
@@ -495,21 +540,23 @@ function Flow() {
     const format = {
       children : [nodes[0].data],
     }
-
     //console.log("nodes nodes", nodes[0].data);
     setContextMenu(null);
     const updatedReactChild = muteNode(format, interactingIdRef.current);
-    console.log("returned node: ", updatedReactChild);
+    //console.log("returned node: ", updatedReactChild);
     initialNodes[0].data = {...updatedReactChild.children[0]}; 
-
-    setNodes(initialNodes);
+    nodes[0].data = {...updatedReactChild.children[0]}; 
+    const updateNode = [...nodes];
+    // console.log("initialNodes returned:", JSON.parse(JSON.stringify(initialNodes))); 
+    // console.log("nodes returned:", JSON.parse(JSON.stringify(nodes))); 
+    setNodes(updateNode);
 
   }
 
   return (
     <div className='Flow' style={{ width: "100vw", height: "100vh" }}
-    // onClick={(e)=>FlowClickHandler(e)}
-    // onMouseDown={(e)=>FlowClickHandler(e)}
+    onClick={(e)=>FlowClickHandler(e)}
+    onMouseDown={(e)=>FlowClickHandler(e)}
     >
       {contextMenu && contextMenu.nodeType === 'Node' &&
         <div
@@ -525,9 +572,10 @@ function Flow() {
         datatype="contextMenu"
         >
           {contextMenu.nodeId}
-          <button  onClick={()=>updateNode()}>create</button>
-          <button  onClick={()=>muteHandler()}> mute </button>
-
+          {!contextMenu.detail && <button  onClick={()=>moveToSubMenu("createOnElement")}>create</button>}
+          {!contextMenu.detail && <button  onClick={()=>muteHandler()}> mute </button> }
+          {contextMenu.detail == 'create' && <button onClick={()=>updateNode()}> Node </button> }
+          {contextMenu.detail == 'create' && <button > Props </button> }
         </div>}
         {contextMenu && contextMenu.nodeType === 'pipe' &&
         <div

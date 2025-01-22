@@ -147,6 +147,7 @@ export type ReactChild = {
   attributes: Attribute[],
   children?: ReactChild[], 
   muteAll?: boolean,
+  type?: 'ghost',
   indexMap?: { [key: string]: string };
 }
 
