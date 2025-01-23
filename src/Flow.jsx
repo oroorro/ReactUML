@@ -63,7 +63,7 @@ const initialNodes = [
           ]
         },
         {
-          nameOfAttribute: 'vars',
+          nameOfAttribute: 'variable',
           totalNumberOfAttribute: 9,
           AttributeContents: [
             {
@@ -124,7 +124,7 @@ const initialNodes = [
               ]
             },
             {
-              nameOfAttribute: 'vars',
+              nameOfAttribute: 'variable',
               totalNumberOfAttribute: 12,
               AttributeContents: [
                 {
@@ -360,7 +360,7 @@ const initialNodes = [
 
 const initialEdges = [{ id: 'e1-2', source: '1', target: '2' }];
 
-function addChildToReactChildIterative(root, id, newChild, type) {
+function addChildToReactChildIterative(root, id, newChild, type, data=null) {
   const path = NodeIndexInArray[id].split('-').map(Number); // Convert the path to an array of indices
   const updatedRoot = { ...root }; // Create a shallow copy of the root for immutability
 
@@ -378,7 +378,7 @@ function addChildToReactChildIterative(root, id, newChild, type) {
         currentNode.children[currentIndex].attributes = [
           ...(currentNode.children[currentIndex].attributes || []),
           {
-            nameOfAttribute: 'empty',
+            nameOfAttribute: data ? data : 'empty',
             totalNumberOfAttribute: 0,
             AttributeContents: [
               {
@@ -490,14 +490,14 @@ function Flow() {
     return updatedRoot;
   }
 
-  const updateNode = (type) => {
+  const updateNode = (type, data=null) => {
     //we need to format data in order to add Node correctly,
     //making data to be the root 
     const format = {
       children: [nodes[0].data],
     }
-
-    const updatedReactChild = addChildToReactChildIterative(format, contextMenu.nodeId, newChild, type);
+    console.log("updateNode", type, data)
+    const updatedReactChild = addChildToReactChildIterative(format, contextMenu.nodeId, newChild, type, data);
     //applying updated part to original initialNodes[0].data
     nodes[0].data = { ...updatedReactChild.children[0] };
     const updateNode = [...nodes];
@@ -507,7 +507,7 @@ function Flow() {
     setContextMenu(null)
   }
 
-  const addProp = () => {
+  const addAttribute = (type) => {
 
   }
 
@@ -553,6 +553,8 @@ function Flow() {
     //     break;
     // }
   }
+
+  
 
   const FlowContextMenuHandler = (event) => {
 
@@ -640,7 +642,7 @@ function Flow() {
           datatype="contextMenu"
         >
           {contextMenu.nodeId}
-          {!contextMenu.detail && <button onClick={() => moveToSubMenu("createOnElement")}>create</button>}
+          {!contextMenu.detail && <button onClick={() => moveToSubMenu("create")}>create</button>}
           {!contextMenu.detail && <button onClick={() => muteHandler()}> mute </button>}
           {contextMenu.detail == 'create' && <button onClick={() => updateNode('Node')}> Node </button>}
           {contextMenu.detail == 'create' && <button onClick={() => updateNode('Prop')}> Prop </button>}
@@ -658,7 +660,7 @@ function Flow() {
           {contextMenu.detail == 'create-attribute-3rd' && 
             <div className='flex flex-col' datatype="contextMenu">
             {  attributeColors.map((attribute)=>(
-              <button>{attribute}</button>
+              <button onClick={() => updateNode('Attribute', attribute)}>{attribute}</button>
             ))}
             </div>
           }
