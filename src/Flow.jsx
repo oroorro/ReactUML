@@ -367,8 +367,29 @@ function addChildToReactChildIterative(root, id, newChild, type) {
   for (let i = 0; i < path.length; i++) {
     const currentIndex = path[i];
 
+    if(type == 'Attribute'){
+      if (!currentNode.attributes) {
+        currentNode.attributes = [];
+      }
 
-    if(type == 'Node'){
+      if (i === path.length - 1) {
+        currentNode.children[currentIndex].attributes = [
+          ...(currentNode.children[currentIndex].attributes || []),
+          {
+            nameOfAttribute: 'empty',
+            totalNumberOfAttribute: 0,
+            AttributeContents: [
+              {
+                name: 'initialNodes',
+                belongsTo: 'X2D',
+              }
+            ]
+          },
+        ];
+      }
+    }
+    //creating Node and Prop
+    else{
       // Ensure children array exists
       if (!currentNode.children) {
         currentNode.children = [];
@@ -390,36 +411,10 @@ function addChildToReactChildIterative(root, id, newChild, type) {
       if (i === path.length - 1) {
         currentNode.children[currentIndex].children = [
           ...(currentNode.children[currentIndex].children || []),
-          newChild,
+          type == 'Node' ? newChild : ghostChild,
         ];
       }
     }
-    else if(type == 'Prop'){
-      if (!currentNode.children) {
-        currentNode.children = [];
-      }
-
-      // If the child at the current index doesn't exist, create a placeholder node
-      if (!currentNode.children[currentIndex]) {
-        currentNode.children[currentIndex] = {
-          title: '',
-          numbersOfPropsGoingIn: 0,
-          color: '',
-          pipes: [],
-          attributes: [],
-          children: [],
-        };
-      }
-
-      // If this is the last index, add the new child to the current node's children
-      if (i === path.length - 1) {
-        currentNode.children[currentIndex].children = [
-          ...(currentNode.children[currentIndex].children || []),
-          ghostChild,
-        ];
-      }
-    }
-
 
     // Move to the next node in the path
     currentNode = currentNode.children[currentIndex];
@@ -625,7 +620,8 @@ function Flow() {
           {!contextMenu.detail && <button  onClick={()=>moveToSubMenu("createOnElement")}>create</button>}
           {!contextMenu.detail && <button  onClick={()=>muteHandler()}> mute </button> }
           {contextMenu.detail == 'create' && <button onClick={()=>updateNode('Node')}> Node </button> }
-          {contextMenu.detail == 'create' && <button onClick={()=>updateNode('Prop')}> Props </button> }
+          {contextMenu.detail == 'create' && <button onClick={()=>updateNode('Prop')}> Prop </button> }
+          {contextMenu.detail == 'create' && <button onClick={()=>updateNode('Attribute')}> Attribute </button> }
         </div>}
         {contextMenu && contextMenu.nodeType === 'pipe' &&
         <div

@@ -23,6 +23,7 @@ const attributeColors: Record<string, string> = {
     vars: "#ff5733",
     functions: "#8e44ad",
     hooks: "#ffb0fe",
+    empty: '#808080',
 };
 
 
