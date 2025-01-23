@@ -20,9 +20,10 @@ const PIPE_HEIGHT_HORIZONTAL = 13;
 const attributeColors: Record<string, string> = {
     import: "#00bfff",
     reactInBuilt: "#ffcc00",
-    vars: "#ff5733",
-    functions: "#8e44ad",
-    hooks: "#ffb0fe",
+    variable: "#ff5733",
+    function: "#bb32bf",
+    hook: "#ffb0fe",
+    empty: '#808080',
 };
 
 
