@@ -27,6 +27,8 @@ const NodeIndexInArray = {
   '#ffdc6b': '0-1', //Store
 }
 
+const attributeColors = ['import', 'reactInBuilt', 'variable', 'function', 'hook', 'create type',]
+
 
 const initialNodes = [
   {
@@ -118,7 +120,7 @@ const initialNodes = [
               nameOfAttribute: 'import',
               totalNumberOfAttribute: 15,
               AttributeContents: [
-                
+
               ]
             },
             {
@@ -325,7 +327,7 @@ const initialNodes = [
                 {
                   title: 'ghost',
                   type: 'ghost',
-                  pipes:[
+                  pipes: [
                     {
                       color: '#dfe7f5',
                       numbersOfProps: 5,
@@ -367,7 +369,7 @@ function addChildToReactChildIterative(root, id, newChild, type) {
   for (let i = 0; i < path.length; i++) {
     const currentIndex = path[i];
 
-    if(type == 'Attribute'){
+    if (type == 'Attribute') {
       if (!currentNode.attributes) {
         currentNode.attributes = [];
       }
@@ -389,7 +391,7 @@ function addChildToReactChildIterative(root, id, newChild, type) {
       }
     }
     //creating Node and Prop
-    else{
+    else {
       // Ensure children array exists
       if (!currentNode.children) {
         currentNode.children = [];
@@ -466,14 +468,14 @@ function Flow() {
     }
   }, []);
 
-  useEffect(()=>{
-    console.log("contextMenu changed:", JSON.parse(JSON.stringify(contextMenu))); 
-  },[contextMenu])
+  useEffect(() => {
+    console.log("contextMenu changed:", JSON.parse(JSON.stringify(contextMenu)));
+  }, [contextMenu])
 
   //returns Node from nodes array for given id 
-  const muteNode = (root, id) =>{
+  const muteNode = (root, id) => {
     const path = NodeIndexInArray[id].split('-').map(Number);
-    const updatedRoot = { ...root }; 
+    const updatedRoot = { ...root };
     let currentNode = updatedRoot;
 
     for (let i = 0; i < path.length; i++) {
@@ -488,16 +490,16 @@ function Flow() {
     return updatedRoot;
   }
 
-  const updateNode = (type) =>{
+  const updateNode = (type) => {
     //we need to format data in order to add Node correctly,
     //making data to be the root 
     const format = {
-      children : [nodes[0].data],
+      children: [nodes[0].data],
     }
 
-    const updatedReactChild  = addChildToReactChildIterative(format, contextMenu.nodeId, newChild, type);
+    const updatedReactChild = addChildToReactChildIterative(format, contextMenu.nodeId, newChild, type);
     //applying updated part to original initialNodes[0].data
-    nodes[0].data = {...updatedReactChild.children[0]}; 
+    nodes[0].data = { ...updatedReactChild.children[0] };
     const updateNode = [...nodes];
     //console.log("updatedReactChild WITH DATA", initialNodes)
     //update node
@@ -511,24 +513,45 @@ function Flow() {
 
   const moveToSubMenu = (type) => {
 
-    switch (type) {
-      case "createOnElement":
+    setContextMenu(prev => {
+      return {
+        nodeId: prev.nodeId,
+        nodeType: 'Node',
+        left: prev.left,
+        top: prev.top,
+        detail: type,
+      }
+    })
+    // switch (type) {
+    //   case "createOnElement":
+    //     setContextMenu(prev => {
+    //       return {
+    //         nodeId: prev.nodeId,
+    //         nodeType: 'Node',
+    //         left: prev.left,
+    //         top: prev.top,
+    //         detail: 'create',
+    //       }
+    //     })
 
-        setContextMenu(prev=>{
-          return {
-            nodeId: prev.nodeId,
-            nodeType: 'Node',
-            left: prev.left,
-            top: prev.top,
-            detail: 'create',
-          }
-        })
+    //     break;
+      
+    //   case "create-attribute-2nd":
+    //     setContextMenu(prev => {
+    //       return {
+    //         nodeId: prev.nodeId,
+    //         nodeType: 'Node',
+    //         left: prev.left,
+    //         top: prev.top,
+    //         detail: 'create-attribute-2nd',
+    //       }
+    //     })
 
-        break;
-    
-      default:
-        break;
-    }
+    //     break; 
+
+    //   default:
+    //     break;
+    // }
   }
 
   const FlowContextMenuHandler = (event) => {
@@ -552,7 +575,7 @@ function Flow() {
         left: event.clientX,
         top: event.clientY
       })
-    }else if(nodeDataType === 'pipe'){
+    } else if (nodeDataType === 'pipe') {
       setContextMenu({
         nodeId: nodeDataId,
         nodeType: 'pipe',
@@ -567,13 +590,13 @@ function Flow() {
 
   const onConnect = useCallback((params) => setEdges((eds) => addEdge(params, eds)), [setEdges]);
 
-  function FlowClickHandler(event){
+  function FlowClickHandler(event) {
 
-    let target = event.target ;
+    let target = event.target;
     let targetParent = target.parentElement
     console.log("target click", target.getAttribute('datatype'))
-  
-    if(targetParent.getAttribute('datatype') !== 'contextMenu' ){
+
+    if (targetParent.getAttribute('datatype') !== 'contextMenu') {
       setContextMenu(null)
     }
   }
@@ -583,14 +606,14 @@ function Flow() {
 
     //access that Node in 
     const format = {
-      children : [nodes[0].data],
+      children: [nodes[0].data],
     }
     //console.log("nodes nodes", nodes[0].data);
     setContextMenu(null);
     const updatedReactChild = muteNode(format, interactingIdRef.current);
     //console.log("returned node: ", updatedReactChild);
-    initialNodes[0].data = {...updatedReactChild.children[0]}; 
-    nodes[0].data = {...updatedReactChild.children[0]}; 
+    initialNodes[0].data = { ...updatedReactChild.children[0] };
+    nodes[0].data = { ...updatedReactChild.children[0] };
     const updateNode = [...nodes];
     // console.log("initialNodes returned:", JSON.parse(JSON.stringify(initialNodes))); 
     // console.log("nodes returned:", JSON.parse(JSON.stringify(nodes))); 
@@ -600,43 +623,61 @@ function Flow() {
 
   return (
     <div className='Flow' style={{ width: "100vw", height: "100vh" }}
-    onClick={(e)=>FlowClickHandler(e)}
-    onMouseDown={(e)=>FlowClickHandler(e)}
+      onClick={(e) => FlowClickHandler(e)}
+      onMouseDown={(e) => FlowClickHandler(e)}
     >
       {contextMenu && contextMenu.nodeType === 'Node' &&
         <div
-        className='flex flex-col'
-        style={{
-          backgroundColor: 'tomato', 
-          position: 'absolute',
-          left: `${contextMenu.left}px`,
-          top: `${contextMenu.top}px`,
-          zIndex: '9999'
-        }}
-        id={contextMenu.nodeId}
-        datatype="contextMenu"
+          className='flex flex-col'
+          style={{
+            backgroundColor: 'tomato',
+            position: 'absolute',
+            left: `${contextMenu.left}px`,
+            top: `${contextMenu.top}px`,
+            zIndex: '9999'
+          }}
+          id={contextMenu.nodeId}
+          datatype="contextMenu"
         >
           {contextMenu.nodeId}
-          {!contextMenu.detail && <button  onClick={()=>moveToSubMenu("createOnElement")}>create</button>}
-          {!contextMenu.detail && <button  onClick={()=>muteHandler()}> mute </button> }
-          {contextMenu.detail == 'create' && <button onClick={()=>updateNode('Node')}> Node </button> }
-          {contextMenu.detail == 'create' && <button onClick={()=>updateNode('Prop')}> Prop </button> }
-          {contextMenu.detail == 'create' && <button onClick={()=>updateNode('Attribute')}> Attribute </button> }
+          {!contextMenu.detail && <button onClick={() => moveToSubMenu("createOnElement")}>create</button>}
+          {!contextMenu.detail && <button onClick={() => muteHandler()}> mute </button>}
+          {contextMenu.detail == 'create' && <button onClick={() => updateNode('Node')}> Node </button>}
+          {contextMenu.detail == 'create' && <button onClick={() => updateNode('Prop')}> Prop </button>}
+          {contextMenu.detail == 'create' && <button onClick={() => moveToSubMenu("create-attribute-2nd")}> Attribute </button>}
+
+          {/** Attribute 2nd layer of sub-menu*/}
+          {contextMenu.detail == 'create-attribute-2nd' && 
+            <div className='flex flex-col' datatype="contextMenu"> 
+              <button onClick={() => updateNode('Attribute')}> Just Create </button> 
+              <button onClick={() => moveToSubMenu("create-attribute-3rd")} > Select Type </button>
+            </div>
+          }
+
+          {/** Attribute 3rd layer of sub-menu, iterate attribute-3rd-array */} 
+          {contextMenu.detail == 'create-attribute-3rd' && 
+            <div className='flex flex-col' datatype="contextMenu">
+            {  attributeColors.map((attribute)=>(
+              <button>{attribute}</button>
+            ))}
+            </div>
+          }
+
         </div>}
-        {contextMenu && contextMenu.nodeType === 'pipe' &&
+      {contextMenu && contextMenu.nodeType === 'pipe' &&
         <div
-        style={{
-          backgroundColor: 'grey', 
-          width: '50px', 
-          height: '50px', 
-          position: 'absolute',
-          left: `${contextMenu.left}px`,
-          top: `${contextMenu.top}px`,
-          zIndex: '9999'
-        }}
-        id={contextMenu.nodeId}
+          style={{
+            backgroundColor: 'grey',
+            width: '50px',
+            height: '50px',
+            position: 'absolute',
+            left: `${contextMenu.left}px`,
+            top: `${contextMenu.top}px`,
+            zIndex: '9999'
+          }}
+          id={contextMenu.nodeId}
         >
-          <button datatype="contextMenu" onClick={()=>updateNode()}>create</button>
+          <button datatype="contextMenu" onClick={() => updateNode()}>create</button>
         </div>}
       <AlgoFlow
         ref={flowRef}
