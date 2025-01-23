@@ -115,6 +115,8 @@ const ReactNode = ({
             return null;
         }
 
+        const addPaddingBottom = children[children.length - 1].type && children[children.length - 1].type == 'ghost';
+
         return (
             <div className='returnScope'
                 style={{
@@ -122,6 +124,8 @@ const ReactNode = ({
                     boxShadow: 'inset 0px 48px 66px 0px rgba(72, 72, 72, 0.59)',
                     paddingTop: '10px',
                     overflow: 'hidden',
+                    paddingBottom: addPaddingBottom ? '10px' : '',
+                    //if any of this children's children has node type of ghost, then give padding bottom: 10px 
                 }}
                 datatype='Node'
             >
@@ -270,7 +274,7 @@ const ReactNode = ({
                                                             </div>
                                                         }
                                                         {/** rendering Node  */}
-                                                        <div className='NodePositionWrapper'
+                                                        {child.type != 'ghost'  && <div className='NodePositionWrapper'
                                                             datatype='Node'
                                                             data-id={`${pipe.color}`}
                                                         >
@@ -416,7 +420,7 @@ const ReactNode = ({
                                                                 {child.muteAll == true&& <button onClick={()=>handleUnmute(child.color)}>...</button>}
                                                                 {!child.muteAll && renderChildren(child.children, level + 1, child.color)}
                                                             </div>
-                                                        </div>
+                                                        </div>}
                                                     </div>
                                                 } 
                                             </div>
