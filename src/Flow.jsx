@@ -493,7 +493,7 @@ function Flow() {
   }, [contextMenu])
 
   //returns Node from nodes array for given id 
-  const muteNode = (root, id) => {
+  const updateNodeState = (root, id, state) => {
     const path = NodeIndexInArray[id].split('-').map(Number);
     const updatedRoot = { ...root };
     let currentNode = updatedRoot;
@@ -502,7 +502,13 @@ function Flow() {
       const currentIndex = path[i];
 
       if (i === path.length - 1) {
-        currentNode.children[currentIndex].muteAll = true;
+        if(state == 'mute'){
+          currentNode.children[currentIndex].muteAll = true;
+        }
+        else if(state == 'select'){
+          currentNode.children[currentIndex].state = 'select';
+        }
+        
       }
 
       currentNode = currentNode.children[currentIndex];
@@ -623,16 +629,20 @@ function Flow() {
     }
   }
 
-  const muteHandler = () => {
+  
+
+
+  //option: NodeState
+  const nodeStateHandler = (option) => {
     //get id of Node , interactingIdRef.current
 
     //access that Node in 
-    const format = {
+    const format  = {
       children: [nodes[0].data],
-    }
+    };
     //console.log("nodes nodes", nodes[0].data);
     setContextMenu(null);
-    const updatedReactChild = muteNode(format, interactingIdRef.current);
+    const updatedReactChild = updateNodeState(format, interactingIdRef.current, option);
     //console.log("returned node: ", updatedReactChild);
     initialNodes[0].data = { ...updatedReactChild.children[0] };
     nodes[0].data = { ...updatedReactChild.children[0] };
@@ -671,8 +681,8 @@ function Flow() {
           {/** mute 2nd layer of sub-menu */}
           {contextMenu.detail == 'mute-2nd' && 
             <div className='flex flex-col' datatype="contextMenu">
-              <button onClick={() => muteHandler()}> all </button>
-              <button > select </button>
+              <button onClick={() => nodeStateHandler('mute')}> all </button>
+              <button onClick={() => nodeStateHandler('select')}> select </button>
             </div>
           }
 

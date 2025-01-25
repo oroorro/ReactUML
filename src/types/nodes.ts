@@ -150,7 +150,7 @@ export type ReactChild = {
   children?: ReactChild[], 
   muteAll?: boolean,
   type?: 'ghost',
-  state?: string,
+  state?: NodeState,
   indexMap?: { [key: string]: string };
 }
 
@@ -169,6 +169,7 @@ export type ReactNodeType = {
 }
 
 export type MuteOption = 'muting' | 'notMuted' | 'muted';
+export type NodeState = 'mute' | 'copy' | 'delete' | 'select' | 'none';
 
 export type Attribute = {
   nameOfAttribute: string, // can be Hook, var, function, reactInbuilt (API, Hook), import, export 
@@ -203,7 +204,7 @@ export type InteractionData = {
 //used when updating elements in Node, Attribute and Prop
 export type updateOption = {
   target: 'attribute' | 'node' | 'prop',
-  state: 'mute' | 'copy' | 'delete',
+  state: NodeState,
   muteOptions?: MuteOption, 
 }
 

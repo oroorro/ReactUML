@@ -96,6 +96,19 @@ const ReactNode = ({
                     const targetAttribute: Attribute = currentNode.children[currentIndex].attributes.find((attrb: Attribute) => attrb.id === id);
                     targetAttribute.mute = updateOption.muteOptions;
                 }
+                else if(updateOption.target == 'node'){
+
+                    currentNode.children[currentIndex].state = updateOption.state;
+                    // switch (updateOption.state) {
+                    //     case 'none':
+                    //         currentNode.children[currentIndex].state = 'none'
+                    //         break;
+                    
+                    //     default:
+                    //         break;
+                    // }
+
+                }
             }
             currentNode = currentNode.children[currentIndex];
         }
@@ -228,6 +241,7 @@ const ReactNode = ({
                         filteredMutedAttribute = child.attributes.filter(attibute => attibute.mute === 'muted');
                         filteredMutingAttribute = child.attributes.filter(attibute => attibute.mute === 'muting');
                         mutedAttributeCount = filteredMutedAttribute.length;
+                        console.log("mutedAttributeCount", mutedAttributeCount);
                         //console.log(child.title, "filtered unmuted:", filteredUnMutedAttribute, "filtered muted",filteredMutedAttribute, "filtered muting", filteredMutingAttribute)
                     }
 
@@ -383,7 +397,14 @@ const ReactNode = ({
                                                         }
                                                         {/** rendering Node  */}
                                                         {/** muting current Node  */}
-                                                        {child.state == 'select' && <div><input style={{ width: '18px', height: '18px' }} type="checkbox" /> <div>selecting</div> </div>}
+                                                        {child.state == 'select' && 
+                                                        <div>
+                                                            {/* <input style={{ width: '18px', height: '18px' }} type="checkbox" />  */}
+                                                            <div className='selectingHeader '>
+                                                                <span>Selecting...</span>
+                                                                <span onClick={() => updateNode(child.color, '-', { target: 'node', state: 'none'})} >Done</span>
+                                                            </div> 
+                                                        </div>}
                                                         {/** muting current Node's children Nodes */}
                                                         {state == 'select' && <input style={{ width: '18px', height: '18px' }} type="checkbox" />}
                                                         {child.type != 'ghost' && <div className='NodePositionWrapper'
