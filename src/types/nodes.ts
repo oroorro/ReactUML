@@ -194,3 +194,10 @@ export type InteractionData = {
   type?: 'mute' | 'muteAll' | null;
   id?: string
 }
+
+export type AttributeIconWrapperProps = {
+  attribute: Attribute,
+  isExpanded: boolean,
+  handleClickOnAttribute: (attributeName: string) => void,
+  attributeColors: Record<string, string>,
+}
