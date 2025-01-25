@@ -132,14 +132,15 @@ const ReactNode = ({
         });
     }
 
-    const handleClickOnAttribute = (attributeName: string) => {
+    const handleClickOnAttribute = (id: string) => {
         setExpandedAttributes((prev) => {
             // If already expanded, remove it from the array
-            if (prev.includes(attributeName)) {
-                return prev.filter((name) => name !== attributeName);
+            if (prev.includes(id)) {
+                const filtered =  prev.filter((name) => name !== id);
+                return filtered;
             }
             // Otherwise, add it to the array
-            return [...prev, attributeName];
+            return [...prev, id];
         });
     };
 
@@ -456,6 +457,7 @@ const ReactNode = ({
                                                                         {/** displaying muting attributes */}
                                                                         {filteredMutingAttribute &&
                                                                             filteredMutingAttribute.map((attr: Attribute, index: number) => {
+                                                                                const isExpanded = expandedAttributes.includes(attr.id);
                                                                                 return (
                                                                                     <div className='flex items-end'>
                                                                                         <div>
@@ -481,7 +483,7 @@ const ReactNode = ({
                                                                             })
                                                                         }
                                                                         {child.attributes && filteredUnMutedAttribute.map((attr: Attribute, index: number) => {
-                                                                            const isExpanded = expandedAttributes.includes(attr.nameOfAttribute);
+                                                                            const isExpanded = expandedAttributes.includes(attr.id);
                                                                             return (
                                                                                 <div className='flex items-end'>
                                                                                     {child.state == 'select' &&

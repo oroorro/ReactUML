@@ -25,7 +25,7 @@ const AttributeIconWrapper = ({
 
                 }}
                 datatype='AttributeContainer'
-                onClick={!isExpanded ? () => handleClickOnAttribute(attribute.nameOfAttribute) : undefined} // Disable onClick if isExpanded
+                onClick={!isExpanded ? () => handleClickOnAttribute(attribute.id) : undefined} // Disable onClick if isExpanded
             >
                 
                 <div className={isExpanded ? 'attributeIconWrapperTitle flex justify-center p-1 border-b border-black' : 'attributeIconWrapperTitle flex justify-center'} >
@@ -57,7 +57,7 @@ const AttributeIconWrapper = ({
                         <button 
                             title='minimize'
                             className="bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold  px-4 rounded-xl ml-auto"
-                            onClick={isExpanded ? () => handleClickOnAttribute(attribute.nameOfAttribute) : undefined} // Disable onClick if isExpanded
+                            onClick={isExpanded ? () => handleClickOnAttribute(attribute.id) : undefined} // Disable onClick if isExpanded
                         >
                             <span className='text-2xl'> - </span>
                         </button>}
