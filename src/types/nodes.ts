@@ -139,6 +139,8 @@ export type NodeOrigin = [number, number];
 //   type: string,
 // };
 
+export type UniqueId = `${string}-${string}`;
+
 export type ReactChild = {
   title: string,
   numbersOfPropsGoingIn: number,
@@ -170,6 +172,7 @@ export type Attribute = {
   nameOfAttribute: string, // can be Hook, var, function, reactInbuilt (API, Hook), import, export 
   totalNumberOfAttribute: number,
   AttributeContents: AttributeContent[] | ReactInBuiltAttributeContent[],
+  id: UniqueId,
   mute?: boolean,
 }
 

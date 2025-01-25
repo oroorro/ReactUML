@@ -6,7 +6,7 @@ import { Position } from '../../types';
 import { useStoreApi } from '../../hook/useStore';
 import useUpdateNodeInternals from '../../hook/useUpdateNodeInternals';
 
-import type { NodeProps, ReactChild, Attribute, Pipe, AttributeContent, ReactInBuiltAttributeContent, Node, NodeDimensionChange } from '../../types';
+import type { NodeProps, ReactChild, Attribute, Pipe, AttributeContent, ReactInBuiltAttributeContent, Node, NodeDimensionChange, UniqueId } from '../../types';
 import AttributeIconWrapper from '../NodeAttribute/AttributeIconWrapper';
 import { AttributeIcon, AttributeIconProps } from '../NodeAttribute/AttributeIcon';
 import './ReactNodeStyle.css';
@@ -15,6 +15,13 @@ const PIPE_WIDTH_VERTICAL = 13;
 const PIPE_HEIGHT_VERTICAL = 5;
 const PIPE_WIDTH_HORIZONTAL = 5;
 const PIPE_HEIGHT_HORIZONTAL = 13;
+
+//target, 
+type updateOption = {
+    target: 'attribute' | 'node' | 'prop',
+    state: 'mute' | 'copy' | 'delete',
+    muteOptions?: true | false, 
+}
 
 // setting attribute colors for different icons
 const attributeColors: Record<string, string> = {
@@ -73,12 +80,12 @@ const ReactNode = ({
         //onNodesChange!(changes);
     }
 
-    const updateNode = (type: string, id: string, index: number) => {
+    const updateNode = (nodeId: string, id: UniqueId, updateOption: updateOption) => {
 
         const nodes: Node[] = getNodes();
 
         //get the id of node 
-        const path = indexMap![id].split('-').map(Number);
+        const path = indexMap![nodeId].split('-').map(Number);
 
         //update mute flag then setNode to update the display 
         let format = {
@@ -92,7 +99,15 @@ const ReactNode = ({
             const currentIndex = path[i];
 
             if (i === path.length - 1) {
-                currentNode.children[currentIndex].attributes[index].mute = true;
+                if(updateOption.muteOptions !== undefined && updateOption.muteOptions == true){
+                    const targetAttribute = currentNode.children[currentIndex].attributes.find((attrb:Attribute)=> attrb.id === id);
+                    targetAttribute.mute = true;
+                }
+                else if(updateOption.muteOptions !== undefined && updateOption.muteOptions == false){
+                    const targetAttribute = currentNode.children[currentIndex].attributes.find((attrb:Attribute)=> attrb.id === id);
+                    targetAttribute.mute = false;
+                }
+               
             }
 
             currentNode = currentNode.children[currentIndex];
@@ -408,7 +423,7 @@ const ReactNode = ({
                                                                                     <div>
                                                                                         <div className='flex justify-center'>
                                                                                             <div className='bg-white hover:bg-gray-300 px-0.5'> {"<"} </div>
-                                                                                            <div className='bg-white hover:bg-gray-300 px-0.5'> U </div>
+                                                                                            <div className='bg-white hover:bg-gray-300 px-0.5' onClick={()=>updateNode(child.color, attr.id, {target: 'attribute', state: 'mute', muteOptions: false})}> U </div>
                                                                                         </div>
                                                                                         <AttributeIconWrapper attribute={attr} isExpanded={isExpanded} handleClickOnAttribute={handleClickOnAttribute} attributeColors={attributeColors}/>
                                                                                     </div>
@@ -416,22 +431,12 @@ const ReactNode = ({
                                                                                 )
                                                                             })
                                                                         }
-                                                                        {child.attributes && filteredUnMutedAttribute.map((attr: Attribute, index: number) => {
-                                                                            //console.log("attributeColors", attr.nameOfAttribute, attributeColors[attr.nameOfAttribute])
-
-                                                                            console.log("child attribute", attributes, child.attributes);
+                                                                        {child.attributes && filteredUnMutedAttribute.map((attr: Attribute, index: number) => {    
                                                                             const isExpanded = expandedAttributes.includes(attr.nameOfAttribute);
-                                                                            //Wrap this, make it as a component HERE
-                                                                            //id of attribute 
-                                                                            //console.log("isExpanded", isExpanded)
                                                                             return (
                                                                                 <div className='flex'>           
-                                                                                    
-                                                                                    {/**from here */}
                                                                                     <AttributeIconWrapper attribute={attr} isExpanded={isExpanded} handleClickOnAttribute={handleClickOnAttribute} attributeColors={attributeColors}/>
-                                                                                    
-                                                                                    {/**to here , make as a component*/}
-                                                                                    {child.state == 'select' && <button className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-1 rounded' onClick={() => updateNode('attribute', child.color, index)}>-</button>}
+                                                                                    {child.state == 'select' && <button className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-1 rounded' onClick={() => updateNode(child.color, attr.id, {target: 'attribute', state: 'mute', muteOptions: true})}>-</button>}
                                                                                 </div>
                                                                             )
 

@@ -44,6 +44,7 @@ const initialNodes = [
       attributes: [
         {
           nameOfAttribute: 'import',
+          id: '1949d9bf4d6-03aee0',
           totalNumberOfAttribute: 15,
           AttributeContents: [
             {
@@ -54,6 +55,7 @@ const initialNodes = [
         },
         {
           nameOfAttribute: 'reactInBuilt',
+          id: '1949d9bf4d6-12831d',
           totalNumberOfAttribute: 5,
           AttributeContents: [
             {
@@ -64,6 +66,7 @@ const initialNodes = [
         },
         {
           nameOfAttribute: 'variable',
+          id: '1949d9bf4d6-170d62',
           totalNumberOfAttribute: 9,
           AttributeContents: [
             {
@@ -108,6 +111,7 @@ const initialNodes = [
           attributes: [
             {
               nameOfAttribute: 'import',
+              id: '1949d9bf4d6-0d6927',
               totalNumberOfAttribute: 15,
               AttributeContents: [
                 {
@@ -118,6 +122,7 @@ const initialNodes = [
             },
             {
               nameOfAttribute: 'import',
+              id: '1949d9bf4d6-169917',
               totalNumberOfAttribute: 15,
               AttributeContents: [
 
@@ -125,6 +130,7 @@ const initialNodes = [
             },
             {
               nameOfAttribute: 'variable',
+              id: '1949d9bf4d6-108cbe',
               totalNumberOfAttribute: 12,
               AttributeContents: [
                 {
@@ -196,6 +202,7 @@ const initialNodes = [
                   attributes: [
                     {
                       nameOfAttribute: 'import',
+                      id: '1949d9bf4d6-0e2d64',
                       totalNumberOfAttribute: 15,
                       AttributeContents: [
                         {
@@ -206,6 +213,7 @@ const initialNodes = [
                     },
                     {
                       nameOfAttribute: 'reactInBuilt',
+                      id: '1949d9bf4d6-0816c7',
                       totalNumberOfAttribute: 5,
                       AttributeContents: [
                         {
@@ -361,6 +369,14 @@ const initialNodes = [
 
 const initialEdges = [{ id: 'e1-2', source: '1', target: '2' }];
 
+//creates unique id
+function generateUniqueId(){
+  const timestamp = Date.now().toString(36); 
+  const randomValue = Math.random().toString(36).substring(2, 8); 
+  return `${timestamp}-${randomValue}`;
+}
+
+//creates Node, Attribute and Prop to given index ex) 0-0-0
 function addChildToReactChildIterative(root, id, newChild, type, data=null) {
   const path = NodeIndexInArray[id].split('-').map(Number); // Convert the path to an array of indices
   const updatedRoot = { ...root }; // Create a shallow copy of the root for immutability
@@ -370,6 +386,7 @@ function addChildToReactChildIterative(root, id, newChild, type, data=null) {
   for (let i = 0; i < path.length; i++) {
     const currentIndex = path[i];
 
+    //creating Attribute 
     if (type == 'Attribute') {
       if (!currentNode.attributes) {
         currentNode.attributes = [];
@@ -380,6 +397,7 @@ function addChildToReactChildIterative(root, id, newChild, type, data=null) {
           ...(currentNode.children[currentIndex].attributes || []),
           {
             nameOfAttribute: data ? data : 'empty',
+            id: generateUniqueId(),
             totalNumberOfAttribute: 0,
             AttributeContents: [
               {
