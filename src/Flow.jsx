@@ -174,6 +174,7 @@ const initialNodes = [
               title: "EdgeRenderer",
               numbersOfPropsGoingIn: 15,
               color: '#f26d1f',
+              state: 'select',
               pipes: [
                 {
                   color: '#dfe7f5',
@@ -643,10 +644,18 @@ function Flow() {
         >
           {contextMenu.nodeId}
           {!contextMenu.detail && <button onClick={() => moveToSubMenu("create")}>create</button>}
-          {!contextMenu.detail && <button onClick={() => muteHandler()}> mute </button>}
+          {!contextMenu.detail && <button onClick={() => moveToSubMenu("mute-2nd")}> mute </button>}
           {contextMenu.detail == 'create' && <button onClick={() => updateNode('Node')}> Node </button>}
           {contextMenu.detail == 'create' && <button onClick={() => updateNode('Prop')}> Prop </button>}
           {contextMenu.detail == 'create' && <button onClick={() => moveToSubMenu("create-attribute-2nd")}> Attribute </button>}
+
+          {/** mute 2nd layer of sub-menu */}
+          {contextMenu.detail == 'mute-2nd' && 
+            <div className='flex flex-col' datatype="contextMenu">
+              <button onClick={() => muteHandler()}> all </button>
+              <button > select </button>
+            </div>
+          }
 
           {/** Attribute 2nd layer of sub-menu*/}
           {contextMenu.detail == 'create-attribute-2nd' && 
