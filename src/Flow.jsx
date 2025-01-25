@@ -108,6 +108,7 @@ const initialNodes = [
           title: "NodeRenderer",
           numbersOfPropsGoingIn: 18,
           color: '#ffa8d5',
+          state: 'select',
           attributes: [
             {
               nameOfAttribute: 'import',
@@ -180,7 +181,7 @@ const initialNodes = [
               title: "EdgeRenderer",
               numbersOfPropsGoingIn: 15,
               color: '#f26d1f',
-              state: 'select',
+              // state: 'select',
               pipes: [
                 {
                   color: '#dfe7f5',

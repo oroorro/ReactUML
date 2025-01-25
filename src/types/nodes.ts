@@ -168,12 +168,14 @@ export type ReactNodeType = {
 
 }
 
+export type MuteOption = 'muting' | 'notMuted' | 'muted';
+
 export type Attribute = {
   nameOfAttribute: string, // can be Hook, var, function, reactInbuilt (API, Hook), import, export 
   totalNumberOfAttribute: number,
   AttributeContents: AttributeContent[] | ReactInBuiltAttributeContent[],
   id: UniqueId,
-  mute?: boolean,
+  mute?: MuteOption,
 }
 
 export type AttributeContent = {
@@ -196,6 +198,13 @@ type ReactInbuiltAttributes = {
 export type InteractionData = {
   type?: 'mute' | 'muteAll' | null;
   id?: string
+}
+
+//used when updating elements in Node, Attribute and Prop
+export type updateOption = {
+  target: 'attribute' | 'node' | 'prop',
+  state: 'mute' | 'copy' | 'delete',
+  muteOptions?: MuteOption, 
 }
 
 export type AttributeIconWrapperProps = {
