@@ -466,7 +466,7 @@ const ReactNode = ({
                                                                     > {/** displaying attributes */}
 
                                                                         {/** displaying muted attributes , onClick changes to show, muted and muting*/}
-                                                                        {mutedAttributeCount !== 0 &&
+                                                                        {mutedAttributeCount > 0 &&
                                                                             <div className='flex items-end'>
                                                                                 <div style={{ fontSize: '18px', fontWeight: '500' }} className='bg-white hover:bg-gray-300 flex px-0.5 rounded'
                                                                                     title="expand muted"
