@@ -208,6 +208,25 @@ export type updateOption = {
   muteOptions?: MuteOption, 
 }
 
+export type UpdateOptionV2 = {
+  target: 'attribute' | 'node' | 'prop',
+  state: NodeState,
+  detailOptions?: DetailOptions, 
+}
+
+export type DetailOptions = {
+
+  muteOptions:{
+    muteState?: MuteOption,
+    unmutingData:{
+      updatedMutedAttributes: Attribute[],
+      unMutedAttributes: Attribute[],
+    }
+  },
+  
+}
+
+
 export type AttributeIconWrapperProps = {
   attribute: Attribute,
   isExpanded: boolean,

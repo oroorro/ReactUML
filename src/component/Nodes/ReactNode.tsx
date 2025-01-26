@@ -6,7 +6,7 @@ import { Position } from '../../types';
 import { useStoreApi } from '../../hook/useStore';
 import useUpdateNodeInternals from '../../hook/useUpdateNodeInternals';
 
-import type { NodeProps, ReactChild, Attribute, Pipe, AttributeContent, ReactInBuiltAttributeContent, Node, NodeDimensionChange, UniqueId, updateOption } from '../../types';
+import type { NodeProps, ReactChild, Attribute, Pipe, AttributeContent, ReactInBuiltAttributeContent, Node, NodeDimensionChange, UniqueId, updateOption, UpdateOptionV2, MuteOption } from '../../types';
 import AttributeIconWrapper from '../NodeAttribute/AttributeIconWrapper';
 import { AttributeIcon, AttributeIconProps } from '../NodeAttribute/AttributeIcon';
 import './ReactNodeStyle.css';
@@ -72,6 +72,49 @@ const ReactNode = ({
 
     }
 
+    const updateNodeV2 = (nodeId: string, id: UniqueId, updateOption: UpdateOptionV2) => {
+
+        const nodes: Node[] = getNodes();
+
+        //get the id of node 
+        const path = indexMap![nodeId].split('-').map(Number);
+
+        //update mute flag then setNode to update the display 
+        let format = {
+            children: [nodes[0].data],
+        }
+
+        const updatedRoot = { ...format };
+        let currentNode = updatedRoot;
+
+        for (let i = 0; i < path.length; i++) {
+            const currentIndex = path[i];
+
+            if (i === path.length - 1) {
+                if (updateOption.detailOptions && updateOption.detailOptions.muteOptions.muteState) {
+                    const targetAttribute: Attribute = currentNode.children[currentIndex].attributes.find((attrb: Attribute) => attrb.id === id);
+                    targetAttribute.mute = updateOption.detailOptions.muteOptions.muteState;
+                }
+                else if(updateOption.target == 'node'){
+
+                    if(updateOption.state == 'none' && updateOption.detailOptions?.muteOptions.unmutingData.unMutedAttributes){
+                        currentNode.children[currentIndex].state = updateOption.state;
+                        currentNode.children[currentIndex].attributes = [...updateOption.detailOptions?.muteOptions.unmutingData.unMutedAttributes, ...updateOption.detailOptions?.muteOptions.unmutingData.updatedMutedAttributes]
+                    }else{
+                        currentNode.children[currentIndex].state = updateOption.state;
+                    }
+                }
+            }
+            currentNode = currentNode.children[currentIndex];
+        }
+
+        nodes[0].data = updatedRoot.children[0];
+        let newNode: Node[] = nodes.map(node => ({ ...node }));
+        newNode[0].data = updatedRoot.children[0];
+
+        setNodes(newNode);
+
+    }
 
     const updateNode = (nodeId: string, id: UniqueId, updateOption: updateOption) => {
 
@@ -97,7 +140,7 @@ const ReactNode = ({
                     targetAttribute.mute = updateOption.muteOptions;
                 }
                 else if(updateOption.target == 'node'){
-
+                  
                     currentNode.children[currentIndex].state = updateOption.state;
                     // switch (updateOption.state) {
                     //     case 'none':
@@ -214,6 +257,34 @@ const ReactNode = ({
                         setNodes(newNode);
                     }
 
+                    //this function is used for the part of changing current Node's state to 'none'
+                    //where the Node needs to have mutingAttribute:[] to be changed into mutedAttribute:[]
+                    const changeMutingToMuted = () =>{
+
+                        //1. add mutingAttribute into mutedAttribute 
+                        const temp: Attribute[]
+                            = filteredMutingAttribute.map(attribute => ({
+                                ...attribute,
+                                mute: 'muted', // Update the `muting` state to 'muted'
+                        }));
+
+                        filteredMutedAttribute = [...temp, ...filteredMutedAttribute];
+                        //2. have unmutedAttribute
+                        // give these two arrayList into updateNode
+                        // updateNode will set it's state to be 'none' and set .attribute = [...1, ...2]
+                        updateNodeV2(child.color, '-', 
+                        { target: 'node', state: 'none',  //changing node's state to 'none'
+                        detailOptions: 
+                            {muteOptions: 
+                                {unmutingData: 
+                                    {updatedMutedAttributes: filteredMutedAttribute,  //1
+                                    unMutedAttributes: filteredUnMutedAttribute  //2
+                                }
+                            }} 
+                        })
+                        
+
+                    }
 
                     let mutedAttributeCount: number;
                     let filteredMutingAttribute: Attribute[];
@@ -402,7 +473,10 @@ const ReactNode = ({
                                                             {/* <input style={{ width: '18px', height: '18px' }} type="checkbox" />  */}
                                                             <div className='selectingHeader '>
                                                                 <span>Selecting...</span>
-                                                                <span onClick={() => updateNode(child.color, '-', { target: 'node', state: 'none'})} >Done</span>
+                                                                {/* we need to emptyFilteredMutingAttribute then call updateNode to change the current Node's state to 'none' */}
+                                                                {/* <span onClick={() => updateNode(child.color, '-', { target: 'node', state: 'none'})} >Done</span> */}
+                                                                <span onClick={() => changeMutingToMuted()} >Done</span>
+                                                                
                                                             </div> 
                                                         </div>}
                                                         {/** muting current Node's children Nodes */}
