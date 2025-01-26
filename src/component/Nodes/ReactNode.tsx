@@ -261,29 +261,31 @@ const ReactNode = ({
                     //where the Node needs to have mutingAttribute:[] to be changed into mutedAttribute:[]
                     const changeMutingToMuted = () =>{
 
-                        //1. add mutingAttribute into mutedAttribute 
-                        const temp: Attribute[]
-                            = filteredMutingAttribute.map(attribute => ({
-                                ...attribute,
-                                mute: 'muted', // Update the `muting` state to 'muted'
-                        }));
+                        if(filteredMutingAttribute && filteredMutingAttribute.length > 0){
+                            //1. add mutingAttribute into mutedAttribute 
+                            const temp: Attribute[]
+                                = filteredMutingAttribute.map(attribute => ({
+                                    ...attribute,
+                                    mute: 'muted', // Update the `muting` state to 'muted'
+                            }));
 
-                        filteredMutedAttribute = [...temp, ...filteredMutedAttribute];
-                        //2. have unmutedAttribute
-                        // give these two arrayList into updateNode
-                        // updateNode will set it's state to be 'none' and set .attribute = [...1, ...2]
-                        updateNodeV2(child.color, '-', 
-                        { target: 'node', state: 'none',  //changing node's state to 'none'
-                        detailOptions: 
-                            {muteOptions: 
-                                {unmutingData: 
-                                    {updatedMutedAttributes: filteredMutedAttribute,  //1
-                                    unMutedAttributes: filteredUnMutedAttribute  //2
-                                }
-                            }} 
-                        })
-                        
-
+                            filteredMutedAttribute = [...temp, ...filteredMutedAttribute];
+                            //2. have unmutedAttribute
+                            // give these two arrayList into updateNode
+                            // updateNode will set it's state to be 'none' and set .attribute = [...1, ...2]
+                            updateNodeV2(child.color, '-', 
+                            { target: 'node', state: 'none',  //changing node's state to 'none'
+                            detailOptions: 
+                                {muteOptions: 
+                                    {unmutingData: 
+                                        {updatedMutedAttributes: filteredMutedAttribute,  //1
+                                        unMutedAttributes: filteredUnMutedAttribute  //2
+                                    }
+                                }} 
+                            })
+                        }else{
+                            updateNode(child.color, '-', { target: 'node', state: 'none'})
+                        }
                     }
 
                     let mutedAttributeCount: number;
@@ -471,11 +473,13 @@ const ReactNode = ({
                                                         {child.state == 'select' && 
                                                         <div>
                                                             {/* <input style={{ width: '18px', height: '18px' }} type="checkbox" />  */}
-                                                            <div className='selectingHeader '>
-                                                                <span>Selecting...</span>
+                                                            <div className='selectingHeader' >
+                                                                <div className='typewriter'>
+                                                                    <div className='bg-white px-1 rounded typewrite'>Selecting...</div>
+                                                                </div>
                                                                 {/* we need to emptyFilteredMutingAttribute then call updateNode to change the current Node's state to 'none' */}
                                                                 {/* <span onClick={() => updateNode(child.color, '-', { target: 'node', state: 'none'})} >Done</span> */}
-                                                                <span onClick={() => changeMutingToMuted()} >Done</span>
+                                                                <span className='bg-white hover:bg-gray-200 ml-2 px-1 rounded ' onClick={() => changeMutingToMuted()} >Done</span>
                                                                 
                                                             </div> 
                                                         </div>}
