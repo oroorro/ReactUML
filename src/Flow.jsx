@@ -44,6 +44,7 @@ const initialNodes = [
       attributes: [
         {
           nameOfAttribute: 'import',
+          id: '1949d9bf4d6-03aee0',
           totalNumberOfAttribute: 15,
           AttributeContents: [
             {
@@ -54,6 +55,7 @@ const initialNodes = [
         },
         {
           nameOfAttribute: 'reactInBuilt',
+          id: '1949d9bf4d6-12831d',
           totalNumberOfAttribute: 5,
           AttributeContents: [
             {
@@ -64,6 +66,7 @@ const initialNodes = [
         },
         {
           nameOfAttribute: 'variable',
+          id: '1949d9bf4d6-170d62',
           totalNumberOfAttribute: 9,
           AttributeContents: [
             {
@@ -105,9 +108,11 @@ const initialNodes = [
           title: "NodeRenderer",
           numbersOfPropsGoingIn: 18,
           color: '#ffa8d5',
+          state: 'select',
           attributes: [
             {
               nameOfAttribute: 'import',
+              id: '1949d9bf4d6-0d6927',
               totalNumberOfAttribute: 15,
               AttributeContents: [
                 {
@@ -118,6 +123,7 @@ const initialNodes = [
             },
             {
               nameOfAttribute: 'import',
+              id: '1949d9bf4d6-169917',
               totalNumberOfAttribute: 15,
               AttributeContents: [
 
@@ -125,6 +131,7 @@ const initialNodes = [
             },
             {
               nameOfAttribute: 'variable',
+              id: '1949d9bf4d6-108cbe',
               totalNumberOfAttribute: 12,
               AttributeContents: [
                 {
@@ -174,6 +181,7 @@ const initialNodes = [
               title: "EdgeRenderer",
               numbersOfPropsGoingIn: 15,
               color: '#f26d1f',
+              // state: 'select',
               pipes: [
                 {
                   color: '#dfe7f5',
@@ -195,6 +203,7 @@ const initialNodes = [
                   attributes: [
                     {
                       nameOfAttribute: 'import',
+                      id: '1949d9bf4d6-0e2d64',
                       totalNumberOfAttribute: 15,
                       AttributeContents: [
                         {
@@ -205,6 +214,7 @@ const initialNodes = [
                     },
                     {
                       nameOfAttribute: 'reactInBuilt',
+                      id: '1949d9bf4d6-0816c7',
                       totalNumberOfAttribute: 5,
                       AttributeContents: [
                         {
@@ -360,6 +370,14 @@ const initialNodes = [
 
 const initialEdges = [{ id: 'e1-2', source: '1', target: '2' }];
 
+//creates unique id
+function generateUniqueId(){
+  const timestamp = Date.now().toString(36); 
+  const randomValue = Math.random().toString(36).substring(2, 8); 
+  return `${timestamp}-${randomValue}`;
+}
+
+//creates Node, Attribute and Prop to given index ex) 0-0-0
 function addChildToReactChildIterative(root, id, newChild, type, data=null) {
   const path = NodeIndexInArray[id].split('-').map(Number); // Convert the path to an array of indices
   const updatedRoot = { ...root }; // Create a shallow copy of the root for immutability
@@ -369,6 +387,7 @@ function addChildToReactChildIterative(root, id, newChild, type, data=null) {
   for (let i = 0; i < path.length; i++) {
     const currentIndex = path[i];
 
+    //creating Attribute 
     if (type == 'Attribute') {
       if (!currentNode.attributes) {
         currentNode.attributes = [];
@@ -379,6 +398,7 @@ function addChildToReactChildIterative(root, id, newChild, type, data=null) {
           ...(currentNode.children[currentIndex].attributes || []),
           {
             nameOfAttribute: data ? data : 'empty',
+            id: generateUniqueId(),
             totalNumberOfAttribute: 0,
             AttributeContents: [
               {
@@ -473,7 +493,7 @@ function Flow() {
   }, [contextMenu])
 
   //returns Node from nodes array for given id 
-  const muteNode = (root, id) => {
+  const updateNodeState = (root, id, state) => {
     const path = NodeIndexInArray[id].split('-').map(Number);
     const updatedRoot = { ...root };
     let currentNode = updatedRoot;
@@ -482,7 +502,13 @@ function Flow() {
       const currentIndex = path[i];
 
       if (i === path.length - 1) {
-        currentNode.children[currentIndex].muteAll = true;
+        if(state == 'mute'){
+          currentNode.children[currentIndex].muteAll = true;
+        }
+        else if(state == 'select'){
+          currentNode.children[currentIndex].state = 'select';
+        }
+        
       }
 
       currentNode = currentNode.children[currentIndex];
@@ -603,16 +629,20 @@ function Flow() {
     }
   }
 
-  const muteHandler = () => {
+  
+
+
+  //option: NodeState
+  const nodeStateHandler = (option) => {
     //get id of Node , interactingIdRef.current
 
     //access that Node in 
-    const format = {
+    const format  = {
       children: [nodes[0].data],
-    }
+    };
     //console.log("nodes nodes", nodes[0].data);
     setContextMenu(null);
-    const updatedReactChild = muteNode(format, interactingIdRef.current);
+    const updatedReactChild = updateNodeState(format, interactingIdRef.current, option);
     //console.log("returned node: ", updatedReactChild);
     initialNodes[0].data = { ...updatedReactChild.children[0] };
     nodes[0].data = { ...updatedReactChild.children[0] };
@@ -643,10 +673,18 @@ function Flow() {
         >
           {contextMenu.nodeId}
           {!contextMenu.detail && <button onClick={() => moveToSubMenu("create")}>create</button>}
-          {!contextMenu.detail && <button onClick={() => muteHandler()}> mute </button>}
+          {!contextMenu.detail && <button onClick={() => moveToSubMenu("mute-2nd")}> mute </button>}
           {contextMenu.detail == 'create' && <button onClick={() => updateNode('Node')}> Node </button>}
           {contextMenu.detail == 'create' && <button onClick={() => updateNode('Prop')}> Prop </button>}
           {contextMenu.detail == 'create' && <button onClick={() => moveToSubMenu("create-attribute-2nd")}> Attribute </button>}
+
+          {/** mute 2nd layer of sub-menu */}
+          {contextMenu.detail == 'mute-2nd' && 
+            <div className='flex flex-col' datatype="contextMenu">
+              <button onClick={() => nodeStateHandler('mute')}> all </button>
+              <button onClick={() => nodeStateHandler('select')}> select </button>
+            </div>
+          }
 
           {/** Attribute 2nd layer of sub-menu*/}
           {contextMenu.detail == 'create-attribute-2nd' && 

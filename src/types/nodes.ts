@@ -139,6 +139,8 @@ export type NodeOrigin = [number, number];
 //   type: string,
 // };
 
+export type UniqueId = `${string}-${string}`;
+
 export type ReactChild = {
   title: string,
   numbersOfPropsGoingIn: number,
@@ -148,6 +150,7 @@ export type ReactChild = {
   children?: ReactChild[], 
   muteAll?: boolean,
   type?: 'ghost',
+  state?: NodeState,
   indexMap?: { [key: string]: string };
 }
 
@@ -165,11 +168,15 @@ export type ReactNodeType = {
 
 }
 
+export type MuteOption = 'muting' | 'notMuted' | 'muted';
+export type NodeState = 'mute' | 'copy' | 'delete' | 'select' | 'none';
+
 export type Attribute = {
   nameOfAttribute: string, // can be Hook, var, function, reactInbuilt (API, Hook), import, export 
   totalNumberOfAttribute: number,
   AttributeContents: AttributeContent[] | ReactInBuiltAttributeContent[],
-  mute?: boolean,
+  id: UniqueId,
+  mute?: MuteOption,
 }
 
 export type AttributeContent = {
@@ -192,4 +199,37 @@ type ReactInbuiltAttributes = {
 export type InteractionData = {
   type?: 'mute' | 'muteAll' | null;
   id?: string
+}
+
+//used when updating elements in Node, Attribute and Prop
+export type updateOption = {
+  target: 'attribute' | 'node' | 'prop',
+  state: NodeState,
+  muteOptions?: MuteOption, 
+}
+
+export type UpdateOptionV2 = {
+  target: 'attribute' | 'node' | 'prop',
+  state: NodeState,
+  detailOptions?: DetailOptions, 
+}
+
+export type DetailOptions = {
+
+  muteOptions:{
+    muteState?: MuteOption,
+    unmutingData:{
+      updatedMutedAttributes: Attribute[],
+      unMutedAttributes: Attribute[],
+    }
+  },
+  
+}
+
+
+export type AttributeIconWrapperProps = {
+  attribute: Attribute,
+  isExpanded: boolean,
+  handleClickOnAttribute: (attributeName: string) => void,
+  attributeColors: Record<string, string>,
 }
