@@ -141,14 +141,14 @@ const ReactNode = ({
                 }
                 else if (updateOption.target == 'node') {
 
-                    
-                    
-                    if(updateOption.state == 'mute'){
+
+
+                    if (updateOption.state == 'mute') {
                         const parentNode: ReactChild[] = currentNode.children[currentIndex].children;
-                        const childNode:ReactChild = parentNode.find(child => child.id == id) as ReactChild;
+                        const childNode: ReactChild = parentNode.find(child => child.id == id) as ReactChild;
                         console.log("reactChild", parentNode, childNode);
                         childNode.state = updateOption.muteOptions;
-                    }else{
+                    } else {
                         const reactChild: ReactChild = currentNode.children[currentIndex];
                         reactChild.state = updateOption.state;
                     }
@@ -223,11 +223,14 @@ const ReactNode = ({
         let filteredMutingReactChilds: ReactChild[] = [];
         let filteredUnMutedReactChilds: ReactChild[] = [];
         let filteredMutedReactChilds: ReactChild[] = [];
+        let totalNumberPropsForMutedChild: number = 0;
 
         if (children) {
             filteredUnMutedReactChilds = children.filter(child => child.state !== 'mute' && child.state !== 'muting');
             filteredMutedReactChilds = children.filter(child => child.state === 'mute');
             filteredMutingReactChilds = children.filter(child => child.state === 'muting');
+            totalNumberPropsForMutedChild = filteredMutedReactChilds.reduce((accumulator, node) => accumulator + node.numbersOfPropsGoingIn, 0);
+
             mutedReactChildCount = filteredMutedReactChilds.length;
             console.log("mutedAttributeCount", mutedReactChildCount);
             console.log(children, "filtered unmuted:", filteredUnMutedReactChilds, "filtered muted", filteredMutedReactChilds, "filtered muting", filteredMutingReactChilds)
@@ -284,6 +287,7 @@ const ReactNode = ({
 
 
         return (
+
             <div className='returnScope'
                 style={{
                     // boxShadow: 'rgba(0,0,0,0.7) 5px 5px 30px inset', 
@@ -291,12 +295,19 @@ const ReactNode = ({
                     paddingTop: '10px',
                     overflow: 'hidden',
                     paddingBottom: addPaddingBottom ? '10px' : '',
+                    position: 'relative'
                     //if any of this children's children has node type of ghost, then give padding bottom: 10px 
                 }}
                 datatype='Node'
             >
-                {/** muting return scope */}
-                {state == 'select' && <input style={{ width: '18px', height: '18px' }} type="checkbox" />}
+                {/** not showing the entire return scope when node's state is 'muteReturnScope' */}
+                {/** pop-up muting return scope */}
+                {state == 'select' &&
+                    <button className='absolute top-[0px] right-[0px] bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded'
+
+                        title="Mute Return Scope"
+                    >M</button>
+                }
 
                 {filteredMutedReactChilds.length > 0 &&
                     <div>
@@ -328,9 +339,9 @@ const ReactNode = ({
 
                                     <div
                                         datatype='pipe'
-                                        className='bg-white hover:bg-gray-300'
+                                        className='bg-gray-300 hover:bg-gray-400'
                                         style={{ width: '18px', height: '18px', position: 'relative', left: '-5px' }}>
-                                        {/* {child.numbersOfPropsGoingIn} */}
+                                        {totalNumberPropsForMutedChild}
                                     </div>
                                     <div id="pipes" className="flex -left-2 relative gap-0.5"
                                         style={{ transition: 'all 0.3s ease' }}
@@ -449,7 +460,7 @@ const ReactNode = ({
                                                     <div
                                                         className="childNode"
                                                         datatype='Node'
-                                                        onClick={()=>changeReactChildsMuteToMuting()}
+                                                        onClick={() => changeReactChildsMuteToMuting()}
 
                                                         style={{
                                                             backgroundColor: '#C8C8C8',
@@ -757,7 +768,7 @@ const ReactNode = ({
                                                         {child.state == 'select' &&
                                                             <div>
                                                                 {/* <input style={{ width: '18px', height: '18px' }} type="checkbox" />  */}
-                                                                <div  className='flex justify-center'>
+                                                                <div className='flex justify-center'>
                                                                     <div >
                                                                         <div className='bg-white px-1 rounded '>Selecting...</div>
                                                                     </div>
@@ -767,33 +778,36 @@ const ReactNode = ({
 
                                                                 </div>
                                                             </div>}
-                                                        
+
                                                         {/* {state == 'select' && child.type != 'ghost' &&
                                                             <button className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded'
                                                                 onClick={() => updateNode(child.color, '-', { target: 'node', state: 'mute', muteOptions: 'mute' })}
                                                                 title="Mute Node"
                                                             >M</button>
                                                         } */}
-                                                        
-                                                        <div className='flex'>
-                                                            <div className='bg-white hover:bg-gray-300 px-0.5'
-                                                                onClick={() => updateNode(parentColor, child.id, { target: 'node', state: 'mute', muteOptions: 'notMuted' })}
-                                                                title='unmute Node'
-                                                                >
-                                                                U
-                                                            </div>
-                                                            <div className='bg-white hover:bg-gray-300 px-0.5'
-                                                                onClick={() => updateNode(parentColor, child.id, { target: 'node', state: 'mute', muteOptions: 'mute' })}
-                                                                title='mute back Node'
-                                                                >
-                                                                {"<"}
-                                                            </div>
-                                                        </div>
-                                                        
-                                                        {child.type != 'ghost' && <div className='NodePositionWrapper'
+
+
+
+                                                        {child.type != 'ghost' && <div className='NodePositionWrapper relative'
                                                             datatype='Node'
                                                             data-id={`${pipe.color}`}
                                                         >
+                                                            {/** muting state pop-up icons */}
+                                                            <div className='flex absolute top-[0px] right-[0px] flex-col'>
+                                                                <div className='bg-white hover:bg-gray-300 px-1.5'
+                                                                    onClick={() => updateNode(parentColor, child.id, { target: 'node', state: 'mute', muteOptions: 'notMuted' })}
+                                                                    title='unmute Node'
+                                                                >
+                                                                    U
+                                                                </div>
+                                                                <div className='bg-white hover:bg-gray-300 px-1.5'
+                                                                    onClick={() => updateNode(parentColor, child.id, { target: 'node', state: 'mute', muteOptions: 'mute' })}
+                                                                    title='mute back Node'
+                                                                >
+                                                                    {"<"}
+                                                                </div>
+                                                            </div>
+
                                                             <div
                                                                 className="childNode"
                                                                 datatype='Node'
@@ -918,8 +932,6 @@ const ReactNode = ({
                     )
 
                 })}
-
-                
                 {filteredUnMutedReactChilds && filteredUnMutedReactChilds.map((child, index) => {
 
                     //set current Node's attribute to be currently saved filteredMutingAttribute, filteredUnMutedAttribute and filteredMutedAttribute
@@ -1187,16 +1199,17 @@ const ReactNode = ({
                                                                 </div>
                                                             </div>}
                                                         {/** inside filteredUnMutedNodes, chaging current Node's children Nodes' state into 'mute'*/}
-                                                        {state == 'select' && child.type != 'ghost' &&
-                                                            <button className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded'
-                                                                onClick={() => updateNode(parentColor, child.id, { target: 'node', state: 'mute', muteOptions: 'mute' })}
-                                                                title="Mute Node"
-                                                            >M</button>
-                                                        }
-                                                        {child.type != 'ghost' && <div className='NodePositionWrapper'
+
+                                                        {child.type != 'ghost' && <div className='NodePositionWrapper relative'
                                                             datatype='Node'
                                                             data-id={`${pipe.color}`}
                                                         >
+                                                            {state == 'select' && child.type != 'ghost' &&
+                                                                <button className='absolute top-[0px] right-[0px] bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded'
+                                                                    onClick={() => updateNode(parentColor, child.id, { target: 'node', state: 'mute', muteOptions: 'mute' })}
+                                                                    title="Mute Node"
+                                                                >M</button>
+                                                            }
                                                             <div
                                                                 className="childNode"
                                                                 datatype='Node'
