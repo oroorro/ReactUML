@@ -151,6 +151,7 @@ export type ReactChild = {
   muteAll?: boolean,
   type?: 'ghost',
   state?: NodeState,
+  id: UniqueId,
   indexMap?: { [key: string]: string };
 }
 
