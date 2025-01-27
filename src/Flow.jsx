@@ -41,6 +41,7 @@ const initialNodes = [
       label: '3',
       title: 'ZoomPane',
       color: '#dfe7f5',
+      id: '1qlx7vx-jj26d3',
       attributes: [
         {
           nameOfAttribute: 'import',
@@ -109,6 +110,7 @@ const initialNodes = [
           numbersOfPropsGoingIn: 18,
           color: '#ffa8d5',
           state: 'select',
+          id: '1qlx7vx-107d1f',
           attributes: [
             {
               nameOfAttribute: 'import',
@@ -181,6 +183,7 @@ const initialNodes = [
               title: "EdgeRenderer",
               numbersOfPropsGoingIn: 15,
               color: '#f26d1f',
+              id: '1qlx7vx-011409',
               // state: 'select',
               pipes: [
                 {
@@ -200,6 +203,7 @@ const initialNodes = [
                   title: "Pane",
                   numbersOfPropsGoingIn: 1,
                   color: '#49abf5',
+                  id: '1qlx7vx-def456',
                   attributes: [
                     {
                       nameOfAttribute: 'import',
@@ -301,6 +305,7 @@ const initialNodes = [
                   title: "Zoom",
                   numbersOfPropsGoingIn: 4,
                   color: '#e8c390',
+                  id: '1qlx7vx-093e0a',
                   pipes: [
                     {
                       color: '#dfe7f5',
@@ -337,6 +342,7 @@ const initialNodes = [
                 {
                   title: 'ghost',
                   type: 'ghost',
+                  id: '1qlx7vx-0106d3',
                   pipes: [
                     {
                       color: '#dfe7f5',
@@ -354,6 +360,7 @@ const initialNodes = [
           title: "Store",
           numbersOfPropsGoingIn: 2,
           color: '#ffdc6b',
+          id: '1qlx7vx-99k6j3',
           pipes: [
             {
               color: '#dfe7f5',

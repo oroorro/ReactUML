@@ -151,6 +151,7 @@ export type ReactChild = {
   muteAll?: boolean,
   type?: 'ghost',
   state?: NodeState,
+  id: UniqueId,
   indexMap?: { [key: string]: string };
 }
 
@@ -168,8 +169,8 @@ export type ReactNodeType = {
 
 }
 
-export type MuteOption = 'muting' | 'notMuted' | 'muted';
-export type NodeState = 'mute' | 'copy' | 'delete' | 'select' | 'none';
+export type MuteOption = 'muting' | 'notMuted' | 'mute';
+export type NodeState = MuteOption | 'copy' | 'delete' | 'select' | 'none';
 
 export type Attribute = {
   nameOfAttribute: string, // can be Hook, var, function, reactInbuilt (API, Hook), import, export 
