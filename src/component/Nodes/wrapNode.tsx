@@ -243,5 +243,5 @@ export default (NodeComponent: ComponentType<NodeProps>) => {
 
   NodeWrapper.displayName = 'NodeWrapper';
 
-  return memo(NodeWrapper);
+  return NodeWrapper;
 };

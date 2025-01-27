@@ -167,6 +167,7 @@ const AlgoFlow = forwardRef<AlgoFlowRefType, AlgoFlowProps>(
         style,
         id,
         nodeDragThreshold,
+        indexMap,
         ...rest
       },
       ref
@@ -297,6 +298,7 @@ const AlgoFlow = forwardRef<AlgoFlowRefType, AlgoFlowProps>(
             connectionRadius={connectionRadius}
             isValidConnection={isValidConnection}
             nodeDragThreshold={nodeDragThreshold}
+            indexMap={indexMap}
           />
             <SelectionListener onSelectionChange={onSelectionChange} />
             {children}

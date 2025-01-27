@@ -24,7 +24,7 @@ import type {
     SelectionDragHandler,
     NodeInternals,
     NodeProps,
-    WrapNodeProps
+    WrapNodeProps, 
 } from './nodes';
 
 
@@ -231,6 +231,7 @@ export type ReactFlowActions = {
     connectionRadius: number;
   
     isValidConnection?: IsValidConnection;
+    indexMap?: { [key: string]: string };
   }; 
   
   export type ReactFlowState = ReactFlowStore & ReactFlowActions;  
@@ -303,3 +304,5 @@ export enum SelectionMode {
   Partial = 'partial',
   Full = 'full',
 }
+
+export type UpdateNodeInternals = (nodeId: string | string[]) => void;

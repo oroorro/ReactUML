@@ -12,6 +12,14 @@
     align-items: center;
 }
 
+.emptyCircle {
+    border: 1px black solid;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 .inner-circle {
     border-radius: 50%;
     display: flex;

@@ -10,6 +10,10 @@ type AttributeIconProps = {
 
 const AttributeIcon = (props: AttributeIconProps) => {
 
+    const isAttributeEmpty = props.nameOfIcon == 'empty';
+    let modifiedColor:string = '';
+    let extraModifiedColor:string = '';
+
     const iconFirstLetter = props.nameOfIcon.charAt(0).toUpperCase();
 
     function changeHexColorByReferenceDifference(
@@ -54,28 +58,32 @@ const AttributeIcon = (props: AttributeIconProps) => {
       
         // Convert back to hex and return
         return rgbToHex(modifiedRgb);
-      }
-      
-      const modifiedColor: string = changeHexColorByReferenceDifference(
-        props.color,
-        '#00bfff', //ref color that we are changing from 
-        '#acf4fa' //ref color that we are changing to 
-      );
+    }
+    
+    
+    if(!isAttributeEmpty){
+        modifiedColor = changeHexColorByReferenceDifference(
+            props.color,
+            '#00bfff', //ref color that we are changing from 
+            '#acf4fa' //ref color that we are changing to 
+        );
 
-      const extraModifiedColor: string = changeHexColorByReferenceDifference(
-        modifiedColor,
-        '#00bfff', //ref color that we are changing from 
-        '#acf4fa' //ref color that we are changing to 
-      );
+        extraModifiedColor = changeHexColorByReferenceDifference(
+            modifiedColor,
+            '#00bfff', //ref color that we are changing from 
+            '#acf4fa' //ref color that we are changing to 
+        );
+    }
       
     //console.log("modifiedColor", props.color, modifiedColor);
       
     if(!props.isExpanded){
         return (
             <div className="icon-container">
-                <div className="circle" style={{width: '20px', height: '20px'}}>
-                    <div className="inner-circle" style={{backgroundColor: props.color, width: '17px', height: '17px', boxShadow: `0px 4.5px 2px ${modifiedColor} inset , 1px 1.5px 1px ${extraModifiedColor} inset`}}>
-                        <span className="icon" style={{fontSize:'15px', transform: 'scaleX(1.2)'}}>{iconFirstLetter}</span>
+                <div className={!isAttributeEmpty ? "circle" : 'emptyCircle'} style={{width: '20px', height: '20px'}}>
+                    <div className="inner-circle" style={{backgroundColor: isAttributeEmpty ? '' : props.color, width: '17px', height: '17px', boxShadow: isAttributeEmpty ? '' : `0px 4.5px 2px ${modifiedColor} inset , 1px 1.5px 1px ${extraModifiedColor} inset`}}>
+                        {!isAttributeEmpty && <span className="icon" style={{fontSize:'15px', transform: 'scaleX(1.2)'}}>{iconFirstLetter}</span>}
+                        {isAttributeEmpty && <span className="icon" style={{fontSize:'15px', transform: 'scaleX(1.2)'}}></span>}
                     </div>
                 </div>
             </div>

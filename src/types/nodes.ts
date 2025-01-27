@@ -139,6 +139,8 @@ export type NodeOrigin = [number, number];
 //   type: string,
 // };
 
+export type UniqueId = `${string}-${string}`;
+
 export type ReactChild = {
   title: string,
   numbersOfPropsGoingIn: number,
@@ -146,6 +148,11 @@ export type ReactChild = {
   pipes: Pipe[],
   attributes: Attribute[],
   children?: ReactChild[], 
+  muteAll?: boolean,
+  type?: 'ghost',
+  state?: NodeState,
+  id: UniqueId,
+  indexMap?: { [key: string]: string };
 }
 
 export type Pipe = {
@@ -155,16 +162,22 @@ export type Pipe = {
   id: string //unique id that each pipe has 
   props: AttributeContent[], //will be using AttributeContent type since, it has all of necessary data type, we may change the name of AttributeContent in the future 
   //props = {name:string, type:string, belongsTo:string }
+  mute?: boolean,
 }
 
 export type ReactNodeType = {
 
 }
 
+export type MuteOption = 'muting' | 'notMuted' | 'mute';
+export type NodeState = MuteOption | 'copy' | 'delete' | 'select' | 'none';
+
 export type Attribute = {
   nameOfAttribute: string, // can be Hook, var, function, reactInbuilt (API, Hook), import, export 
   totalNumberOfAttribute: number,
   AttributeContents: AttributeContent[] | ReactInBuiltAttributeContent[],
+  id: UniqueId,
+  mute?: MuteOption,
 }
 
 export type AttributeContent = {
@@ -182,4 +195,42 @@ type ReactInbuiltAttributes = {
   name: string,
   type?: string,
   belongsTo: string //id of Node that created props for the first time 
+}
+
+export type InteractionData = {
+  type?: 'mute' | 'muteAll' | null;
+  id?: string
+}
+
+//used when updating elements in Node, Attribute and Prop
+export type updateOption = {
+  target: 'attribute' | 'node' | 'prop',
+  state: NodeState,
+  muteOptions?: MuteOption, 
+}
+
+export type UpdateOptionV2 = {
+  target: 'attribute' | 'node' | 'prop',
+  state: NodeState,
+  detailOptions?: DetailOptions, 
+}
+
+export type DetailOptions = {
+
+  muteOptions:{
+    muteState?: MuteOption,
+    unmutingData:{
+      updatedMutedAttributes: Attribute[],
+      unMutedAttributes: Attribute[],
+    }
+  },
+  
+}
+
+
+export type AttributeIconWrapperProps = {
+  attribute: Attribute,
+  isExpanded: boolean,
+  handleClickOnAttribute: (attributeName: string) => void,
+  attributeColors: Record<string, string>,
 }
