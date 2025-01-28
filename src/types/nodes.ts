@@ -233,4 +233,5 @@ export type AttributeIconWrapperProps = {
   isExpanded: boolean,
   handleClickOnAttribute: (attributeName: string) => void,
   attributeColors: Record<string, string>,
+  nodeId: UniqueId,
 }

@@ -6,10 +6,11 @@ import { Position } from '../../types';
 import { useStoreApi } from '../../hook/useStore';
 import useUpdateNodeInternals from '../../hook/useUpdateNodeInternals';
 
-import type { NodeProps, ReactChild, Attribute, Pipe, AttributeContent, ReactInBuiltAttributeContent, Node, NodeDimensionChange, UniqueId, updateOption, UpdateOptionV2, MuteOption } from '../../types';
+import type { ReactFlowState, NodeProps, ReactChild, Attribute, Pipe, AttributeContent, ReactInBuiltAttributeContent, Node, NodeDimensionChange, UniqueId, updateOption, UpdateOptionV2, MuteOption } from '../../types';
 import AttributeIconWrapper from '../NodeAttribute/AttributeIconWrapper';
 import { AttributeIcon, AttributeIconProps } from '../NodeAttribute/AttributeIcon';
 import './ReactNodeStyle.css';
+import { useStore } from '../../hook/useStore';
 
 const PIPE_WIDTH_VERTICAL = 13;
 const PIPE_HEIGHT_VERTICAL = 5;
@@ -39,6 +40,22 @@ const ReactNode = ({
     const [expandedAttributes, setExpandedAttributes] = useState<string[]>([]);
     const [expandedprops, setExpandedProps] = useState<string[]>([]);
 
+
+    useEffect(()=>{
+
+        if(data.stateManager.id){
+            const id = data.stateManager.id;
+          
+            if(!expandedAttributes.includes(id)){
+                setExpandedAttributes((prev)=>{
+               
+                    return [...prev, id]
+                })
+            }
+            
+        }
+    },[getNodes()])
+    
     const handleUnmute = (id: string) => {
 
         const nodes: Node[] = getNodes();
@@ -199,6 +216,12 @@ const ReactNode = ({
     }
 
     const handleClickOnAttribute = (id: string) => {
+
+        const nodes: Node[] = getNodes();
+        nodes[0].data.stateManager.id = "";
+        setNodes(nodes);
+
+
         setExpandedAttributes((prev) => {
             // If already expanded, remove it from the array
             if (prev.includes(id)) {
@@ -232,8 +255,8 @@ const ReactNode = ({
             totalNumberPropsForMutedChild = filteredMutedReactChilds.reduce((accumulator, node) => accumulator + node.numbersOfPropsGoingIn, 0);
 
             mutedReactChildCount = filteredMutedReactChilds.length;
-            console.log("mutedAttributeCount", mutedReactChildCount);
-            console.log(children, "filtered unmuted:", filteredUnMutedReactChilds, "filtered muted", filteredMutedReactChilds, "filtered muting", filteredMutingReactChilds)
+            //console.log("mutedAttributeCount", mutedReactChildCount);
+            //console.log(children, "filtered unmuted:", filteredUnMutedReactChilds, "filtered muted", filteredMutedReactChilds, "filtered muting", filteredMutingReactChilds)
         }
 
         //using same logic as updateStatesInArray
@@ -336,6 +359,7 @@ const ReactNode = ({
                                 >
 
                                     {/** rendering numbers of props going in to child*/}
+
 
                                     <div
                                         datatype='pipe'
@@ -608,7 +632,7 @@ const ReactNode = ({
                         filteredMutedAttribute = child.attributes.filter(attibute => attibute.mute === 'mute');
                         filteredMutingAttribute = child.attributes.filter(attibute => attibute.mute === 'muting');
                         mutedAttributeCount = filteredMutedAttribute.length;
-                        console.log("mutedAttributeCount", mutedAttributeCount);
+                        //console.log("mutedAttributeCount", mutedAttributeCount);
                         //console.log(child.title, "filtered unmuted:", filteredUnMutedAttribute, "filtered muted",filteredMutedAttribute, "filtered muting", filteredMutingAttribute)
                     }
 
@@ -893,7 +917,7 @@ const ReactNode = ({
                                                                                                     U
                                                                                                 </div>
                                                                                             </div>
-                                                                                            <AttributeIconWrapper attribute={attr} isExpanded={isExpanded} handleClickOnAttribute={handleClickOnAttribute} attributeColors={attributeColors} />
+                                                                                            <AttributeIconWrapper nodeId={child.id} attribute={attr} isExpanded={isExpanded} handleClickOnAttribute={handleClickOnAttribute} attributeColors={attributeColors} />
                                                                                         </div>
                                                                                     </div>
 
@@ -909,7 +933,7 @@ const ReactNode = ({
                                                                                             onClick={() => updateNode(child.color, attr.id, { target: 'attribute', state: 'mute', muteOptions: 'mute' })}
                                                                                             title="mute"
                                                                                         >-</button>}
-                                                                                    <AttributeIconWrapper attribute={attr} isExpanded={isExpanded} handleClickOnAttribute={handleClickOnAttribute} attributeColors={attributeColors} />
+                                                                                    <AttributeIconWrapper nodeId={child.id} attribute={attr} isExpanded={isExpanded} handleClickOnAttribute={handleClickOnAttribute} attributeColors={attributeColors} />
                                                                                 </div>
                                                                             )
 
@@ -1028,7 +1052,6 @@ const ReactNode = ({
                         filteredMutedAttribute = child.attributes.filter(attibute => attibute.mute === 'mute');
                         filteredMutingAttribute = child.attributes.filter(attibute => attibute.mute === 'muting');
                         mutedAttributeCount = filteredMutedAttribute.length;
-                        console.log("mutedAttributeCount", mutedAttributeCount);
                         //console.log(child.title, "filtered unmuted:", filteredUnMutedAttribute, "filtered muted",filteredMutedAttribute, "filtered muting", filteredMutingAttribute)
                     }
 
@@ -1295,7 +1318,7 @@ const ReactNode = ({
                                                                                                     U
                                                                                                 </div>
                                                                                             </div>
-                                                                                            <AttributeIconWrapper attribute={attr} isExpanded={isExpanded} handleClickOnAttribute={handleClickOnAttribute} attributeColors={attributeColors} />
+                                                                                            <AttributeIconWrapper nodeId={child.id} attribute={attr} isExpanded={isExpanded} handleClickOnAttribute={handleClickOnAttribute} attributeColors={attributeColors} />
                                                                                         </div>
                                                                                     </div>
 
@@ -1311,7 +1334,7 @@ const ReactNode = ({
                                                                                             onClick={() => updateNode(child.color, attr.id, { target: 'attribute', state: 'mute', muteOptions: 'mute' })}
                                                                                             title="mute"
                                                                                         >-</button>}
-                                                                                    <AttributeIconWrapper attribute={attr} isExpanded={isExpanded} handleClickOnAttribute={handleClickOnAttribute} attributeColors={attributeColors} />
+                                                                                    <AttributeIconWrapper nodeId={child.id} attribute={attr} isExpanded={isExpanded} handleClickOnAttribute={handleClickOnAttribute} attributeColors={attributeColors} />
                                                                                 </div>
                                                                             )
 

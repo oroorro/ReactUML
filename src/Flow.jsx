@@ -29,8 +29,9 @@ const NodeIndexInArray = {
 
 const attributeColors = ['import', 'reactInBuilt', 'variable', 'function', 'hook', 'create type',]
 
+let stateManger = {id: ''};
 
-const initialNodes = [
+let initialNodes = [
   {
     id: '3',
     position: { x: 50, y: 50 },
@@ -38,6 +39,7 @@ const initialNodes = [
 
     data: {
       indexMap: NodeIndexInArray,
+      stateManager: stateManger,
       label: '3',
       title: 'ZoomPane',
       color: '#dfe7f5',
@@ -589,18 +591,32 @@ function Flow() {
 
   
 
+  function findElementWithDatatype(element) {
+    if (!element) return null;
+    if (element.hasAttribute('datatype')) {
+      return element;
+    }
+    return findElementWithDatatype(element.parentElement);
+  }
+
+
   const FlowContextMenuHandler = (event) => {
 
     //get the type of element; which will be either 1. 1-Node other than return scope, 2-Node's return scope   2. pipe  3. Attribute
 
     event.preventDefault();
+
+
     const target = event.target;
+    const elementWithDatatype = findElementWithDatatype(target);
+    //console.log("elementWithDatatype", elementWithDatatype);
+
     const nodeDataId = target.getAttribute('data-id') ? target.getAttribute('data-id') : target.parentElement?.getAttribute('data-id');
     const nodeDataType = target.getAttribute('datatype') ? target.getAttribute('datatype') : target.parentElement?.getAttribute('datatype');
 
     interactingIdRef.current = nodeDataId;
-    //console.log("target context", nodeDataId);
-    //console.log("nodeDataType", nodeDataType);
+    console.log("target context", nodeDataId);
+    console.log("nodeDataType", nodeDataType);
 
     if (nodeDataType === 'Node') {
       console.log("target context", nodeDataId);
@@ -618,6 +634,30 @@ function Flow() {
         top: event.clientY
       })
     }
+    
+    if (elementWithDatatype.getAttribute('datatype') === 'Attribute') {
+      setContextMenu({
+        nodeId: elementWithDatatype.getAttribute('data-id'),
+        nodeType: 'Attribute',
+        left: event.clientX,
+        top: event.clientY
+      })
+
+    }
+  }
+
+  const addAttributeValue = () => {
+    const ids = contextMenu.nodeId.split('+');
+    // const stateManger = {
+    //   id: ids[1]
+    // }
+    // console.log("stateManger", stateManger);
+    nodes[0].data.stateManager.id = ids[1];
+    const updateNode = [...nodes];
+    //console.log("updatedReactChild WITH DATA", initialNodes)
+    //update node
+    setNodes(updateNode);
+    setContextMenu(null)
   }
 
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
@@ -629,7 +669,7 @@ function Flow() {
 
     let target = event.target;
     let targetParent = target.parentElement
-    console.log("target click", target.getAttribute('datatype'))
+    //console.log("target click", target.getAttribute('datatype'))
 
     if (targetParent.getAttribute('datatype') !== 'contextMenu') {
       setContextMenu(null)
@@ -662,8 +702,8 @@ function Flow() {
 
   return (
     <div className='Flow' style={{ width: "100vw", height: "100vh" }}
-      onClick={(e) => FlowClickHandler(e)}
-      onMouseDown={(e) => FlowClickHandler(e)}
+      // onClick={(e) => FlowClickHandler(e)}
+      // onMouseDown={(e) => FlowClickHandler(e)}
     >
       {contextMenu && contextMenu.nodeType === 'Node' &&
         <div
@@ -723,9 +763,25 @@ function Flow() {
             zIndex: '9999'
           }}
           id={contextMenu.nodeId}
+          datatype="contextMenu"
         >
           <button datatype="contextMenu" onClick={() => updateNode()}>create</button>
         </div>}
+        {contextMenu && contextMenu.nodeType === 'Attribute' &&
+          <div
+          style={{
+            backgroundColor: 'white',
+            width: '50px',
+            height: '50px',
+            position: 'absolute',
+            left: `${contextMenu.left}px`,
+            top: `${contextMenu.top}px`,
+            zIndex: '9999'
+          }}
+          >
+            <button onClick={()=>addAttributeValue()}> Add </button>
+            <button> Delete </button>
+          </div>}
       <AlgoFlow
         ref={flowRef}
         nodes={nodes}
@@ -735,6 +791,7 @@ function Flow() {
         onConnect={onConnect}
         onContextMenu={(e) => { FlowContextMenuHandler(e) }}
         indexMap={NodeIndexInArray}
+        stateManager={stateManger}
       >
         <Background />
         <Controls />

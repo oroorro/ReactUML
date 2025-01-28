@@ -6,7 +6,8 @@ const AttributeIconWrapper = ({
     attribute, 
     isExpanded, 
     handleClickOnAttribute, 
-    attributeColors
+    attributeColors,
+    nodeId
 }:AttributeIconWrapperProps) =>{
 
     return (
@@ -24,7 +25,9 @@ const AttributeIconWrapper = ({
                     padding: isExpanded ? '1px 6px' : '0px 2px',
 
                 }}
-                datatype='AttributeContainer'
+                datatype='Attribute'
+                //id nodeId-attributeId
+                data-id={`${nodeId}+${attribute.id}`}
                 onClick={!isExpanded ? () => handleClickOnAttribute(attribute.id) : undefined} // Disable onClick if isExpanded
             >
                 
@@ -45,8 +48,9 @@ const AttributeIconWrapper = ({
                                 >
                                     {'in total '}
                                 </span>
-                            </div>}
-
+                            </div>
+                        }
+                        {/** showing number of Attribute when not expanded  */}
                         <div>
                             <span style={{ marginLeft: '3px', fontSize: '18px', fontWeight: '500' }}>{attribute.totalNumberOfAttribute}</span>
                         </div>

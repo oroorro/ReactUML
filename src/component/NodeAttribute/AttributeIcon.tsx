@@ -79,11 +79,11 @@ const AttributeIcon = (props: AttributeIconProps) => {
       
     if(!props.isExpanded){
         return (
-            <div className="icon-container">
+            <div  className="icon-container">
                 <div className={!isAttributeEmpty ? "circle" : 'emptyCircle'} style={{width: '20px', height: '20px'}}>
                     <div className="inner-circle" style={{backgroundColor: isAttributeEmpty ? '' : props.color, width: '17px', height: '17px', boxShadow: isAttributeEmpty ? '' : `0px 4.5px 2px ${modifiedColor} inset , 1px 1.5px 1px ${extraModifiedColor} inset`}}>
-                        {!isAttributeEmpty && <span className="icon" style={{fontSize:'15px', transform: 'scaleX(1.2)'}}>{iconFirstLetter}</span>}
-                        {isAttributeEmpty && <span className="icon" style={{fontSize:'15px', transform: 'scaleX(1.2)'}}></span>}
+                        {!isAttributeEmpty && <span  className="icon" style={{fontSize:'15px', transform: 'scaleX(1.2)'}}>{iconFirstLetter}</span>}
+                        {isAttributeEmpty && <span  className="icon" style={{fontSize:'15px', transform: 'scaleX(1.2)'}}></span>}
                     </div>
                 </div>
             </div>
@@ -91,7 +91,7 @@ const AttributeIcon = (props: AttributeIconProps) => {
     }else{
         return (
             <div className="icon-container">
-                <span className="icon text-xl" >{props.nameOfIcon}</span>
+                <span  className="icon text-xl" >{props.nameOfIcon}</span>
             </div>
         )
     }
