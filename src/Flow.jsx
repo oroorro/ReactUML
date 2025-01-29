@@ -379,6 +379,30 @@ let initialNodes = [
 
 const initialEdges = [{ id: 'e1-2', source: '1', target: '2' }];
 
+function findNodeById( nodeId, initialNodes) {
+  // Use a queue for Breadth-First Search
+  const queue = [...initialNodes];
+
+  while (queue.length > 0) {
+    const currentNode = queue.shift(); // Dequeue the first node
+
+    if (!currentNode) continue;
+
+    // Check if the current node's id matches
+    if (currentNode.id === nodeId) {
+      return currentNode;
+    }
+
+    // Add children to the queue if they exist
+    if (currentNode.children && currentNode.children.length > 0) {
+      queue.push(...currentNode.children);
+    }
+  }
+
+  // Return undefined if the node was not found
+  return undefined;
+}
+
 //creates unique id
 function generateUniqueId(){
   const timestamp = Date.now().toString(36); 
@@ -387,92 +411,88 @@ function generateUniqueId(){
 }
 
 //creates Node, Attribute and Prop to given index ex) 0-0-0
-function addChildToReactChildIterative(root, id, newChild, type, data=null) {
-  const path = NodeIndexInArray[id].split('-').map(Number); // Convert the path to an array of indices
-  const updatedRoot = { ...root }; // Create a shallow copy of the root for immutability
+// function addChildToReactChildIterative(root, id, newChild, type, data=null) {
+//   const path = NodeIndexInArray[id].split('-').map(Number); // Convert the path to an array of indices
 
-  let currentNode = updatedRoot; // Start from the root node
 
-  for (let i = 0; i < path.length; i++) {
-    const currentIndex = path[i];
+//   const updatedRoot = { ...root }; // Create a shallow copy of the root for immutability
 
-    //creating Attribute 
-    if (type == 'Attribute') {
-      if (!currentNode.attributes) {
-        currentNode.attributes = [];
-      }
+//   let currentNode = updatedRoot; // Start from the root node
 
-      if (i === path.length - 1) {
-        currentNode.children[currentIndex].attributes = [
-          ...(currentNode.children[currentIndex].attributes || []),
-          {
-            nameOfAttribute: data ? data : 'empty',
-            id: generateUniqueId(),
-            totalNumberOfAttribute: 0,
-            AttributeContents: [
-              {
-                name: 'initialNodes',
-                belongsTo: 'X2D',
-              }
-            ]
-          },
-        ];
-      }
-    }
-    //creating Node and Prop
-    else {
-      // Ensure children array exists
-      if (!currentNode.children) {
-        currentNode.children = [];
-      }
+//   for (let i = 0; i < path.length; i++) {
+//     const currentIndex = path[i];
 
-      // If the child at the current index doesn't exist, create a placeholder node
-      if (!currentNode.children[currentIndex]) {
-        currentNode.children[currentIndex] = {
-          title: '',
-          numbersOfPropsGoingIn: 0,
-          color: '',
-          pipes: [],
-          attributes: [],
-          children: [],
-        };
-      }
+//     //creating Attribute 
+//     if (type == 'Attribute') {
+//       if (!currentNode.attributes) {
+//         currentNode.attributes = [];
+//       }
 
-      // If this is the last index, add the new child to the current node's children
-      if (i === path.length - 1) {
-        currentNode.children[currentIndex].children = [
-          ...(currentNode.children[currentIndex].children || []),
-          type == 'Node' ? newChild : ghostChild,
-        ];
-      }
-    }
+//       if (i === path.length - 1) {
+//         currentNode.children[currentIndex].attributes = [
+//           ...(currentNode.children[currentIndex].attributes || []),
+//           {
+//             nameOfAttribute: data ? data : 'empty',
+//             id: generateUniqueId(),
+//             totalNumberOfAttribute: 0,
+//             AttributeContents: [
+//               {
+//                 name: 'initialNodes',
+//                 belongsTo: 'X2D',
+//               }
+//             ]
+//           },
+//         ];
+//       }
+//     }
+//     //creating Node and Prop
+//     else {
+//       // Ensure children array exists
+//       if (!currentNode.children) {
+//         currentNode.children = [];
+//       }
 
-    // Move to the next node in the path
-    currentNode = currentNode.children[currentIndex];
-  }
+//       // If the child at the current index doesn't exist, create a placeholder node
+//       if (!currentNode.children[currentIndex]) {
+//         currentNode.children[currentIndex] = {
+//           title: '',
+//           numbersOfPropsGoingIn: 0,
+//           color: '',
+//           pipes: [],
+//           attributes: [],
+//           children: [],
+//         };
+//       }
 
-  return updatedRoot; // Return the updated tree
-}
+//       // If this is the last index, add the new child to the current node's children
+//       if (i === path.length - 1) {
+//         currentNode.children[currentIndex].children = [
+//           ...(currentNode.children[currentIndex].children || []),
+//           type == 'Node' ? newChild : ghostChild,
+//         ];
+        
+//         NodeIndexInArray[newChild.id] = {};
+//         NodeIndexInArray[newChild.id] = `${path}-0`;
+//       }
+//     }
 
-const newChild = {
-  title: 'NewNode',
-  numbersOfPropsGoingIn: 1,
-  color: '#abcdef',
-  pipes: [
-    {
-      color: '#dfe7f5',
-      numbersOfProps: 18,
-      name: "Node",
-      id: 'X2'
-    },
-  ],
-  attributes: [],
-};
+//     // Move to the next node in the path
+//     currentNode = currentNode.children[currentIndex];
+//   }
+
+//   console.log("updatedRoot", NodeIndexInArray);
+//   return updatedRoot; // Return the updated tree
+// }
+
+
+
+
 
 const ghostChild = {
   title: 'ghost',
   numbersOfPropsGoingIn: 1,
   color: '#abcdef',
+  id: generateUniqueId(),
   pipes: [
     {
       color: '#dfe7f5',
@@ -490,6 +510,76 @@ function Flow() {
   const flowRef = useRef(null);
   const interactingIdRef = useRef(null);
   const [contextMenu, setContextMenu] = useState(null);
+
+
+  function addChildToReactChildIterative(root, id, type, data=null) {
+    //const path = NodeIndexInArray[id].split('-').map(Number); // Convert the path to an array of indices
+  
+    const newChild = {
+      title: 'NewNode',
+      numbersOfPropsGoingIn: 1,
+      color: '#abcdef',
+      id: generateUniqueId(),
+      pipes: [
+        {
+          color: '#dfe7f5',
+          numbersOfProps: 18,
+          name: "Node",
+          id: 'X2'
+        },
+      ],
+      attributes: [],
+    };
+    //const updatedRoot = { ...root }; // Create a shallow copy of the root for immutability
+  
+    //let currentNode = updatedRoot; // Start from the root node
+  
+    //const reactChild: ReactChild[] = [nodes[0].data];
+  
+    let foundNode = findNodeById(id, root);
+  
+    console.log("found node in <Flow>", foundNode);
+  
+    //for (let i = 0; i < path.length; i++) {
+      //const currentIndex = path[i];
+  
+      //creating Attribute 
+      if (type == 'Attribute') {
+        foundNode.attributes = [
+            ...(foundNode.attributes || []),
+            {
+              nameOfAttribute: data ? data : 'empty',
+              id: generateUniqueId(),
+              totalNumberOfAttribute: 0,
+              AttributeContents: [
+                {
+                  name: 'initialNodes',
+                  belongsTo: 'X2D',
+                }
+              ]
+            },
+        ];
+      }
+      //creating Node and Prop
+      else {
+  
+        // If the child at the current index doesn't exist, create a placeholder node
+        if (!foundNode.children) {
+          foundNode.children = [newChild];
+        }else{
+          foundNode.children = [
+            ...foundNode.children,
+            type == 'Node' ?  newChild: ghostChild,
+          ];
+        }
+      }
+  
+      // Move to the next node in the path
+      //currentNode = currentNode.children[currentIndex];
+
+    //console.log("initialNodes", initialNodes)
+    //return foundNode; // Return the updated tree
+  }
 
   useEffect(() => {
     if (flowRef.current) {
@@ -528,17 +618,16 @@ function Flow() {
   const updateNode = (type, data=null) => {
     //we need to format data in order to add Node correctly,
     //making data to be the root 
-    const format = {
-      children: [nodes[0].data],
-    }
+
     console.log("updateNode", type, data)
-    const updatedReactChild = addChildToReactChildIterative(format, contextMenu.nodeId, newChild, type, data);
+    addChildToReactChildIterative([nodes[0].data], contextMenu.nodeId, type, data);
     //applying updated part to original initialNodes[0].data
-    nodes[0].data = { ...updatedReactChild.children[0] };
-    const updateNode = [...nodes];
+    //nodes[0].data = { ...updatedReactChild.children[0] };
+    //const updateNode = [...nodes];
     //console.log("updatedReactChild WITH DATA", initialNodes)
     //update node
-    setNodes(updateNode);
+    setNodes( initialNodes);
+   
     setContextMenu(null)
   }
 

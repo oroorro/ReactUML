@@ -41,6 +41,30 @@ const ReactNode = ({
     const [expandedprops, setExpandedProps] = useState<string[]>([]);
 
 
+    function findNodeById(nodeId: UniqueId, initialNodes: ReactChild[]): ReactChild | undefined {
+        // Use a queue for Breadth-First Search
+        const queue: ReactChild[] = [...initialNodes];
+      
+        while (queue.length > 0) {
+          const currentNode = queue.shift(); // Dequeue the first node
+      
+          if (!currentNode) continue;
+      
+          // Check if the current node's id matches
+          if (currentNode.id === nodeId) {
+            return currentNode;
+          }
+      
+          // Add children to the queue if they exist
+          if (currentNode.children && currentNode.children.length > 0) {
+            queue.push(...currentNode.children);
+          }
+        }
+      
+        // Return undefined if the node was not found
+        return undefined;
+    }
+
     useEffect(()=>{
 
         if(data.stateManager.id){
@@ -56,12 +80,17 @@ const ReactNode = ({
         }
     },[getNodes()])
     
-    const handleUnmute = (id: string) => {
+    const handleUnmute = (id: UniqueId) => {
 
         const nodes: Node[] = getNodes();
 
+        const reactChild: ReactChild[] = [nodes[0].data];
+
+        let node = findNodeById(id, reactChild);
+
+        console.log("found node in handleUnmute", node);
         //get the id of node 
-        const path = indexMap![id].split('-').map(Number);
+        //const path = indexMap![id].split('-').map(Number);
 
         //update mute flag then setNode to update the display 
         let format = {
@@ -71,21 +100,22 @@ const ReactNode = ({
         const updatedRoot = { ...format };
         let currentNode = updatedRoot;
 
-        for (let i = 0; i < path.length; i++) {
-            const currentIndex = path[i];
+        //for (let i = 0; i < path.length; i++) {
+            //const currentIndex = path[i];
 
-            if (i === path.length - 1) {
-                currentNode.children[currentIndex].muteAll = false;
-            }
+            //if (i === path.length - 1) {
+                //currentNode.children[currentIndex].muteAll = false;
+            //}
 
-            currentNode = currentNode.children[currentIndex];
-        }
+            //currentNode = currentNode.children[currentIndex];
+        //}
 
-        nodes[0].data = updatedRoot.children[0];
-        let newNode: Node[] = nodes.map(node => ({ ...node }));
-        newNode[0].data = updatedRoot.children[0];
-
-        setNodes(newNode);
+        // nodes[0].data = updatedRoot.children[0];
+        // let newNode: Node[] = nodes.map(node => ({ ...node }));
+        // newNode[0].data = updatedRoot.children[0];
+        if(node)  node.muteAll = false;
+       
+        setNodes(nodes);
 
     }
 
@@ -835,7 +865,7 @@ const ReactNode = ({
                                                             <div
                                                                 className="childNode"
                                                                 datatype='Node'
-                                                                data-id={child.color}
+                                                                data-id={child.id}
                                                                 style={{
                                                                     backgroundColor: child.color,
                                                                     marginLeft: '20px',
@@ -869,7 +899,7 @@ const ReactNode = ({
                                                                         }}
                                                                         //contentEditable='true'
                                                                         datatype='Node'
-                                                                        data-id={child.color}
+                                                                        data-id={child.id}
                                                                     >
                                                                         {child.title}
                                                                     </div>
@@ -939,7 +969,7 @@ const ReactNode = ({
 
                                                                         })}
                                                                     </div>}
-                                                                {child.muteAll == true && <button onClick={() => handleUnmute(child.color)}>...</button>}
+                                                                {child.muteAll == true && <button onClick={() => handleUnmute(child.id)}>...</button>}
                                                                 {!child.muteAll && renderChildren(child.children, level + 1, child.color, child.state as string)}
                                                             </div>
                                                         </div>}
@@ -1236,7 +1266,7 @@ const ReactNode = ({
                                                             <div
                                                                 className="childNode"
                                                                 datatype='Node'
-                                                                data-id={child.color}
+                                                                data-id={child.id}
                                                                 style={{
                                                                     backgroundColor: child.color,
                                                                     marginLeft: '20px',
@@ -1270,7 +1300,7 @@ const ReactNode = ({
                                                                         }}
                                                                         //contentEditable='true'
                                                                         datatype='Node'
-                                                                        data-id={child.color}
+                                                                        data-id={child.id}
                                                                     >
                                                                         {child.title}
                                                                     </div>
@@ -1340,7 +1370,7 @@ const ReactNode = ({
 
                                                                         })}
                                                                     </div>}
-                                                                {child.muteAll == true && <button onClick={() => handleUnmute(child.color)}>...</button>}
+                                                                {child.muteAll == true && <button onClick={() => handleUnmute(child.id)}>...</button>}
                                                                 {!child.muteAll && renderChildren(child.children, level + 1, child.color, child.state as string)}
                                                             </div>
                                                         </div>}
