@@ -202,6 +202,8 @@ export type InteractionData = {
   id?: string
 }
 
+export type TargetElement = 'attribute' | 'node' | 'prop';
+
 //used when updating elements in Node, Attribute and Prop
 export type updateOption = {
   target: 'attribute' | 'node' | 'prop',
@@ -211,14 +213,14 @@ export type updateOption = {
 
 export type UpdateOptionV2 = {
   target: 'attribute' | 'node' | 'prop',
-  state: NodeState,
+  state: NodeState, // indicates node's state 
   detailOptions?: DetailOptions, 
 }
 
 export type DetailOptions = {
 
   muteOptions:{
-    muteState?: MuteOption,
+    muteState?: MuteOption, //used to change target element's state into this value 
     unmutingData:{
       updatedMutedAttributes: Attribute[],
       unMutedAttributes: Attribute[],

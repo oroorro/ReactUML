@@ -117,6 +117,7 @@ let initialNodes = [
             {
               nameOfAttribute: 'import',
               id: '1949d9bf4d6-0d6927',
+              mute: 'notMuted',
               totalNumberOfAttribute: 15,
               AttributeContents: [
                 {
@@ -128,6 +129,7 @@ let initialNodes = [
             {
               nameOfAttribute: 'import',
               id: '1949d9bf4d6-169917',
+              mute: 'notMuted',
               totalNumberOfAttribute: 15,
               AttributeContents: [
 
@@ -137,6 +139,7 @@ let initialNodes = [
               nameOfAttribute: 'variable',
               id: '1949d9bf4d6-108cbe',
               totalNumberOfAttribute: 12,
+              mute: 'notMuted',
               AttributeContents: [
                 {
                   name: 'names',

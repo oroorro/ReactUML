@@ -6,7 +6,7 @@ import { Position } from '../../types';
 import { useStoreApi } from '../../hook/useStore';
 import useUpdateNodeInternals from '../../hook/useUpdateNodeInternals';
 
-import type { ReactFlowState, NodeProps, ReactChild, Attribute, Pipe, AttributeContent, ReactInBuiltAttributeContent, Node, NodeDimensionChange, UniqueId, updateOption, UpdateOptionV2, MuteOption } from '../../types';
+import type { ReactFlowState, NodeProps, ReactChild, Attribute, Pipe, AttributeContent, ReactInBuiltAttributeContent, Node, NodeDimensionChange, UniqueId, updateOption, UpdateOptionV2, MuteOption, TargetElement } from '../../types';
 import AttributeIconWrapper from '../NodeAttribute/AttributeIconWrapper';
 import { AttributeIcon, AttributeIconProps } from '../NodeAttribute/AttributeIcon';
 import './ReactNodeStyle.css';
@@ -40,6 +40,57 @@ const ReactNode = ({
     const [expandedAttributes, setExpandedAttributes] = useState<string[]>([]);
     const [expandedprops, setExpandedProps] = useState<string[]>([]);
 
+
+    function findElementWithTypes(nodeId: UniqueId, otherElementId: UniqueId, elementType: TargetElement): ReactChild | Attribute | undefined{
+
+        const nodes: Node[] = getNodes();
+
+        const reactChild: ReactChild[] = [nodes[0].data];
+
+        const queue: ReactChild[] = [...reactChild];
+
+        while (queue.length > 0) {
+            const currentNode = queue.shift(); // Dequeue the first node
+        
+            if (!currentNode) continue;
+        
+            // Check if the current node's id matches
+          
+            if (currentNode.id === nodeId) {
+                if(elementType == 'attribute'){
+                    const foundAttribute: Attribute = currentNode.attributes.find(attrib=>attrib.id == otherElementId) as Attribute;
+                    return foundAttribute;
+                }
+                return currentNode;
+            }
+            // Add children to the queue if they exist
+            if (currentNode.children && currentNode.children.length > 0) {
+              queue.push(...currentNode.children);
+            }
+        }
+
+        return undefined;
+    }
+
+    function updateElements(nodeId: UniqueId, otherElementId: UniqueId, elementType: TargetElement, updateOption: updateOption){
+
+        const foundElement = findElementWithTypes(nodeId, otherElementId, elementType);
+
+        const nodes: Node[] = getNodes();
+        if (!foundElement) {
+            console.warn(`Element not found for nodeId: ${nodeId}, otherElementId: ${otherElementId}`);
+            return;
+        }
+  
+        if ("mute" in foundElement) {
+            (foundElement as Attribute).mute = updateOption.muteOptions;
+        } else {
+            console.warn(`'mute' property does not exist on found element.`);
+        }
+
+        setNodes(nodes);
+
+    }
 
     function findNodeById(nodeId: UniqueId, initialNodes: ReactChild[]): ReactChild | undefined {
         // Use a queue for Breadth-First Search
@@ -93,12 +144,12 @@ const ReactNode = ({
         //const path = indexMap![id].split('-').map(Number);
 
         //update mute flag then setNode to update the display 
-        let format = {
-            children: [nodes[0].data],
-        }
+        // let format = {
+        //     children: [nodes[0].data],
+        // }
 
-        const updatedRoot = { ...format };
-        let currentNode = updatedRoot;
+        // const updatedRoot = { ...format };
+        // let currentNode = updatedRoot;
 
         //for (let i = 0; i < path.length; i++) {
             //const currentIndex = path[i];
@@ -165,25 +216,32 @@ const ReactNode = ({
 
     const updateNode = (nodeId: string, id: UniqueId, updateOption: updateOption) => {
 
+        console.log("updateNode", id, updateOption)
         const nodes: Node[] = getNodes();
 
         //get the id of node 
         const path = indexMap![nodeId].split('-').map(Number);
 
+        const reactChild: ReactChild[] = [nodes[0].data];
+
+        let foundNode = findNodeById(id, reactChild);
+
         //update mute flag then setNode to update the display 
-        let format = {
-            children: [nodes[0].data],
-        }
+        // let format = {
+        //     children: [nodes[0].data],
+        // }
 
-        const updatedRoot = { ...format };
-        let currentNode = updatedRoot;
+        //const updatedRoot = { ...format };
+        //let currentNode = updatedRoot;
 
-        for (let i = 0; i < path.length; i++) {
-            const currentIndex = path[i];
+        //for (let i = 0; i < path.length; i++) {
+            //const currentIndex = path[i];
 
-            if (i === path.length - 1) {
+            //if (i === path.length - 1) {
+            if(foundNode){
                 if (updateOption.target == 'attribute' && updateOption.muteOptions) {
-                    const targetAttribute: Attribute = currentNode.children[currentIndex].attributes.find((attrb: Attribute) => attrb.id === id);
+                    //const targetAttribute: Attribute = currentNode.children[currentIndex].attributes.find((attrb: Attribute) => attrb.id === id);
+                    const targetAttribute: Attribute = foundNode.attributes.find((attrb: Attribute) => attrb.id === id) as Attribute;
                     targetAttribute.mute = updateOption.muteOptions;
                 }
                 else if (updateOption.target == 'node') {
@@ -191,12 +249,14 @@ const ReactNode = ({
 
 
                     if (updateOption.state == 'mute') {
-                        const parentNode: ReactChild[] = currentNode.children[currentIndex].children;
+                        //const parentNode: ReactChild[] = currentNode.children[currentIndex].children;
+                        const parentNode: ReactChild[] = foundNode.children as ReactChild[];
                         const childNode: ReactChild = parentNode.find(child => child.id == id) as ReactChild;
                         console.log("reactChild", parentNode, childNode);
                         childNode.state = updateOption.muteOptions;
                     } else {
-                        const reactChild: ReactChild = currentNode.children[currentIndex];
+                        //const reactChild: ReactChild = currentNode.children[currentIndex];
+                        const reactChild: ReactChild = foundNode;
                         reactChild.state = updateOption.state;
                     }
                     // switch (updateOption.state) {
@@ -210,14 +270,15 @@ const ReactNode = ({
 
                 }
             }
-            currentNode = currentNode.children[currentIndex];
-        }
+            // }
+            // currentNode = currentNode.children[currentIndex];
+        //}
 
-        nodes[0].data = updatedRoot.children[0];
-        let newNode: Node[] = nodes.map(node => ({ ...node }));
-        newNode[0].data = updatedRoot.children[0];
+        //nodes[0].data = updatedRoot.children[0];
+        //let newNode: Node[] = nodes.map(node => ({ ...node }));
+        //newNode[0].data = updatedRoot.children[0];
 
-        setNodes(newNode);
+        setNodes(nodes);
 
     }
 
@@ -960,7 +1021,8 @@ const ReactNode = ({
                                                                                 <div className='flex items-end'>
                                                                                     {child.state == 'select' &&
                                                                                         <button className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-1 rounded'
-                                                                                            onClick={() => updateNode(child.color, attr.id, { target: 'attribute', state: 'mute', muteOptions: 'mute' })}
+                                                                                            //onClick={() => updateNode(child.color, attr.id, { target: 'attribute', state: 'mute', muteOptions: 'mute' })}
+                                                                                            onClick={() => findElementWithTypes(child.id, attr.id, 'attribute')}
                                                                                             title="mute"
                                                                                         >-</button>}
                                                                                     <AttributeIconWrapper nodeId={child.id} attribute={attr} isExpanded={isExpanded} handleClickOnAttribute={handleClickOnAttribute} attributeColors={attributeColors} />
@@ -1361,7 +1423,8 @@ const ReactNode = ({
                                                                                 <div className='flex items-end'>
                                                                                     {child.state == 'select' &&
                                                                                         <button className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-1 rounded'
-                                                                                            onClick={() => updateNode(child.color, attr.id, { target: 'attribute', state: 'mute', muteOptions: 'mute' })}
+                                                                                            //onClick={() => updateNode(child.color, attr.id, { target: 'attribute', state: 'mute', muteOptions: 'mute' })}
+                                                                                            onClick={() => updateElements(child.id, attr.id, 'attribute', { target: 'attribute', state: 'mute', muteOptions: 'mute' })}
                                                                                             title="mute"
                                                                                         >-</button>}
                                                                                     <AttributeIconWrapper nodeId={child.id} attribute={attr} isExpanded={isExpanded} handleClickOnAttribute={handleClickOnAttribute} attributeColors={attributeColors} />
