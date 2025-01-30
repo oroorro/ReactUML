@@ -382,29 +382,7 @@ let initialNodes = [
 
 const initialEdges = [{ id: 'e1-2', source: '1', target: '2' }];
 
-function findNodeById( nodeId, initialNodes) {
-  // Use a queue for Breadth-First Search
-  const queue = [...initialNodes];
 
-  while (queue.length > 0) {
-    const currentNode = queue.shift(); // Dequeue the first node
-
-    if (!currentNode) continue;
-
-    // Check if the current node's id matches
-    if (currentNode.id === nodeId) {
-      return currentNode;
-    }
-
-    // Add children to the queue if they exist
-    if (currentNode.children && currentNode.children.length > 0) {
-      queue.push(...currentNode.children);
-    }
-  }
-
-  // Return undefined if the node was not found
-  return undefined;
-}
 
 //creates unique id
 function generateUniqueId(){
@@ -584,52 +562,18 @@ function Flow() {
     //return foundNode; // Return the updated tree
   }
 
-  useEffect(() => {
-    if (flowRef.current) {
-      console.log("Child component's DOM node:", flowRef.current.className);
-    }
-  }, []);
-
-  useEffect(() => {
-    console.log("contextMenu changed:", JSON.parse(JSON.stringify(contextMenu)));
-  }, [contextMenu])
-
-  //returns Node from nodes array for given id 
-  const updateNodeState = (root, id, state) => {
-    const path = NodeIndexInArray[id].split('-').map(Number);
-    const updatedRoot = { ...root };
-    let currentNode = updatedRoot;
-
-    for (let i = 0; i < path.length; i++) {
-      const currentIndex = path[i];
-
-      if (i === path.length - 1) {
-        if(state == 'mute'){
-          currentNode.children[currentIndex].muteAll = true;
-        }
-        else if(state == 'select'){
-          currentNode.children[currentIndex].state = 'select';
-        }
-        
-      }
-
-      currentNode = currentNode.children[currentIndex];
-    }
-    return updatedRoot;
-  }
-
   const updateNode = (type, data=null) => {
     //we need to format data in order to add Node correctly,
     //making data to be the root 
 
     console.log("updateNode", type, data)
-    addChildToReactChildIterative([nodes[0].data], contextMenu.nodeId, type, data);
+    addChildToReactChildIterative(nodes[0].data.children, contextMenu.nodeId, type, data);
     //applying updated part to original initialNodes[0].data
     //nodes[0].data = { ...updatedReactChild.children[0] };
-    //const updateNode = [...nodes];
+    const updateNode = [...nodes];
     //console.log("updatedReactChild WITH DATA", initialNodes)
     //update node
-    setNodes( initialNodes);
+    setNodes(updateNode);
    
     setContextMenu(null)
   }
@@ -776,20 +720,57 @@ function Flow() {
     //get id of Node , interactingIdRef.current
 
     //access that Node in 
-    const format  = {
-      children: [nodes[0].data],
-    };
     //console.log("nodes nodes", nodes[0].data);
     setContextMenu(null);
-    const updatedReactChild = updateNodeState(format, interactingIdRef.current, option);
+    //const updatedReactChild = 
+    updateNodeState(nodes[0].data.children, interactingIdRef.current, option);
     //console.log("returned node: ", updatedReactChild);
-    initialNodes[0].data = { ...updatedReactChild.children[0] };
-    nodes[0].data = { ...updatedReactChild.children[0] };
-    const updateNode = [...nodes];
+    //initialNodes[0].data = { ...updatedReactChild.children[0] };
+    //nodes[0].data = { ...updatedReactChild.children[0] };
+    //const updateNode = [...nodes];
     // console.log("initialNodes returned:", JSON.parse(JSON.stringify(initialNodes))); 
     // console.log("nodes returned:", JSON.parse(JSON.stringify(nodes))); 
+    const updateNode = [...nodes]; //shallow copy 
     setNodes(updateNode);
 
+  }
+
+   //returns Node from nodes array for given id 
+   const updateNodeState = (root, id, state) => { //fix 
+    const updatedRoot = [ ...root ];
+    // let currentNode = updatedRoot;
+    let foundNode = findNodeById(id, updatedRoot);
+    //console.log("foundNode", foundNode)
+    if(state == 'mute'){
+      foundNode.muteAll = true;
+    }
+    else if(state == 'select'){
+      foundNode.state = 'select';
+    }
+  }
+
+  function findNodeById( nodeId, initialNodes) {
+    // Use a queue for Breadth-First Search
+    const queue = Array.isArray(initialNodes) ? initialNodes : [initialNodes];;
+  
+    while (queue.length > 0) {
+      const currentNode = queue.shift(); // Dequeue the first node
+  
+      if (!currentNode) continue;
+  
+      // Check if the current node's id matches
+      if (currentNode.id === nodeId) {
+        return currentNode;
+      }
+  
+      // Add children to the queue if they exist
+      if (currentNode.children && currentNode.children.length > 0) {
+        queue.push(...currentNode.children);
+      }
+    }
+  
+    // Return undefined if the node was not found
+    return undefined;
   }
 
   return (

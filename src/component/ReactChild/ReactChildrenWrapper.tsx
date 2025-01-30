@@ -98,7 +98,7 @@ const ReactChildrenWrapper = ({
                                 }
                             })
                     } else {
-                        updateNode(child.color, '-', { target: 'node', state: 'none' })
+                        updateNode(child.color, child.id, { target: 'node', state: 'none' })
                     }
                 }
 
@@ -312,7 +312,9 @@ const ReactChildrenWrapper = ({
                                                         datatype='Node'
                                                         data-id={`${pipe.color}`}
                                                     >
-                                                        {/** muting state pop-up icons */}
+                                                        
+                                                        {state == 'select' && 
+                                                        
                                                         <div className='flex absolute top-[0px] right-[0px] flex-col'>
                                                             <div className='bg-white hover:bg-gray-300 px-1.5'
                                                                 onClick={() => updateNode(parentId, child.id, { target: 'node', state: 'mute', muteOptions: 'notMuted' })}
@@ -327,6 +329,7 @@ const ReactChildrenWrapper = ({
                                                                 {"<"}
                                                             </div>
                                                         </div>
+                                                        }
 
                                                         <div
                                                             className="childNode"

@@ -42,7 +42,7 @@ const ReactNode = ({
     const [expandedprops, setExpandedProps] = useState<string[]>([]);
 
 
-    function findElementWithTypes(nodeId: UniqueId, otherElementId: UniqueId, elementType: TargetElement): ReactChild | Attribute | undefined{
+    function findElementWithTypes(nodeId: UniqueId, otherElementId: UniqueId, elementType: TargetElement): ReactChild | Attribute | undefined {
 
         const nodes: Node[] = getNodes();
 
@@ -52,28 +52,28 @@ const ReactNode = ({
 
         while (queue.length > 0) {
             const currentNode = queue.shift(); // Dequeue the first node
-        
+
             if (!currentNode) continue;
-        
+
             // Check if the current node's id matches
-          
+
             if (currentNode.id === nodeId) {
-                if(elementType == 'attribute'){
-                    const foundAttribute: Attribute = currentNode.attributes.find(attrib=>attrib.id == otherElementId) as Attribute;
+                if (elementType == 'attribute') {
+                    const foundAttribute: Attribute = currentNode.attributes.find(attrib => attrib.id == otherElementId) as Attribute;
                     return foundAttribute;
                 }
                 return currentNode;
             }
             // Add children to the queue if they exist
             if (currentNode.children && currentNode.children.length > 0) {
-              queue.push(...currentNode.children);
+                queue.push(...currentNode.children);
             }
         }
 
         return undefined;
     }
 
-    function updateElements(nodeId: UniqueId, otherElementId: UniqueId, elementType: TargetElement, updateOption: updateOption){
+    function updateElements(nodeId: UniqueId, otherElementId: UniqueId, elementType: TargetElement, updateOption: updateOption) {
 
         const foundElement = findElementWithTypes(nodeId, otherElementId, elementType);
 
@@ -82,7 +82,7 @@ const ReactNode = ({
             console.warn(`Element not found for nodeId: ${nodeId}, otherElementId: ${otherElementId}`);
             return;
         }
-  
+
         if ("mute" in foundElement) {
             (foundElement as Attribute).mute = updateOption.muteOptions;
         } else {
@@ -96,42 +96,42 @@ const ReactNode = ({
     function findNodeById(nodeId: UniqueId, initialNodes: ReactChild[]): ReactChild | undefined {
         // Use a queue for Breadth-First Search
         const queue: ReactChild[] = [...initialNodes];
-      
+
         while (queue.length > 0) {
-          const currentNode = queue.shift(); // Dequeue the first node
-      
-          if (!currentNode) continue;
-      
-          // Check if the current node's id matches
-          if (currentNode.id === nodeId) {
-            return currentNode;
-          }
-      
-          // Add children to the queue if they exist
-          if (currentNode.children && currentNode.children.length > 0) {
-            queue.push(...currentNode.children);
-          }
+            const currentNode = queue.shift(); // Dequeue the first node
+
+            if (!currentNode) continue;
+
+            // Check if the current node's id matches
+            if (currentNode.id === nodeId) {
+                return currentNode;
+            }
+
+            // Add children to the queue if they exist
+            if (currentNode.children && currentNode.children.length > 0) {
+                queue.push(...currentNode.children);
+            }
         }
-      
+
         // Return undefined if the node was not found
         return undefined;
     }
 
-    useEffect(()=>{
+    useEffect(() => {
 
-        if(data.stateManager.id){
+        if (data.stateManager.id) {
             const id = data.stateManager.id;
-          
-            if(!expandedAttributes.includes(id)){
-                setExpandedAttributes((prev)=>{
-               
+
+            if (!expandedAttributes.includes(id)) {
+                setExpandedAttributes((prev) => {
+
                     return [...prev, id]
                 })
             }
-            
+
         }
-    },[getNodes()])
-    
+    }, [getNodes()])
+
     const handleUnmute = (id: UniqueId) => {
 
         const nodes: Node[] = getNodes();
@@ -153,20 +153,20 @@ const ReactNode = ({
         // let currentNode = updatedRoot;
 
         //for (let i = 0; i < path.length; i++) {
-            //const currentIndex = path[i];
+        //const currentIndex = path[i];
 
-            //if (i === path.length - 1) {
-                //currentNode.children[currentIndex].muteAll = false;
-            //}
+        //if (i === path.length - 1) {
+        //currentNode.children[currentIndex].muteAll = false;
+        //}
 
-            //currentNode = currentNode.children[currentIndex];
+        //currentNode = currentNode.children[currentIndex];
         //}
 
         // nodes[0].data = updatedRoot.children[0];
         // let newNode: Node[] = nodes.map(node => ({ ...node }));
         // newNode[0].data = updatedRoot.children[0];
-        if(node)  node.muteAll = false;
-       
+        if (node) node.muteAll = false;
+
         setNodes(nodes);
 
     }
@@ -236,43 +236,43 @@ const ReactNode = ({
         //let currentNode = updatedRoot;
 
         //for (let i = 0; i < path.length; i++) {
-            //const currentIndex = path[i];
+        //const currentIndex = path[i];
 
-            //if (i === path.length - 1) {
-            if(foundNode){
-                if (updateOption.target == 'attribute' && updateOption.muteOptions) {
-                    //const targetAttribute: Attribute = currentNode.children[currentIndex].attributes.find((attrb: Attribute) => attrb.id === id);
-                    const targetAttribute: Attribute = foundNode.attributes.find((attrb: Attribute) => attrb.id === id) as Attribute;
-                    targetAttribute.mute = updateOption.muteOptions;
-                }
-                else if (updateOption.target == 'node') {
-
-
-
-                    if (updateOption.state == 'mute') {
-                        //const parentNode: ReactChild[] = currentNode.children[currentIndex].children;
-                        const parentNode: ReactChild[] = foundNode.children as ReactChild[];
-                        const childNode: ReactChild = parentNode.find(child => child.id == id) as ReactChild;
-                        console.log("reactChild", parentNode, childNode);
-                        childNode.state = updateOption.muteOptions;
-                    } else {
-                        //const reactChild: ReactChild = currentNode.children[currentIndex];
-                        const reactChild: ReactChild = foundNode;
-                        reactChild.state = updateOption.state;
-                    }
-                    // switch (updateOption.state) {
-                    //     case 'none':
-                    //         currentNode.children[currentIndex].state = 'none'
-                    //         break;
-
-                    //     default:
-                    //         break;
-                    // }
-
-                }
+        //if (i === path.length - 1) {
+        if (foundNode) {
+            if (updateOption.target == 'attribute' && updateOption.muteOptions) {
+                //const targetAttribute: Attribute = currentNode.children[currentIndex].attributes.find((attrb: Attribute) => attrb.id === id);
+                const targetAttribute: Attribute = foundNode.attributes.find((attrb: Attribute) => attrb.id === id) as Attribute;
+                targetAttribute.mute = updateOption.muteOptions;
             }
-            // }
-            // currentNode = currentNode.children[currentIndex];
+            else if (updateOption.target == 'node') {
+
+
+
+                if (updateOption.state == 'mute') {
+                    //const parentNode: ReactChild[] = currentNode.children[currentIndex].children;
+                    const parentNode: ReactChild[] = foundNode.children as ReactChild[];
+                    const childNode: ReactChild = parentNode.find(child => child.id == id) as ReactChild;
+                    console.log("reactChild", parentNode, childNode);
+                    childNode.state = updateOption.muteOptions;
+                } else {
+                    //const reactChild: ReactChild = currentNode.children[currentIndex];
+                    const reactChild: ReactChild = foundNode;
+                    reactChild.state = updateOption.state;
+                }
+                // switch (updateOption.state) {
+                //     case 'none':
+                //         currentNode.children[currentIndex].state = 'none'
+                //         break;
+
+                //     default:
+                //         break;
+                // }
+
+            }
+        }
+        // }
+        // currentNode = currentNode.children[currentIndex];
         //}
 
         //nodes[0].data = updatedRoot.children[0];
@@ -627,7 +627,8 @@ const ReactNode = ({
                     </div>
                 }
                 {/* //filter children by it's state being mute|muting|unmuted or undefined  */}
-                {filteredMutingReactChilds && filteredMutingReactChilds.map((child, index) => {
+
+                {false && (filteredMutingReactChilds && filteredMutingReactChilds.map((child, index) => {
 
                     //set current Node's attribute to be currently saved filteredMutingAttribute, filteredUnMutedAttribute and filteredMutedAttribute
                     function updateNodeInArray() {
@@ -736,7 +737,6 @@ const ReactNode = ({
                                 padding: '1px',
                             }}
                         > {/* parent's inner boundary where return statement goes */}
-
                             <div className='pipeStickyWrapper'
                                 style={{ position: 'relative' }}
                             >
@@ -1047,28 +1047,8 @@ const ReactNode = ({
                         </div>
                     )
 
-                })}
-                {/* {filteredUnMutedReactChilds && 
-                <ReactChildrenWrapper 
-                    reactChildren={filteredUnMutedReactChilds}
-                    renderChildren={renderChildren}
-                    expandedAttributes={expandedAttributes}
-                    expandedprops={expandedprops}
-                    state={state}
-                    level={level}
-                    parentId={parentId}
-                    handleUnmute={handleUnmute}
-                    findElementWithTypes={findElementWithTypes}
-                    handleClickOnAttribute={handleClickOnAttribute}
-                    attributeColors={attributeColors}
-                    updateNode={updateNode}
-                    updateNodeV2={updateNodeV2}
-                    handlePropGoingInToChild={handlePropGoingInToChild}
-                    displayPropsData={displayPropsData}
-                    /> 
-                } */}
-
-                {filteredUnMutedReactChilds && filteredUnMutedReactChilds.map((child, index) => {
+                }))}
+                {false && filteredUnMutedReactChilds && filteredUnMutedReactChilds.map((child, index) => {
 
                     //set current Node's attribute to be currently saved filteredMutingAttribute, filteredUnMutedAttribute and filteredMutedAttribute
                     function updateNodeInArray() {
@@ -1284,8 +1264,8 @@ const ReactNode = ({
                                                 }
 
                                                 {/** redering tail: 
-                                                 *    when pipe's number is bigger than 1, render -- vertical arrow of parent's color pipe
-                                                 */}
+                             *    when pipe's number is bigger than 1, render -- vertical arrow of parent's color pipe
+                             */}
                                                 {i == child.pipes.length - 1 &&
                                                     <div
                                                         datatype='Node'
@@ -1470,6 +1450,45 @@ const ReactNode = ({
                     )
 
                 })}
+                {filteredMutingReactChilds &&
+                    <ReactChildrenWrapper
+                        reactChildren={filteredMutingReactChilds}
+                        renderChildren={renderChildren}
+                        expandedAttributes={expandedAttributes}
+                        expandedprops={expandedprops}
+                        state={state}
+                        level={level}
+                        parentId={parentId}
+                        handleUnmute={handleUnmute}
+                        findElementWithTypes={findElementWithTypes}
+                        handleClickOnAttribute={handleClickOnAttribute}
+                        attributeColors={attributeColors}
+                        updateNode={updateNode}
+                        updateNodeV2={updateNodeV2}
+                        handlePropGoingInToChild={handlePropGoingInToChild}
+                        displayPropsData={displayPropsData}
+                    />
+                }
+                {filteredUnMutedReactChilds &&
+                    <ReactChildrenWrapper
+                        reactChildren={filteredUnMutedReactChilds}
+                        renderChildren={renderChildren}
+                        expandedAttributes={expandedAttributes}
+                        expandedprops={expandedprops}
+                        state={state}
+                        level={level}
+                        parentId={parentId}
+                        handleUnmute={handleUnmute}
+                        findElementWithTypes={findElementWithTypes}
+                        handleClickOnAttribute={handleClickOnAttribute}
+                        attributeColors={attributeColors}
+                        updateNode={updateNode}
+                        updateNodeV2={updateNodeV2}
+                        handlePropGoingInToChild={handlePropGoingInToChild}
+                        displayPropsData={displayPropsData}
+                    />
+                }
+
 
             </div>
         );
