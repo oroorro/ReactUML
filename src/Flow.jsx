@@ -751,7 +751,7 @@ function Flow() {
 
   function findNodeById( nodeId, initialNodes) {
     // Use a queue for Breadth-First Search
-    const queue = Array.isArray(initialNodes) ? initialNodes : [initialNodes];;
+    const queue = Array.isArray(initialNodes) ? [...initialNodes] : [...initialNodes];;
   
     while (queue.length > 0) {
       const currentNode = queue.shift(); // Dequeue the first node
