@@ -6,9 +6,10 @@ import { Position } from '../../types';
 import { useStoreApi } from '../../hook/useStore';
 import useUpdateNodeInternals from '../../hook/useUpdateNodeInternals';
 
-import type { ReactFlowState, NodeProps, ReactChild, Attribute, Pipe, AttributeContent, ReactInBuiltAttributeContent, Node, NodeDimensionChange, UniqueId, updateOption, UpdateOptionV2, MuteOption, TargetElement } from '../../types';
+import type { NodeProps, ReactChild, Attribute, Pipe, NodeState, ReactInBuiltAttributeContent, Node, NodeDimensionChange, UniqueId, updateOption, UpdateOptionV2, MuteOption, TargetElement } from '../../types';
 import AttributeIconWrapper from '../NodeAttribute/AttributeIconWrapper';
-import { AttributeIcon, AttributeIconProps } from '../NodeAttribute/AttributeIcon';
+import ReactChildrenWrapper from '../ReactChild/ReactChildrenWrapper';
+
 import './ReactNodeStyle.css';
 import { useStore } from '../../hook/useStore';
 
@@ -308,10 +309,9 @@ const ReactNode = ({
 
     const handleClickOnAttribute = (id: string) => {
 
-        const nodes: Node[] = getNodes();
-        nodes[0].data.stateManager.id = "";
-        setNodes(nodes);
-
+        // const nodes: Node[] = getNodes();
+        // nodes[0].data.stateManager.id = "";
+        // setNodes(nodes);
 
         setExpandedAttributes((prev) => {
             // If already expanded, remove it from the array
@@ -325,7 +325,7 @@ const ReactNode = ({
     };
 
     // Recursive function to render children
-    const renderChildren = (children: ReactChild[] | undefined, level: number, parentColor: string, state: string): JSX.Element | null => {
+    const renderChildren = (children: ReactChild[] | undefined, level: number, parentId: UniqueId, state: NodeState): JSX.Element | null => {
         if (!children || children.length === 0) {
             return null;
         }
@@ -370,31 +370,31 @@ const ReactNode = ({
             const nodes: Node[] = getNodes();
 
             //get the id of node 
-            const path = indexMap![parentColor].split('-').map(Number);
+            // const path = indexMap![parentColor].split('-').map(Number);
 
 
-            let format = {
-                children: [nodes[0].data],
-            }
-            const updatedRoot = { ...format };
-            let currentNode = updatedRoot;
+            // let format = {
+            //     children: [nodes[0].data],
+            // }
+            // const updatedRoot = { ...format };
+            // let currentNode = updatedRoot;
 
-            for (let i = 0; i < path.length; i++) {
-                const currentIndex = path[i];
+            // for (let i = 0; i < path.length; i++) {
+            //     const currentIndex = path[i];
 
-                if (i === path.length - 1) {
-                    currentNode.children[currentIndex].children = [...filteredMutingReactChilds, ...filteredUnMutedReactChilds, ...filteredMutedReactChilds];
-                }
+            //     if (i === path.length - 1) {
+            //         currentNode.children[currentIndex].children = [...filteredMutingReactChilds, ...filteredUnMutedReactChilds, ...filteredMutedReactChilds];
+            //     }
 
-                currentNode = currentNode.children[currentIndex];
-            }
+            //     currentNode = currentNode.children[currentIndex];
+            // }
 
-            nodes[0].data = updatedRoot.children[0];
-            let newNode: Node[] = nodes.map(node => ({ ...node }));
+            // nodes[0].data = updatedRoot.children[0];
+            // let newNode: Node[] = nodes.map(node => ({ ...node }));
 
-            newNode[0].data = updatedRoot.children[0];
+            // newNode[0].data = updatedRoot.children[0];
 
-            setNodes(newNode);
+            // setNodes(newNode);
         }
 
 
@@ -446,7 +446,7 @@ const ReactNode = ({
                                         filter: 'drop-shadow(rgba(0, 0, 0, 0.9) 6px 4px 2.5px)',
                                     }}
                                     datatype='Node'
-                                    data-id={parentColor}  //HERE id of Node(parent)
+                                    data-id={parentId}  //HERE id of Node(parent)
                                 >
 
                                     {/** rendering numbers of props going in to child*/}
@@ -535,7 +535,7 @@ const ReactNode = ({
                                         {
                                             <div
                                                 datatype='Node'
-                                                data-id={parentColor}
+                                                data-id={parentId}
                                             >
                                                 {/* {child.pipes.length > 1 &&
                                                     <div
@@ -751,7 +751,7 @@ const ReactNode = ({
                                         filter: 'drop-shadow(rgba(0, 0, 0, 0.9) 6px 4px 2.5px)',
                                     }}
                                     datatype='Node'
-                                    data-id={parentColor}  //HERE id of Node(parent)
+                                    data-id={parentId}  //HERE id of Node(parent)
                                 >
 
                                     {/** rendering numbers of props going in to child*/}
@@ -849,7 +849,7 @@ const ReactNode = ({
                                                 {i == child.pipes.length - 1 &&
                                                     <div
                                                         datatype='Node'
-                                                        data-id={parentColor}
+                                                        data-id={parentId}
                                                     >
                                                         {child.pipes.length > 1 &&
                                                             <div
@@ -910,13 +910,13 @@ const ReactNode = ({
                                                             {/** muting state pop-up icons */}
                                                             <div className='flex absolute top-[0px] right-[0px] flex-col'>
                                                                 <div className='bg-white hover:bg-gray-300 px-1.5'
-                                                                    onClick={() => updateNode(parentColor, child.id, { target: 'node', state: 'mute', muteOptions: 'notMuted' })}
+                                                                    onClick={() => updateNode(parentId, child.id, { target: 'node', state: 'mute', muteOptions: 'notMuted' })}
                                                                     title='unmute Node'
                                                                 >
                                                                     U
                                                                 </div>
                                                                 <div className='bg-white hover:bg-gray-300 px-1.5'
-                                                                    onClick={() => updateNode(parentColor, child.id, { target: 'node', state: 'mute', muteOptions: 'mute' })}
+                                                                    onClick={() => updateNode(parentId, child.id, { target: 'node', state: 'mute', muteOptions: 'mute' })}
                                                                     title='mute back Node'
                                                                 >
                                                                     {"<"}
@@ -1032,7 +1032,7 @@ const ReactNode = ({
                                                                         })}
                                                                     </div>}
                                                                 {child.muteAll == true && <button onClick={() => handleUnmute(child.id)}>...</button>}
-                                                                {!child.muteAll && renderChildren(child.children, level + 1, child.color, child.state as string)}
+                                                                {!child.muteAll && renderChildren(child.children, level + 1, child.id, child.state as NodeState)}
                                                             </div>
                                                         </div>}
                                                     </div>
@@ -1048,6 +1048,26 @@ const ReactNode = ({
                     )
 
                 })}
+                {/* {filteredUnMutedReactChilds && 
+                <ReactChildrenWrapper 
+                    reactChildren={filteredUnMutedReactChilds}
+                    renderChildren={renderChildren}
+                    expandedAttributes={expandedAttributes}
+                    expandedprops={expandedprops}
+                    state={state}
+                    level={level}
+                    parentId={parentId}
+                    handleUnmute={handleUnmute}
+                    findElementWithTypes={findElementWithTypes}
+                    handleClickOnAttribute={handleClickOnAttribute}
+                    attributeColors={attributeColors}
+                    updateNode={updateNode}
+                    updateNodeV2={updateNodeV2}
+                    handlePropGoingInToChild={handlePropGoingInToChild}
+                    displayPropsData={displayPropsData}
+                    /> 
+                } */}
+
                 {filteredUnMutedReactChilds && filteredUnMutedReactChilds.map((child, index) => {
 
                     //set current Node's attribute to be currently saved filteredMutingAttribute, filteredUnMutedAttribute and filteredMutedAttribute
@@ -1171,7 +1191,7 @@ const ReactNode = ({
                                         filter: 'drop-shadow(rgba(0, 0, 0, 0.9) 6px 4px 2.5px)',
                                     }}
                                     datatype='Node'
-                                    data-id={parentColor}  //HERE id of Node(parent)
+                                    data-id={parentId}  //HERE id of Node(parent)
                                 >
 
                                     {/** rendering numbers of props going in to child*/}
@@ -1269,7 +1289,7 @@ const ReactNode = ({
                                                 {i == child.pipes.length - 1 &&
                                                     <div
                                                         datatype='Node'
-                                                        data-id={parentColor}
+                                                        data-id={parentId}
                                                     >
                                                         {child.pipes.length > 1 &&
                                                             <div
@@ -1321,7 +1341,7 @@ const ReactNode = ({
                                                         >
                                                             {state == 'select' && child.type != 'ghost' &&
                                                                 <button className='absolute top-[0px] right-[0px] bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded'
-                                                                    onClick={() => updateNode(parentColor, child.id, { target: 'node', state: 'mute', muteOptions: 'mute' })}
+                                                                    onClick={() => updateNode(parentId, child.id, { target: 'node', state: 'mute', muteOptions: 'mute' })}
                                                                     title="Mute Node"
                                                                 >M</button>
                                                             }
@@ -1434,7 +1454,7 @@ const ReactNode = ({
                                                                         })}
                                                                     </div>}
                                                                 {child.muteAll == true && <button onClick={() => handleUnmute(child.id)}>...</button>}
-                                                                {!child.muteAll && renderChildren(child.children, level + 1, child.color, child.state as string)}
+                                                                {!child.muteAll && renderChildren(child.children, level + 1, child.id, child.state as NodeState)}
                                                             </div>
                                                         </div>}
                                                     </div>

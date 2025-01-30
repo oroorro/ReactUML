@@ -237,3 +237,22 @@ export type AttributeIconWrapperProps = {
   attributeColors: Record<string, string>,
   nodeId: UniqueId,
 }
+
+export type ReactChildrenWrapperProps = {
+  reactChildren: ReactChild[]
+  renderChildren: (hildren: ReactChild[] | undefined, level: number, parentId: UniqueId, state: NodeState) => JSX.Element | null, 
+  expandedAttributes: string[]
+  expandedprops: string[],
+  state: NodeState,
+  level: number,
+  parentId: UniqueId,
+  handleUnmute: (id: UniqueId) => void,
+  findElementWithTypes: (nodeId: UniqueId, otherElementId: UniqueId, elementType: TargetElement) => ReactChild | Attribute | undefined, //new one 
+  handleClickOnAttribute: (id: string) => void,
+  attributeColors: Record<string, string>,
+  updateNode: (nodeId: string, id: UniqueId, updateOption: updateOption) => void,
+  updateNodeV2: (nodeId: string, id: UniqueId, updateOption: UpdateOptionV2) => void,
+  handlePropGoingInToChild: (pipe: Pipe) => void,
+  displayPropsData: (pipe: Pipe) => void,
+  
+}
