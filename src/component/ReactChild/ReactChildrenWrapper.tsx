@@ -16,12 +16,12 @@ const ReactChildrenWrapper = ({
     state,
     level,
     parentId,
-    handleUnmute,
-    findElementWithTypes,
+    handleUnmute, 
+    findElementWithTypes, //fix 
     handleClickOnAttribute,
     attributeColors,
-    updateNode,
-    updateNodeV2, 
+    updateNode, //fix
+    updateNodeV2, //fix
     handlePropGoingInToChild,
     displayPropsData
 
@@ -98,7 +98,7 @@ const ReactChildrenWrapper = ({
                                 }
                             })
                     } else {
-                        updateNode(child.color, child.id, { target: 'node', state: 'none' })
+                        updateNode(child.id, child.id, { target: 'node', state: 'none' })
                     }
                 }
 
@@ -313,7 +313,7 @@ const ReactChildrenWrapper = ({
                                                         data-id={`${pipe.color}`}
                                                     >
                                                         
-                                                        {state == 'select' && 
+                                                        {/* {state == 'select' && 
                                                         
                                                         <div className='flex absolute top-[0px] right-[0px] flex-col'>
                                                             <div className='bg-white hover:bg-gray-300 px-1.5'
@@ -329,7 +329,13 @@ const ReactChildrenWrapper = ({
                                                                 {"<"}
                                                             </div>
                                                         </div>
-                                                        }
+                                                        } */}
+                                                        {state == 'select' && child.type != 'ghost' &&
+                                                                <button className='absolute top-[0px] right-[0px] bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded'
+                                                                    onClick={() => updateNode(parentId, child.id, { target: 'node', state: 'mute', muteOptions: 'mute' })}
+                                                                    title="Mute Node"
+                                                                >M</button> 
+                                                            }
 
                                                         <div
                                                             className="childNode"
@@ -404,13 +410,13 @@ const ReactChildrenWrapper = ({
                                                                                     <div>
                                                                                         <div className='flex justify-center'>
                                                                                             <div className='bg-white hover:bg-gray-300 px-0.5'
-                                                                                                onClick={() => updateNode(child.color, attr.id, { target: 'attribute', state: 'mute', muteOptions: 'mute' })}
+                                                                                                onClick={() => updateNode(child.id, attr.id, { target: 'attribute', state: 'mute', muteOptions: 'mute' })}
                                                                                                 title='mute back'
                                                                                             >
                                                                                                 {"<"}
                                                                                             </div>
                                                                                             <div className='bg-white hover:bg-gray-300 px-0.5'
-                                                                                                onClick={() => updateNode(child.color, attr.id, { target: 'attribute', state: 'mute', muteOptions: 'notMuted' })}
+                                                                                                onClick={() => updateNode(child.id, attr.id, { target: 'attribute', state: 'mute', muteOptions: 'notMuted' })}
                                                                                                 title='unmute'
                                                                                             >
                                                                                                 U
@@ -429,8 +435,8 @@ const ReactChildrenWrapper = ({
                                                                             <div className='flex items-end'>
                                                                                 {child.state == 'select' &&
                                                                                     <button className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-1 rounded'
-                                                                                        //onClick={() => updateNode(child.color, attr.id, { target: 'attribute', state: 'mute', muteOptions: 'mute' })}
-                                                                                        onClick={() => findElementWithTypes(child.id, attr.id, 'attribute')}
+                                                                                        onClick={() => updateNode(child.id, attr.id, { target: 'attribute', state: 'mute', muteOptions: 'mute' })}
+                                                                                        //onClick={() => findElementWithTypes(child.id, attr.id, 'attribute')}
                                                                                         title="mute"
                                                                                     >-</button>}
                                                                                 <AttributeIconWrapper nodeId={child.id} attribute={attr} isExpanded={isExpanded} handleClickOnAttribute={handleClickOnAttribute} attributeColors={attributeColors} />

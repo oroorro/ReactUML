@@ -177,7 +177,8 @@ export type Attribute = {
   totalNumberOfAttribute: number,
   AttributeContents: AttributeContent[] | ReactInBuiltAttributeContent[],
   id: UniqueId,
-  mute?: MuteOption,
+  mute?: AllState, //muteState
+  //other state , copy 
 }
 
 export type AttributeContent = {
@@ -213,8 +214,25 @@ export type updateOption = {
 
 export type UpdateOptionV2 = {
   target: 'attribute' | 'node' | 'prop',
-  state: NodeState, // indicates node's state 
-  detailOptions?: DetailOptions, 
+  state: NodeState, // indicates node's state  //maybe add targetState
+  detailOptions?: DetailOptions,     
+}
+
+
+export type updateOptions = {
+  target: 'attribute' | 'node' | 'prop',
+  nodeState: NodeState, // indicates node's state  
+  targetPreviousState?: AllState,
+  targetStateChangingInto?: AllState, 
+  detailOptions?: muteDetailOptions,     
+}
+
+export type AllState = NodeState; //will contain all of the states use for all elements 
+export type muteDetailOptions = UnmutingData;
+
+export type UnmutingData = {
+  updatedMutedAttributes: Attribute[],
+      unMutedAttributes: Attribute[],
 }
 
 export type DetailOptions = {
@@ -250,7 +268,7 @@ export type ReactChildrenWrapperProps = {
   findElementWithTypes: (nodeId: UniqueId, otherElementId: UniqueId, elementType: TargetElement) => ReactChild | Attribute | undefined, //new one 
   handleClickOnAttribute: (id: string) => void,
   attributeColors: Record<string, string>,
-  updateNode: (nodeId: string, id: UniqueId, updateOption: updateOption) => void,
+  updateNode: (nodeId: UniqueId, id: UniqueId, updateOption: updateOption) => void,
   updateNodeV2: (nodeId: string, id: UniqueId, updateOption: UpdateOptionV2) => void,
   handlePropGoingInToChild: (pipe: Pipe) => void,
   displayPropsData: (pipe: Pipe) => void,
