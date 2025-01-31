@@ -29,7 +29,7 @@ const NodeIndexInArray = {
 
 const attributeColors = ['import', 'reactInBuilt', 'variable', 'function', 'hook', 'create type',]
 
-let stateManger = {id: ''};
+let stateManger = { id: '' };
 
 let initialNodes = [
   {
@@ -117,6 +117,7 @@ let initialNodes = [
             {
               nameOfAttribute: 'import',
               id: '1949d9bf4d6-0d6927',
+              mute: 'notMuted',
               totalNumberOfAttribute: 15,
               AttributeContents: [
                 {
@@ -128,6 +129,7 @@ let initialNodes = [
             {
               nameOfAttribute: 'import',
               id: '1949d9bf4d6-169917',
+              mute: 'notMuted',
               totalNumberOfAttribute: 15,
               AttributeContents: [
 
@@ -137,6 +139,7 @@ let initialNodes = [
               nameOfAttribute: 'variable',
               id: '1949d9bf4d6-108cbe',
               totalNumberOfAttribute: 12,
+              mute: 'notMuted',
               AttributeContents: [
                 {
                   name: 'names',
@@ -380,99 +383,18 @@ let initialNodes = [
 const initialEdges = [{ id: 'e1-2', source: '1', target: '2' }];
 
 //creates unique id
-function generateUniqueId(){
-  const timestamp = Date.now().toString(36); 
-  const randomValue = Math.random().toString(36).substring(2, 8); 
+function generateUniqueId() {
+  const timestamp = Date.now().toString(36);
+  const randomValue = Math.random().toString(36).substring(2, 8);
   return `${timestamp}-${randomValue}`;
 }
 
-//creates Node, Attribute and Prop to given index ex) 0-0-0
-function addChildToReactChildIterative(root, id, newChild, type, data=null) {
-  const path = NodeIndexInArray[id].split('-').map(Number); // Convert the path to an array of indices
-  const updatedRoot = { ...root }; // Create a shallow copy of the root for immutability
-
-  let currentNode = updatedRoot; // Start from the root node
-
-  for (let i = 0; i < path.length; i++) {
-    const currentIndex = path[i];
-
-    //creating Attribute 
-    if (type == 'Attribute') {
-      if (!currentNode.attributes) {
-        currentNode.attributes = [];
-      }
-
-      if (i === path.length - 1) {
-        currentNode.children[currentIndex].attributes = [
-          ...(currentNode.children[currentIndex].attributes || []),
-          {
-            nameOfAttribute: data ? data : 'empty',
-            id: generateUniqueId(),
-            totalNumberOfAttribute: 0,
-            AttributeContents: [
-              {
-                name: 'initialNodes',
-                belongsTo: 'X2D',
-              }
-            ]
-          },
-        ];
-      }
-    }
-    //creating Node and Prop
-    else {
-      // Ensure children array exists
-      if (!currentNode.children) {
-        currentNode.children = [];
-      }
-
-      // If the child at the current index doesn't exist, create a placeholder node
-      if (!currentNode.children[currentIndex]) {
-        currentNode.children[currentIndex] = {
-          title: '',
-          numbersOfPropsGoingIn: 0,
-          color: '',
-          pipes: [],
-          attributes: [],
-          children: [],
-        };
-      }
-
-      // If this is the last index, add the new child to the current node's children
-      if (i === path.length - 1) {
-        currentNode.children[currentIndex].children = [
-          ...(currentNode.children[currentIndex].children || []),
-          type == 'Node' ? newChild : ghostChild,
-        ];
-      }
-    }
-
-    // Move to the next node in the path
-    currentNode = currentNode.children[currentIndex];
-  }
-
-  return updatedRoot; // Return the updated tree
-}
-
-const newChild = {
-  title: 'NewNode',
-  numbersOfPropsGoingIn: 1,
-  color: '#abcdef',
-  pipes: [
-    {
-      color: '#dfe7f5',
-      numbersOfProps: 18,
-      name: "Node",
-      id: 'X2'
-    },
-  ],
-  attributes: [],
-};
 
 const ghostChild = {
   title: 'ghost',
   numbersOfPropsGoingIn: 1,
   color: '#abcdef',
+  id: generateUniqueId(),
   pipes: [
     {
       color: '#dfe7f5',
@@ -491,60 +413,77 @@ function Flow() {
   const interactingIdRef = useRef(null);
   const [contextMenu, setContextMenu] = useState(null);
 
-  useEffect(() => {
-    if (flowRef.current) {
-      console.log("Child component's DOM node:", flowRef.current.className);
+
+  function performUpdateElement(root, id, type, data = null) {
+
+    const newChild = {
+      title: 'NewNode',
+      numbersOfPropsGoingIn: 1,
+      color: '#abcdef',
+      id: generateUniqueId(),
+      pipes: [
+        {
+          color: '#dfe7f5',
+          numbersOfProps: 18,
+          name: "Node",
+          id: 'X2'
+        },
+      ],
+      attributes: [],
+    };
+
+    let foundNode = findNodeById(id, root);
+
+    //console.log("found node in <Flow>", foundNode);
+
+    //creating Attribute 
+    if (type == 'Attribute') {
+      foundNode.attributes = [
+        ...(foundNode.attributes || []),
+        {
+          nameOfAttribute: data ? data : 'empty',
+          id: generateUniqueId(),
+          totalNumberOfAttribute: 0,
+          AttributeContents: [
+            {
+              name: 'initialNodes',
+              belongsTo: 'X2D',
+            }
+          ]
+        },
+      ];
     }
-  }, []);
+    //creating Node and Prop
+    else {
 
-  useEffect(() => {
-    console.log("contextMenu changed:", JSON.parse(JSON.stringify(contextMenu)));
-  }, [contextMenu])
-
-  //returns Node from nodes array for given id 
-  const updateNodeState = (root, id, state) => {
-    const path = NodeIndexInArray[id].split('-').map(Number);
-    const updatedRoot = { ...root };
-    let currentNode = updatedRoot;
-
-    for (let i = 0; i < path.length; i++) {
-      const currentIndex = path[i];
-
-      if (i === path.length - 1) {
-        if(state == 'mute'){
-          currentNode.children[currentIndex].muteAll = true;
-        }
-        else if(state == 'select'){
-          currentNode.children[currentIndex].state = 'select';
-        }
-        
+      // If the child at the current index doesn't exist, create a placeholder node
+      if (!foundNode.children) {
+        foundNode.children = [newChild];
+      } else {
+        foundNode.children = [
+          ...foundNode.children,
+          type == 'Node' ? newChild : ghostChild,
+        ];
       }
-
-      currentNode = currentNode.children[currentIndex];
     }
-    return updatedRoot;
   }
 
-  const updateNode = (type, data=null) => {
+  //add/delete element; Node, Prop and Attribute
+  //this function calls performUpdateElement 
+  //then setNodes 
+  const updateElement = (type, data = null) => {
     //we need to format data in order to add Node correctly,
     //making data to be the root 
-    const format = {
-      children: [nodes[0].data],
-    }
-    console.log("updateNode", type, data)
-    const updatedReactChild = addChildToReactChildIterative(format, contextMenu.nodeId, newChild, type, data);
-    //applying updated part to original initialNodes[0].data
-    nodes[0].data = { ...updatedReactChild.children[0] };
-    const updateNode = [...nodes];
-    //console.log("updatedReactChild WITH DATA", initialNodes)
+    performUpdateElement(nodes[0].data.children, contextMenu.nodeId, type, data);
+
+    const updatedNode = [...nodes];
+
     //update node
-    setNodes(updateNode);
+    setNodes(updatedNode);
+    //close contextMenu 
     setContextMenu(null)
   }
 
-  const addAttribute = (type) => {
-
-  }
 
   const moveToSubMenu = (type) => {
 
@@ -570,7 +509,7 @@ function Flow() {
     //     })
 
     //     break;
-      
+
     //   case "create-attribute-2nd":
     //     setContextMenu(prev => {
     //       return {
@@ -589,8 +528,8 @@ function Flow() {
     // }
   }
 
-  
 
+  //find element until it reaches 'datatype' recursively 
   function findElementWithDatatype(element) {
     if (!element) return null;
     if (element.hasAttribute('datatype')) {
@@ -634,7 +573,7 @@ function Flow() {
         top: event.clientY
       })
     }
-    
+
     if (elementWithDatatype.getAttribute('datatype') === 'Attribute') {
       setContextMenu({
         nodeId: elementWithDatatype.getAttribute('data-id'),
@@ -653,10 +592,10 @@ function Flow() {
     // }
     // console.log("stateManger", stateManger);
     nodes[0].data.stateManager.id = ids[1];
-    const updateNode = [...nodes];
+    const updatedNode = [...nodes];
     //console.log("updatedReactChild WITH DATA", initialNodes)
     //update node
-    setNodes(updateNode);
+    setNodes(updatedNode);
     setContextMenu(null)
   }
 
@@ -666,7 +605,6 @@ function Flow() {
   const onConnect = useCallback((params) => setEdges((eds) => addEdge(params, eds)), [setEdges]);
 
   function FlowClickHandler(event) {
-
     let target = event.target;
     let targetParent = target.parentElement
     //console.log("target click", target.getAttribute('datatype'))
@@ -676,40 +614,66 @@ function Flow() {
     }
   }
 
-  
-
-
   //option: NodeState
   const nodeStateHandler = (option) => {
-    //get id of Node , interactingIdRef.current
-
-    //access that Node in 
-    const format  = {
-      children: [nodes[0].data],
-    };
-    //console.log("nodes nodes", nodes[0].data);
+    //getting id of Node from interactingIdRef.current, which was saved when contextMenu on Node got triggered 
+    updateNodeState(nodes[0].data.children, interactingIdRef.current, option);
+    const updatedNode = [...nodes]; //shallow copy 
+    setNodes(updatedNode);
     setContextMenu(null);
-    const updatedReactChild = updateNodeState(format, interactingIdRef.current, option);
-    //console.log("returned node: ", updatedReactChild);
-    initialNodes[0].data = { ...updatedReactChild.children[0] };
-    nodes[0].data = { ...updatedReactChild.children[0] };
-    const updateNode = [...nodes];
-    // console.log("initialNodes returned:", JSON.parse(JSON.stringify(initialNodes))); 
-    // console.log("nodes returned:", JSON.parse(JSON.stringify(nodes))); 
-    setNodes(updateNode);
 
+  }
+
+  //update node's state by given node's id 
+  const updateNodeState = (root, id, state) => { 
+    const updatedRoot = [...root];
+    // let currentNode = updatedRoot;
+    let foundNode = findNodeById(id, updatedRoot);
+
+    if (state == 'mute') {
+      foundNode.muteAll = true;
+    }
+    else if (state == 'select') {
+      foundNode.state = 'select';
+    }
+
+  }
+
+  function findNodeById(nodeId, initialNodes) {
+    // Use a queue for Breadth First Search
+    // making sure queue will be Array type 
+    const queue = Array.isArray(initialNodes) ? [...initialNodes] : [...initialNodes];;
+
+    while (queue.length > 0) {
+      const currentNode = queue.shift(); // Dequeue the first node
+
+      if (!currentNode) continue;
+
+      // Check if the current node's id matches
+      if (currentNode.id === nodeId) {
+        return currentNode;
+      }
+
+      // Add children to the queue if they exist
+      if (currentNode.children && currentNode.children.length > 0) {
+        queue.push(...currentNode.children);
+      }
+    }
+
+    // Return undefined if the node was not found
+    return undefined;
   }
 
   return (
     <div className='Flow' style={{ width: "100vw", height: "100vh" }}
-      // onClick={(e) => FlowClickHandler(e)}
-      // onMouseDown={(e) => FlowClickHandler(e)}
+    onClick={(e) => FlowClickHandler(e)}
+    onMouseDown={(e) => FlowClickHandler(e)}
     >
       {contextMenu && contextMenu.nodeType === 'Node' &&
         <div
-          className='flex flex-col'
+          className='flex flex-col bg-white px-2 py-1'
           style={{
-            backgroundColor: 'tomato',
+           
             position: 'absolute',
             left: `${contextMenu.left}px`,
             top: `${contextMenu.top}px`,
@@ -718,15 +682,16 @@ function Flow() {
           id={contextMenu.nodeId}
           datatype="contextMenu"
         >
-          {contextMenu.nodeId}
-          {!contextMenu.detail && <button onClick={() => moveToSubMenu("create")}>create</button>}
-          {!contextMenu.detail && <button onClick={() => moveToSubMenu("mute-2nd")}> mute </button>}
-          {contextMenu.detail == 'create' && <button onClick={() => updateNode('Node')}> Node </button>}
-          {contextMenu.detail == 'create' && <button onClick={() => updateNode('Prop')}> Prop </button>}
+          
+          {!contextMenu.detail && <button onClick={() => moveToSubMenu("create")}>Create</button>}
+          {!contextMenu.detail && <button >Delete</button>}
+          {!contextMenu.detail && <button onClick={() => moveToSubMenu("mute-2nd")}> Mute </button>}
+          {contextMenu.detail == 'create' && <button onClick={() => updateElement('Node')}> Node </button>}
+          {contextMenu.detail == 'create' && <button onClick={() => updateElement('Prop')}> Prop </button>}
           {contextMenu.detail == 'create' && <button onClick={() => moveToSubMenu("create-attribute-2nd")}> Attribute </button>}
 
           {/** mute 2nd layer of sub-menu */}
-          {contextMenu.detail == 'mute-2nd' && 
+          {contextMenu.detail == 'mute-2nd' &&
             <div className='flex flex-col' datatype="contextMenu">
               <button onClick={() => nodeStateHandler('mute')}> all </button>
               <button onClick={() => nodeStateHandler('select')}> select </button>
@@ -734,19 +699,19 @@ function Flow() {
           }
 
           {/** Attribute 2nd layer of sub-menu*/}
-          {contextMenu.detail == 'create-attribute-2nd' && 
-            <div className='flex flex-col' datatype="contextMenu"> 
-              <button onClick={() => updateNode('Attribute')}> Just Create </button> 
+          {contextMenu.detail == 'create-attribute-2nd' &&
+            <div className='flex flex-col' datatype="contextMenu">
+              <button onClick={() => updateElement('Attribute')}> Just Create </button>
               <button onClick={() => moveToSubMenu("create-attribute-3rd")} > Select Type </button>
             </div>
           }
 
-          {/** Attribute 3rd layer of sub-menu, iterate attribute-3rd-array */} 
-          {contextMenu.detail == 'create-attribute-3rd' && 
+          {/** Attribute 3rd layer of sub-menu, iterate attribute-3rd-array */}
+          {contextMenu.detail == 'create-attribute-3rd' &&
             <div className='flex flex-col' datatype="contextMenu">
-            {  attributeColors.map((attribute)=>(
-              <button onClick={() => updateNode('Attribute', attribute)}>{attribute}</button>
-            ))}
+              {attributeColors.map((attribute) => (
+                <button onClick={() => updateElement('Attribute', attribute)}>{attribute}</button>
+              ))}
             </div>
           }
 
@@ -765,10 +730,10 @@ function Flow() {
           id={contextMenu.nodeId}
           datatype="contextMenu"
         >
-          <button datatype="contextMenu" onClick={() => updateNode()}>create</button>
+          <button datatype="contextMenu" onClick={() => updateElement()}>create</button>
         </div>}
-        {contextMenu && contextMenu.nodeType === 'Attribute' &&
-          <div
+      {contextMenu && contextMenu.nodeType === 'Attribute' &&
+        <div
           style={{
             backgroundColor: 'white',
             width: '50px',
@@ -778,10 +743,10 @@ function Flow() {
             top: `${contextMenu.top}px`,
             zIndex: '9999'
           }}
-          >
-            <button onClick={()=>addAttributeValue()}> Add </button>
-            <button> Delete </button>
-          </div>}
+        >
+          <button onClick={() => addAttributeValue()}> Add </button>
+          <button> Delete </button>
+        </div>}
       <AlgoFlow
         ref={flowRef}
         nodes={nodes}
