@@ -17,18 +17,17 @@ const ReactChildrenWrapper = ({
     level,
     parentId,
     handleUnmute, 
-    findElementWithTypes, //fix 
     handleClickOnAttribute,
     attributeColors,
-    updateNode, //fix
-    updateNodeV2, //fix
+    updateNode, 
+    updateNodeV2, 
     handlePropGoingInToChild,
     displayPropsData
 
 }:ReactChildrenWrapperProps) => {
 
     const store = useStoreApi();
-    const { setNodes, getNodes, indexMap, onNodesChange } = store.getState();
+    const { setNodes, getNodes, indexMap } = store.getState();
 
     return(
         <div>
@@ -332,7 +331,7 @@ const ReactChildrenWrapper = ({
                                                         } */}
                                                         {state == 'select' && child.type != 'ghost' &&
                                                                 <button className='absolute top-[0px] right-[0px] bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded'
-                                                                    onClick={() => updateNode(parentId, child.id, { target: 'node', state: 'mute', muteOptions: 'mute' })}
+                                                                    onClick={() => updateNode(child.id, child.id, { target: 'node', state: 'mute', muteOptions: 'mute' })}
                                                                     title="Mute Node"
                                                                 >M</button> 
                                                             }

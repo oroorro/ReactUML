@@ -35,17 +35,10 @@ const ReactNode = ({
     data,
 }: NodeProps) => {
     const store = useStoreApi();
-    const updateNodeInternals = useUpdateNodeInternals();
-    const { setNodes, getNodes, indexMap, onNodesChange } = store.getState();
+    const { setNodes, getNodes, indexMap } = store.getState();
     const { children, title, color, attributes } = data;
     const [expandedAttributes, setExpandedAttributes] = useState<string[]>([]);
     const [expandedprops, setExpandedProps] = useState<string[]>([]);
-
-
-    function isAttribute(element: ReactChild | Attribute): element is Attribute {
-        return 'id' in element && 'AttributeContents' in element;
-    }
-
 
 
 
@@ -80,65 +73,7 @@ const ReactNode = ({
         return undefined;
     }
 
-    // function updateElements(nodeId: UniqueId, otherElementId: UniqueId, elementType: TargetElement, updateOption: updateOption) {
-
-
-    //     const foundElement = findElementWithTypes(nodeId, otherElementId, elementType);
-
-    //     const nodes: Node[] = getNodes();
-    //     if (!foundElement) {
-    //         console.warn(`Element not found for nodeId: ${nodeId}, otherElementId: ${otherElementId}`);
-    //         return;
-    //     }
-
-    //     if ("mute" in foundElement) { 
-
-    //         (foundElement as Attribute).mute = updateOption.muteOptions;
-
-    //     } else {
-    //         console.warn(`'mute' property does not exist on found element.`);
-    //     }
-
-    //     setNodes(nodes);
-
-    // }
-
-    //combining updateNode + updateNodeV2 
-    // function updateElements(nodeId: UniqueId, otherElementId: UniqueId, elementType: TargetElement, updateOption: updateOptions) {
-
-
-    //     //const foundElement = findElementWithTypes(nodeId, otherElementId, elementType);
-    //     const nodes: Node[] = getNodes();
-    //     const reactChild: ReactChild[] = [nodes[0].data];
-    //     //get Node from given nodeId 
-    //     let foundNode = findNodeById(nodeId, reactChild);
-
-    //     if (!foundNode) {
-    //         console.warn(`Element not found for nodeId: ${nodeId}, otherElementId: ${otherElementId}`);
-    //         return;
-    //     }
-
-    //     //if target was other than Node given then handle them
-    //     if (updateOption.target == 'attribute' && updateOption.targetStateChangingInto) {
-    //         //const targetAttribute: Attribute = currentNode.children[currentIndex].attributes.find((attrb: Attribute) => attrb.id === id);
-    //         const targetAttribute: Attribute = foundNode.attributes.find((attrb: Attribute) => attrb.id === otherElementId) as Attribute;
-    //         targetAttribute.mute = updateOption.targetStateChangingInto;
-    //     }
-    //     else if (updateOption.target == 'node') {
-    //         //make Node to be 'mute' state 
-    //         if (updateOption.state == 'mute') {
-
-    //             foundNode.state = updateOption.muteOptions;
-    //         }
-    //     }
-    //     //if not, handle node case 
-
-
-
-    //     setNodes(nodes);
-
-    // }
-
+ 
     function findNodeById(nodeId: UniqueId, initialNodes: ReactChild[]): ReactChild | undefined {
         // Use a queue for Breadth-First Search
         const queue: ReactChild[] = [...initialNodes];
@@ -261,85 +196,16 @@ const ReactNode = ({
 
     }
 
-    // const updateNode = (nodeId: string, id: UniqueId, updateOption: updateOption) => {
-
-    //     console.log("updateNode", id, updateOption)
-    //     const nodes: Node[] = getNodes();
-
-    //     //get the id of node 
-    //     const path = indexMap![nodeId].split('-').map(Number);
-
-    //     const reactChild: ReactChild[] = [nodes[0].data];
-
-    //     let foundNode = findNodeById(id, reactChild); // should 
-
-    //     //update mute flag then setNode to update the display 
-    //     // let format = {
-    //     //     children: [nodes[0].data],
-    //     // }
-
-    //     //const updatedRoot = { ...format };
-    //     //let currentNode = updatedRoot;
-
-    //     //for (let i = 0; i < path.length; i++) {
-    //     //const currentIndex = path[i];
-
-    //     //if (i === path.length - 1) {
-    //     if (foundNode) {
-    //         if (updateOption.target == 'attribute' && updateOption.muteOptions) {
-    //             //const targetAttribute: Attribute = currentNode.children[currentIndex].attributes.find((attrb: Attribute) => attrb.id === id);
-    //             const targetAttribute: Attribute = foundNode.attributes.find((attrb: Attribute) => attrb.id === id) as Attribute;
-    //             targetAttribute.mute = updateOption.muteOptions;
-    //         }
-    //         else if (updateOption.target == 'node') {
-
-
-
-    //             if (updateOption.state == 'mute') {
-    //                 //const parentNode: ReactChild[] = currentNode.children[currentIndex].children;
-    //                 const parentNode: ReactChild[] = foundNode.children as ReactChild[];
-    //                 const childNode: ReactChild = parentNode.find(child => child.id == id) as ReactChild;
-    //                 console.log("reactChild", parentNode, childNode);
-    //                 childNode.state = updateOption.muteOptions;
-    //             } else {
-    //                 //const reactChild: ReactChild = currentNode.children[currentIndex];
-    //                 const reactChild: ReactChild = foundNode;
-    //                 reactChild.state = updateOption.state;
-    //             }
-    //             // switch (updateOption.state) {
-    //             //     case 'none':
-    //             //         currentNode.children[currentIndex].state = 'none'
-    //             //         break;
-
-    //             //     default:
-    //             //         break;
-    //             // }
-
-    //         }
-    //     }
-    //     // }
-    //     // currentNode = currentNode.children[currentIndex];
-    //     //}
-
-    //     //nodes[0].data = updatedRoot.children[0];
-    //     //let newNode: Node[] = nodes.map(node => ({ ...node }));
-    //     //newNode[0].data = updatedRoot.children[0];
-
-    //     setNodes(nodes);
-
-    // }
-
-
     const updateNode = (nodeId: UniqueId, targetId: UniqueId, updateOption: updateOption) => {
 
-        console.log("updateNode", nodeId, targetId, updateOption);
+        //console.log("updateNode", nodeId, targetId, updateOption);
         const nodes: Node[] = getNodes();
 
 
         const reactChild: ReactChild[] = [nodes[0].data];
 
         let foundNode = findNodeById(nodeId, reactChild); 
-        console.log("foundNode", foundNode);
+        //console.log("foundNode", foundNode);
 
         if (foundNode) {
             if (updateOption.target == 'attribute' && updateOption.muteOptions) {
@@ -355,6 +221,8 @@ const ReactNode = ({
                     reactChild.state = updateOption.state;
                 }
             }
+        }else{
+            console.warn("Node can't be found in updateNode");
         }
         setNodes(nodes);
     }
@@ -427,7 +295,7 @@ const ReactNode = ({
 
         //using same logic as updateStatesInArray
         //
-        const changeReactChildsMuteToMuting = () => {
+        const changeReactChildsMuteToMuting = (parentId: UniqueId) => {
 
             const temp: ReactChild[]
                 = filteredMutedReactChilds.map(child => ({
@@ -437,42 +305,29 @@ const ReactNode = ({
 
             filteredMutingReactChilds = [...temp, ...filteredMutingReactChilds];
             filteredMutedReactChilds = []; //set muted array to be empty since they all have benn changed into 'muting' state
-            updateChildrenInParentNode();
+            updateChildrenInParentNode(parentId);
         }
 
         //same logic as updateNodeInArray but performed in parent scope 
-        function updateChildrenInParentNode() { //FIX
+        //this function receives parentId and find that Node then
+        //re-set it's children with filteredMutingReactChilds, filteredUnMutedReactChilds, filteredMutedReactChilds
+        //this function is used when clicking on 'muted' child which is the child of parentId
+        function updateChildrenInParentNode(parentId: UniqueId) { 
             const nodes: Node[] = getNodes();
 
-            //get the id of node 
-            // const path = indexMap![parentColor].split('-').map(Number);
-            //const parentNode = findNodeById(parentId) //FIX
+            const reactChild: ReactChild[] = [nodes[0].data];
+            //get the id of parent Node 
+            const parentNode = findNodeById(parentId, reactChild) 
 
-            // let format = {
-            //     children: [nodes[0].data],
-            // }
-            // const updatedRoot = { ...format };
-            // let currentNode = updatedRoot;
+            if(parentNode){
+                    parentNode.children = [...filteredMutingReactChilds, ...filteredUnMutedReactChilds, ...filteredMutedReactChilds];
+            }else{
+                console.warn("parentNode couldn't be found in updateChildrenInParentNode(parentId: UniqueId)");
+            }
 
-            // for (let i = 0; i < path.length; i++) {
-            //     const currentIndex = path[i];
-
-            //     if (i === path.length - 1) {
-            //         currentNode.children[currentIndex].children = [...filteredMutingReactChilds, ...filteredUnMutedReactChilds, ...filteredMutedReactChilds];
-            //     }
-
-            //     currentNode = currentNode.children[currentIndex];
-            // }
-
-            // nodes[0].data = updatedRoot.children[0];
-            // let newNode: Node[] = nodes.map(node => ({ ...node }));
-
-            // newNode[0].data = updatedRoot.children[0];
-
-            // setNodes(newNode);
+            let newNode: Node[] = nodes.map(node => ({ ...node }));
+            setNodes(newNode);
         }
-
-
 
 
         return (
@@ -650,7 +505,7 @@ const ReactNode = ({
                                                     <div
                                                         className="childNode"
                                                         datatype='Node'
-                                                        onClick={() => changeReactChildsMuteToMuting()}
+                                                        onClick={() => changeReactChildsMuteToMuting(parentId)}
 
                                                         style={{
                                                             backgroundColor: '#C8C8C8',
