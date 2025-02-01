@@ -277,3 +277,17 @@ export type ReactChildrenWrapperProps = {
   displayPropsData: (pipe: Pipe) => void,
   
 }
+
+export type AttributeContentWrapperProps = {
+  content: AttributeContent | ReactInBuiltAttributeContent,
+  handleUpdateAttributeContent: (option: string, contentId: UniqueId, data?: AttributeData)=> void,
+  //attributeState: 'editing' | 'none' | 'selected' | 'showOptions' | undefined
+}
+
+
+export type AttributeData = {
+  changingContent:{
+    name: string,
+    type: string
+  }
+} | null;

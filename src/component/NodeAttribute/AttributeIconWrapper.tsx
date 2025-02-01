@@ -1,9 +1,11 @@
 import { useRef } from "react";
 import { AttributeIcon } from "./AttributeIcon"
-import { AttributeIconWrapperProps, AttributeContent, ReactInBuiltAttributeContent, Attribute } from "../../types"
+import { AttributeIconWrapperProps, AttributeContent, ReactInBuiltAttributeContent, Attribute, AttributeData } from "../../types"
 import { useStoreApi } from "../../hook/useStore";
 import { ReactChild, UniqueId } from "../../types";
 import { generateUniqueId } from "../../utils/generateId";
+import AttributeContentWrapper from "./AttributeContentWrapper";
+
 
 
 const AttributeIconWrapper = ({
@@ -19,9 +21,13 @@ const AttributeIconWrapper = ({
 
     const contentNameRef = useRef<HTMLInputElement>(null);
     const contentTypeRef = useRef<HTMLInputElement>(null);
+    
 
+    const isAttributeContent = (content: AttributeContent | ReactInBuiltAttributeContent): content is AttributeContent => {
+        return (content as AttributeContent).name !== undefined;
+      };
 
-    const getCurrentAttribute = ():Attribute | undefined => {
+    const getCurrentAttribute = (): Attribute | undefined => {
         const nodes = getNodes();
 
         const reactChild: ReactChild[] = [nodes[0].data];
@@ -62,7 +68,7 @@ const AttributeIconWrapper = ({
     //this function is used to change state of Attribute or it's content 
     //@param option represents state that Attribute will be changing into 
     //@param contentId represents to Attribute's content id; it is used when deleting a content from current(this) Attribute
-    const handleUpdateAttributeContent = (option: string, contentId: UniqueId = '-') => {
+    const handleUpdateAttributeContent = (option: string, contentId: UniqueId = '-', data?: AttributeData) => {
 
         const nodes = getNodes();
 
@@ -92,25 +98,39 @@ const AttributeIconWrapper = ({
                         contentTypeRef.current.value = "";
                     }
                 }
-            } else if(option == 'cancelAdd' || option == 'none') {
+            } else if (option == 'cancelAdd' || option == 'none') {
                 //change state to none 
                 targetAttribute.state = 'none';
             }
             //show options
-            else if(option == 'showOptions'){
+            else if (option == 'showOptions') {
                 targetAttribute.state = 'showOptions';
             }
-            else if(option == 'editing'){
+            else if (option == 'editing') { //showing two input HTML elements with two buttons for creating '+' and cancelling 'x'
                 targetAttribute.state = 'editing';
             }
-            else if(option == 'delete'){
-                const contents:AttributeContent[] = targetAttribute.AttributeContents as AttributeContent[];
+            //changing value 
+            else if(option == 'changeValue'){
+
+                //find AttributeContent by given contentId
+                const targetContent: AttributeContent = targetAttribute.AttributeContents.find((content)=> content.id == contentId) as AttributeContent;
+
+                //change value using AttributeData
+                if(isAttributeContent(targetContent)){
+                    targetContent.name = data?.changingContent.name as string;
+                    targetContent.type = data?.changingContent.type as string;
+                }
+
+            }
+            //for given AttributeContent, change it's name and type into given value 
+            else if (option == 'delete') {
+                const contents: AttributeContent[] = targetAttribute.AttributeContents as AttributeContent[];
                 const filteredContents = contents.filter((attrib) => attrib.id != contentId)
                 console.log("filteredContents", filteredContents)
                 targetAttribute.AttributeContents = [...filteredContents];
             }
 
-        }else{
+        } else {
             console.warn("targetAttribute couldn't be found");
         }
 
@@ -121,11 +141,11 @@ const AttributeIconWrapper = ({
     //this function will be called from minimize button on expanded mode for AttributeIconWrapper
     //1.set the Attribute state to none so that other editing buttons will disappear
     //2.set handleClickOnAttribute to not include current AttributeId 
-    const handleMinimizeButton = () =>{
+    const handleMinimizeButton = () => {
         //1.
         handleUpdateAttributeContent('none');
         //2.
-        if(isExpanded){
+        if (isExpanded) {
             handleClickOnAttribute(attribute.id)
         }
     }
@@ -133,17 +153,17 @@ const AttributeIconWrapper = ({
     //1. check current state
     //2. if current state was 'editing' then change the state to ''
     //3. if current state was 'showOptions' then change the state to ''
-    const handleOptionsButton = () =>{
+    const handleOptionsButton = () => {
 
         //getting currentAttribute 
         const currentAttribute = getCurrentAttribute()
 
-        if(!currentAttribute) console.warn("Attribute is undefined");
+        if (!currentAttribute) console.warn("Attribute is undefined");
 
         //change to 'none' when state does not exist in currentAttribute or currentAttribute's state is either 'editing' triggered by contextMeun's add button on Attributeor 'showOptions' triggered by clicking options
-        if(currentAttribute?.state == 'showOptions' || currentAttribute?.state == 'editing' || !currentAttribute?.state){ 
+        if (currentAttribute?.state == 'showOptions' || currentAttribute?.state == 'editing' || !currentAttribute?.state) {
             handleUpdateAttributeContent('none')
-        }else if(currentAttribute?.state == 'none'){
+        } else if (currentAttribute?.state == 'none') {
             handleUpdateAttributeContent('showOptions')
         }
     }
@@ -200,7 +220,7 @@ const AttributeIconWrapper = ({
                         <button
                             title='Options'
                             className="bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold  px-4 rounded-xl ml-auto"
-                            onClick={()=>handleOptionsButton()}
+                            onClick={() => handleOptionsButton()}
                         >
                             c
                         </button>
@@ -208,7 +228,7 @@ const AttributeIconWrapper = ({
                             title='Minimize'
                             className="bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold  px-4 rounded-xl ml-auto"
                             //onClick={isExpanded ? () => handleClickOnAttribute(attribute.id) : undefined} 
-                            onClick={() => handleMinimizeButton()} 
+                            onClick={() => handleMinimizeButton()}
                         >
                             <span className='text-2xl'> - </span>
                         </button>
@@ -234,15 +254,25 @@ const AttributeIconWrapper = ({
 
             >
                 {isExpanded && attribute.AttributeContents && attribute.AttributeContents.map((content: AttributeContent | ReactInBuiltAttributeContent) => (
-                    <div>
-                        {"name" in content &&
-                            <div className='attributeContentWrapper relative inline-block p-2 border-2 border-transparent hover:border-blue-500 transition duration-300' style={{ border: '1px solid black', padding: '0px 3px', borderRadius: '5px' }}>
-                                <span className="hover:bg-[#ebebeb] transition duration-300 rounded-md px-1">{content.name}</span>
-                                <span>: </span>
-                                <span className="hover:bg-[#ebebeb] transition duration-300 rounded-md px-1">{content.type ?? "N/A"}</span>
-                            </div>
+                    // <div>
+                    //     {"name" in content &&
+                    //         <div className='attributeContentWrapper relative inline-block p-2 border-2 border-transparent hover:border-blue-500 transition duration-300' style={{ border: '1px solid black', padding: '0px 3px', borderRadius: '5px' }}>
+                    //             <span className="hover:bg-[#ebebeb] transition duration-300 rounded-md px-1">{content.name}</span>
+                    //             <span>: </span>
+                    //             <span className="hover:bg-[#ebebeb] transition duration-300 rounded-md px-1">{content.type ?? "N/A"}</span>
+                    //         </div>
 
-                        }
+                    //     }
+                    //     {attribute.state == 'showOptions' && <button
+                    //         title="Remove"
+                    //         className="bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold ml-1 px-2 rounded-xl ml-auto"
+                    //         onClick={() => handleUpdateAttributeContent('delete', content.id)}
+                    //     >
+                    //         x
+                    //     </button>}
+                    // </div>
+                    <div className="flex">
+                        <AttributeContentWrapper content={content} handleUpdateAttributeContent={handleUpdateAttributeContent} />
                         {attribute.state == 'showOptions' && <button
                             title="Remove"
                             className="bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold ml-1 px-2 rounded-xl ml-auto"
@@ -251,7 +281,6 @@ const AttributeIconWrapper = ({
                             x
                         </button>}
                     </div>
-
 
                 ))}
                 {attribute.state == 'editing' && <div>
@@ -272,12 +301,12 @@ const AttributeIconWrapper = ({
                         x
                     </button>
                 </div>}
-                { attribute.state == 'showOptions' && 
-                <button  
-                title="Add"
-                className="bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold mt-1 px-2 rounded-xl"
-                onClick={() => handleUpdateAttributeContent('editing')}
-                >+</button>} {/** adding Attribute's content when showoption button is clicked  */}
+                {attribute.state == 'showOptions' &&
+                    <button
+                        title="Add"
+                        className="bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold mt-1 px-2 rounded-xl"
+                        onClick={() => handleUpdateAttributeContent('editing')}
+                    >+</button>} {/** adding Attribute's content when showoption button is clicked  */}
             </div>
         </div>
     )
