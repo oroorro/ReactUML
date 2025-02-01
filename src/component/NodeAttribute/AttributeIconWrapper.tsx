@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import { AttributeIcon } from "./AttributeIcon"
-import { AttributeIconWrapperProps, AttributeContent, ReactInBuiltAttributeContent } from "../../types"
+import { AttributeIconWrapperProps, AttributeContent, ReactInBuiltAttributeContent, Attribute } from "../../types"
 import { useStoreApi } from "../../hook/useStore";
 import { ReactChild, UniqueId } from "../../types";
 import { generateUniqueId } from "../../utils/generateId";
@@ -20,6 +20,18 @@ const AttributeIconWrapper = ({
     const contentNameRef = useRef<HTMLInputElement>(null);
     const contentTypeRef = useRef<HTMLInputElement>(null);
 
+
+    const getCurrentAttribute = ():Attribute | undefined => {
+        const nodes = getNodes();
+
+        const reactChild: ReactChild[] = [nodes[0].data];
+
+        let node = findNodeById(nodeId, reactChild);
+
+        const targetAttribute = node?.attributes.find((attri) => attri.id == attribute.id);
+
+        return targetAttribute
+    }
 
 
     function findNodeById(nodeId: UniqueId, initialNodes: ReactChild[]): ReactChild | undefined {
@@ -47,8 +59,9 @@ const AttributeIconWrapper = ({
     }
 
     //nodeId, attributeId, attributeContentId 
-
-    //id of AttributeContent, change state into, 
+    //this function is used to change state of Attribute or it's content 
+    //@param option represents state that Attribute will be changing into 
+    //@param contentId represents to Attribute's content id; it is used when deleting a content from current(this) Attribute
     const handleUpdateAttributeContent = (option: string, contentId: UniqueId = '-') => {
 
         const nodes = getNodes();
@@ -117,6 +130,23 @@ const AttributeIconWrapper = ({
         }
     }
 
+    //1. check current state
+    //2. if current state was 'editing' then change the state to ''
+    //3. if current state was 'showOptions' then change the state to ''
+    const handleOptionsButton = () =>{
+
+        //getting currentAttribute 
+        const currentAttribute = getCurrentAttribute()
+
+        if(!currentAttribute) console.warn("Attribute is undefined");
+
+        if(currentAttribute?.state == 'showOptions' || currentAttribute?.state == 'editing'){
+            handleUpdateAttributeContent('none')
+        }else if(currentAttribute?.state == 'none'){
+            handleUpdateAttributeContent('showOptions')
+        }
+    }
+
     return (
 
         <div
@@ -169,7 +199,7 @@ const AttributeIconWrapper = ({
                         <button
                             title='Options'
                             className="bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold  px-4 rounded-xl ml-auto"
-                            onClick={()=>handleUpdateAttributeContent('showOptions')}
+                            onClick={()=>handleOptionsButton()}
                         >
                             c
                         </button>
