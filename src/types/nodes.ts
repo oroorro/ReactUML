@@ -178,6 +178,7 @@ export type Attribute = {
   AttributeContents: AttributeContent[] | ReactInBuiltAttributeContent[],
   id: UniqueId,
   mute?: AllState, //muteState
+  state?: 'editing' | 'none' | 'selected'
   //other state , copy 
 }
 

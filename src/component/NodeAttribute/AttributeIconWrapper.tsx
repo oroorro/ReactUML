@@ -10,6 +10,8 @@ const AttributeIconWrapper = ({
     nodeId
 }:AttributeIconWrapperProps) =>{
 
+    console.log("attribute.state", attribute, attribute.state);
+
     return (
               
             <div
@@ -65,7 +67,6 @@ const AttributeIconWrapper = ({
                         >
                             <span className='text-2xl'> - </span>
                         </button>}
-
                 </div>
 
                 <div
@@ -96,6 +97,17 @@ const AttributeIconWrapper = ({
                             }
                         </div>
                     ))}
+                    { isExpanded && attribute.state == 'editing' && <div>
+                                <input className="bg-white shadow-md appearance-none focus:outline-none focus:bg-gray-100"></input>
+                                <span className="mx-2 s">:</span>
+                                <input className="bg-white shadow-md appearance-none focus:outline-none focus:bg-gray-100"></input>
+                                <button className="ml-1 bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold  px-4 rounded-xl ml-auto"
+                                    
+                                    >
+                                    Done
+                                </button>
+                    </div>}
+                    { isExpanded && <button>+</button>}
                 </div>
             </div>
     )

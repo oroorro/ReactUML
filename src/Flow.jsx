@@ -595,7 +595,10 @@ function Flow() {
     const updatedNode = [...nodes];
     //console.log("updatedReactChild WITH DATA", initialNodes)
     //update node
+
+    updateElementState('attribute', nodes[0].data.children, ids[0], 'editing');
     setNodes(updatedNode);
+   
     setContextMenu(null)
   }
 
@@ -615,9 +618,9 @@ function Flow() {
   }
 
   //option: NodeState
-  const nodeStateHandler = (option) => {
+  const elementStateHandler = (target, option) => {
     //getting id of Node from interactingIdRef.current, which was saved when contextMenu on Node got triggered 
-    updateNodeState(nodes[0].data.children, interactingIdRef.current, option);
+    updateElementState(target, nodes[0].data.children, interactingIdRef.current, option);
     const updatedNode = [...nodes]; //shallow copy 
     setNodes(updatedNode);
     setContextMenu(null);
@@ -625,19 +628,32 @@ function Flow() {
   }
 
   //update node's state by given node's id 
-  const updateNodeState = (root, id, state) => { 
+  const updateElementState = (target, root, nodeId, state) => { 
     const updatedRoot = [...root];
     // let currentNode = updatedRoot;
-    let foundNode = findNodeById(id, updatedRoot);
+    let foundNode = findNodeById(nodeId, updatedRoot);
 
-    if (state == 'mute') {
-      foundNode.muteAll = true;
+    if(target == 'node'){
+      if (state == 'mute') {
+        foundNode.muteAll = true;
+      }
+      else if (state == 'select') {
+        foundNode.state = 'select';
+      }
+    }else if(target == 'attribute'){
+      const ids = contextMenu.nodeId.split('+');// id[0] is nodeid and id[1] is attribute id 
+
+      const attribute = foundNode.attributes.find((attrib)=> attrib.id == ids[1]);
+      attribute.state = state;
+      console.log("found attribute", attribute);
     }
-    else if (state == 'select') {
-      foundNode.state = 'select';
-    }
+    
 
   }
+
+
+
+
 
   function findNodeById(nodeId, initialNodes) {
     // Use a queue for Breadth First Search
@@ -666,8 +682,8 @@ function Flow() {
 
   return (
     <div className='Flow' style={{ width: "100vw", height: "100vh" }}
-    onClick={(e) => FlowClickHandler(e)}
-    onMouseDown={(e) => FlowClickHandler(e)}
+    // onClick={(e) => FlowClickHandler(e)}
+    // onMouseDown={(e) => FlowClickHandler(e)}
     >
       {contextMenu && contextMenu.nodeType === 'Node' &&
         <div
@@ -693,8 +709,8 @@ function Flow() {
           {/** mute 2nd layer of sub-menu */}
           {contextMenu.detail == 'mute-2nd' &&
             <div className='flex flex-col' datatype="contextMenu">
-              <button onClick={() => nodeStateHandler('mute')}> all </button>
-              <button onClick={() => nodeStateHandler('select')}> select </button>
+              <button onClick={() => elementStateHandler('node', 'mute')}> all </button>
+              <button onClick={() => elementStateHandler('node', 'select')}> select </button>
             </div>
           }
 

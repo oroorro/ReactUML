@@ -101,6 +101,7 @@ const ReactNode = ({
     useEffect(() => {
 
         if (data.stateManager.id) {
+            //console.log("data stateManager", data.stateManager.id)
             const id = data.stateManager.id;
 
             if (!expandedAttributes.includes(id)) {
@@ -250,11 +251,14 @@ const ReactNode = ({
         });
     }
 
+    //this function gets triggered when user clicks on minimize button on Attributewrapper
+    //It will 1. set stateManager.id as empty value in order to prevent re-opening Attributewrapper; since Attributewrapper gets open by getting stateManger.id
+    //        2. remove stored stateManager.id in setExpandedAttributes
     const handleClickOnAttribute = (id: string) => {
 
-        // const nodes: Node[] = getNodes();
-        // nodes[0].data.stateManager.id = "";
-        // setNodes(nodes);
+        const nodes: Node[] = getNodes();
+        nodes[0].data.stateManager.id = "";
+        setNodes(nodes);
 
         setExpandedAttributes((prev) => {
             // If already expanded, remove it from the array
