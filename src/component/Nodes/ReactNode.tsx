@@ -124,7 +124,7 @@ const ReactNode = ({
 
         console.log("found node in handleUnmute", node);
         //get the id of node 
-        //const path = indexMap![id].split('-').map(Number);
+   
 
         //update mute flag then setNode to update the display 
         // let format = {
@@ -158,7 +158,7 @@ const ReactNode = ({
         const nodes: Node[] = getNodes();
 
         //get the id of node 
-        const path = indexMap![nodeId].split('-').map(Number);
+        const path = indexMap![nodeId].split('-').map(Number); //FIX this 
 
         //update mute flag then setNode to update the display 
         let format = {

@@ -1,5 +1,9 @@
+import { useRef } from "react";
 import { AttributeIcon } from "./AttributeIcon"
 import { AttributeIconWrapperProps, AttributeContent, ReactInBuiltAttributeContent } from "../../types"
+import { useStoreApi } from "../../hook/useStore";
+import { ReactChild, UniqueId } from "../../types";
+import { generateUniqueId } from "../../utils/generateId";
 
 
 const AttributeIconWrapper = ({
@@ -10,7 +14,81 @@ const AttributeIconWrapper = ({
     nodeId
 }:AttributeIconWrapperProps) =>{
 
-    console.log("attribute.state", attribute, attribute.state);
+    const store = useStoreApi();
+    const { setNodes, getNodes } = store.getState();
+
+    const contentNameRef = useRef<HTMLInputElement>(null);
+    const contentTypeRef = useRef<HTMLInputElement>(null);
+
+
+
+    function findNodeById(nodeId: UniqueId, initialNodes: ReactChild[]): ReactChild | undefined {
+        // Use a queue for Breadth-First Search
+        const queue: ReactChild[] = [...initialNodes];
+
+        while (queue.length > 0) {
+            const currentNode = queue.shift(); // Dequeue the first node
+
+            if (!currentNode) continue;
+
+            // Check if the current node's id matches
+            if (currentNode.id === nodeId) {
+                return currentNode;
+            }
+
+            // Add children to the queue if they exist
+            if (currentNode.children && currentNode.children.length > 0) {
+                queue.push(...currentNode.children);
+            }
+        }
+
+        // Return undefined if the node was not found
+        return undefined;
+    }
+
+    //nodeId, attributeId, attributeContentId 
+
+    //id of AttributeContent, change state into, 
+    const handleUpdateAttributeContent = () => {
+
+        const nodes = getNodes();
+
+        const reactChild: ReactChild[] = [nodes[0].data];
+
+        let node = findNodeById(nodeId, reactChild);
+    
+        const targetAttribute = node?.attributes.find((attri)=>attri.id == attribute.id);
+
+        //add 
+        if(targetAttribute?.AttributeContents && contentNameRef.current && contentNameRef.current.value != ''){
+
+            const newAttributeContet:AttributeContent = {
+                id: generateUniqueId(),
+                name: contentNameRef.current?.value as string,
+                type: contentTypeRef.current?.value as string,
+                belongsTo: attribute.id
+            }
+            targetAttribute.AttributeContents = [...targetAttribute.AttributeContents as AttributeContent[], newAttributeContet];
+
+            //clean <input/> 
+            if(contentNameRef.current && contentTypeRef.current){
+                contentNameRef.current.value = "";
+                contentTypeRef.current.value = "";
+            }
+           
+
+        }else{
+            console.warn("targetAttribute couldn't be found");
+        }
+        console.log("targetAttribute", targetAttribute,);
+
+        //cancelAdding
+
+        //delete 
+
+        setNodes(nodes);
+
+    }
 
     return (
               
@@ -96,18 +174,28 @@ const AttributeIconWrapper = ({
                                 </div>
                             }
                         </div>
+
+
                     ))}
-                    { isExpanded && attribute.state == 'editing' && <div>
-                                <input className="bg-white shadow-md appearance-none focus:outline-none focus:bg-gray-100"></input>
+                    {attribute.state == 'editing' && <div>
+                                <input ref={contentNameRef} className="bg-white shadow-md appearance-none focus:outline-none focus:bg-gray-100"></input>
                                 <span className="mx-2 s">:</span>
-                                <input className="bg-white shadow-md appearance-none focus:outline-none focus:bg-gray-100"></input>
-                                <button className="ml-1 bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold  px-4 rounded-xl ml-auto"
+                                <input ref={contentTypeRef} className="bg-white shadow-md appearance-none focus:outline-none focus:bg-gray-100"></input>
+                                <button className="ml-1 bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold  px-2 rounded-xl ml-auto"
+                                    onClick={()=>handleUpdateAttributeContent()}
+                                    title="add"
+                                    >
+                                    +
+                                </button>
+                                <button
+                                    title="cancel"
+                                    className="bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold  px-2 rounded-xl ml-auto"
                                     
                                     >
-                                    Done
+                                x
                                 </button>
                     </div>}
-                    { isExpanded && <button>+</button>}
+                    {/* { isExpanded && <button  >+</button>} */} 
                 </div>
             </div>
     )

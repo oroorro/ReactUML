@@ -53,6 +53,7 @@ let initialNodes = [
             {
               name: 'initialNodes',
               belongsTo: 'X2D',
+              id: '194bef45ea2-031087'
             }
           ]
         },
@@ -64,6 +65,7 @@ let initialNodes = [
             {
               name: 'UseEffect',
               belongsTo: 'X2D',
+              id: '194bef45ea2-0faf69'
             }
           ]
         },
@@ -75,31 +77,37 @@ let initialNodes = [
             {
               name: 'names',
               type: 'string[]',
-              belongsTo: 'X2D',
+              id:'194bef45ea2-0aa763',
+              belongsTo: '1949d9bf4d6-170d62',
             },
             {
               name: 'users',
               type: 'User[]',
-              belongsTo: 'X2D',
+              id: '194bef45ea2-14f0d1',
+              belongsTo: '1949d9bf4d6-170d62',
             },
             {
               name: 'userLocation',
               type: '[string, number, number]',
-              belongsTo: 'X2D',
+              id: '194bef45ea2-05e1b3', 
+              belongsTo: '1949d9bf4d6-170d62',
             },
             {
               name: 'buttonColor',
               type: "red | green | blue",
+              id:'194bef45ea2-0fe9ab',
               belongsTo: 'XW2',
             },
             {
               name: 'userId',
               type: 'string | number',
+              id: '194bef45ea2-059bfb',
               belongsTo: 'X2D',
             },
             {
               name: 'currentUserRole',
               type: 'UserRole',
+              id: '194bef45ea2-0d0fc0',
               //nestedType: {string 'nameOfType': object 'typeDef'}
               belongsTo: 'X2D',
             }
@@ -123,6 +131,7 @@ let initialNodes = [
                 {
                   name: 'initialNodes',
                   belongsTo: 'X2D',
+                  id: '194bef45ea2-14d67a'
                 }
               ]
             },
@@ -145,32 +154,38 @@ let initialNodes = [
                   name: 'names',
                   type: 'string[]',
                   belongsTo: 'X2D',
+                  id: '194bef45ea2-057271'
                 },
                 {
                   name: 'users',
                   type: 'User[]',
                   belongsTo: 'X2D',
+                  id: '194bef45ea2-16a5de'
                 },
                 {
                   name: 'userLocation',
                   type: '[string, number, number]',
                   belongsTo: 'X2D',
+                  id: '194bef45ea2-0100ed',
                 },
                 {
                   name: 'buttonColor',
                   type: "red | green | blue",
                   belongsTo: 'XW2',
+                  id: '194bef45ea2-115e9f',
                 },
                 {
                   name: 'userId',
                   type: 'string | number',
                   belongsTo: 'X2D',
+                  id: '194bef45ea2-03569b'
                 },
                 {
                   name: 'currentUserRole',
                   type: 'UserRole',
                   //nestedType: {string 'nameOfType': object 'typeDef'}
                   belongsTo: 'X2D',
+                  id: '194bef45ea2-073467'
                 }
               ]
             },
@@ -218,6 +233,7 @@ let initialNodes = [
                         {
                           name: 'initialNodes',
                           belongsTo: 'X2D',
+                          id: '194bef45ea2-04db24'
                         }
                       ]
                     },
@@ -234,6 +250,7 @@ let initialNodes = [
                               belongsTo: '2X',
                             }
                           ],
+                          id: '194bef45ea2-01d4c4'
                         }
                       ]
                     },

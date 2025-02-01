@@ -430,7 +430,6 @@ const ReactChildrenWrapper = ({
                                                                     }
                                                                     {child.attributes && filteredUnMutedAttribute.map((attr: Attribute, index: number) => {
                                                                         const isExpanded = expandedAttributes.includes(attr.id);
-                                                                        //const isEdit = 
                                                                         return (
                                                                             <div className='flex items-end'>
                                                                                 {child.state == 'select' &&
