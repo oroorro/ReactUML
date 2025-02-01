@@ -49,7 +49,7 @@ const AttributeIconWrapper = ({
     //nodeId, attributeId, attributeContentId 
 
     //id of AttributeContent, change state into, 
-    const handleUpdateAttributeContent = () => {
+    const handleUpdateAttributeContent = (option: string) => {
 
         const nodes = getNodes();
 
@@ -60,34 +60,41 @@ const AttributeIconWrapper = ({
         const targetAttribute = node?.attributes.find((attri)=>attri.id == attribute.id);
 
         //add 
-        if(targetAttribute?.AttributeContents && contentNameRef.current && contentNameRef.current.value != ''){
-
-            const newAttributeContet:AttributeContent = {
-                id: generateUniqueId(),
-                name: contentNameRef.current?.value as string,
-                type: contentTypeRef.current?.value as string,
-                belongsTo: attribute.id
+        if(option == 'add'){
+            if(targetAttribute?.AttributeContents && contentNameRef.current && contentNameRef.current.value != ''){
+                //create new AttributeContent 
+                const newAttributeContet:AttributeContent = {
+                    id: generateUniqueId(),
+                    name: contentNameRef.current?.value as string,
+                    type: contentTypeRef.current?.value as string,
+                    belongsTo: attribute.id
+                }
+                //adding newly created AttributeContent with previously existing AttributeContents in target Attribute 
+                targetAttribute.AttributeContents = [...targetAttribute.AttributeContents as AttributeContent[], newAttributeContet];
+    
+                //clean <input/> 
+                if(contentNameRef.current && contentTypeRef.current){
+                    contentNameRef.current.value = "";
+                    contentTypeRef.current.value = "";
+                }
+            }else{
+                console.warn("targetAttribute couldn't be found");
             }
-            targetAttribute.AttributeContents = [...targetAttribute.AttributeContents as AttributeContent[], newAttributeContet];
-
-            //clean <input/> 
-            if(contentNameRef.current && contentTypeRef.current){
-                contentNameRef.current.value = "";
-                contentTypeRef.current.value = "";
+        }else if(option == 'cancelAdd'){
+            if(targetAttribute){
+                //find attribute 
+                targetAttribute.state = 'none';
+                //change state to none 
+            }else{
+                console.warn("targetAttribute couldn't be found");
             }
-           
-
-        }else{
-            console.warn("targetAttribute couldn't be found");
         }
-        console.log("targetAttribute", targetAttribute,);
-
-        //cancelAdding
-
         //delete 
-
+        else{
+            console.warn("no option was specified in handleUpdateAttributeContent");
+        }
+        //console.log("targetAttribute", targetAttribute,);
         setNodes(nodes);
-
     }
 
     return (
@@ -182,7 +189,7 @@ const AttributeIconWrapper = ({
                                 <span className="mx-2 s">:</span>
                                 <input ref={contentTypeRef} className="bg-white shadow-md appearance-none focus:outline-none focus:bg-gray-100"></input>
                                 <button className="ml-1 bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold  px-2 rounded-xl ml-auto"
-                                    onClick={()=>handleUpdateAttributeContent()}
+                                    onClick={()=>handleUpdateAttributeContent('add')}
                                     title="add"
                                     >
                                     +
@@ -190,7 +197,7 @@ const AttributeIconWrapper = ({
                                 <button
                                     title="cancel"
                                     className="bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold  px-2 rounded-xl ml-auto"
-                                    
+                                    onClick={()=>handleUpdateAttributeContent('cancelAdd')}
                                     >
                                 x
                                 </button>
