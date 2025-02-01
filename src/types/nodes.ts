@@ -282,6 +282,8 @@ export type AttributeContentWrapperProps = {
   content: AttributeContent | ReactInBuiltAttributeContent,
   handleUpdateAttributeContent: (option: string, contentId: UniqueId, data?: AttributeData)=> void,
   //attributeState: 'editing' | 'none' | 'selected' | 'showOptions' | undefined
+  nodeId: UniqueId,
+  attributeId: UniqueId,
 }
 
 

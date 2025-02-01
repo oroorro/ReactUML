@@ -6,7 +6,8 @@ import { AttributeContent, ReactInBuiltAttributeContent, AttributeContentWrapper
 const AttributeContentWrapper = ({
     content,
     handleUpdateAttributeContent,
-
+    nodeId,
+    attributeId
     //option button or minimize button, they will make isEditing to be false 
     //update Attribute's content in data structure 
 }: AttributeContentWrapperProps) => {
@@ -79,7 +80,10 @@ const AttributeContentWrapper = ({
                 ) : (
                     <>
                         {"name" in content &&
-                            <div className='attributeContentWrapper relative inline-block p-2 border-2 border-transparent hover:border-blue-500 transition duration-300' style={{ border: '1px solid black', padding: '0px 3px', borderRadius: '5px' }}>
+                            <div 
+                            datatype="AttributeContent"
+                            data-id={`${nodeId}+${attributeId}+${content.id}`}
+                            className='attributeContentWrapper relative inline-block p-2 border-2 border-transparent hover:border-blue-500 transition duration-300' style={{ border: '1px solid black', padding: '0px 3px', borderRadius: '5px' }}>
                                 <span  className="hover:bg-[#ebebeb] transition duration-300 rounded-md px-1">{content.name}</span>
                                 <span>: </span>
                                 <span  className="hover:bg-[#ebebeb] transition duration-300 rounded-md px-1">{content.type ?? "N/A"}</span>

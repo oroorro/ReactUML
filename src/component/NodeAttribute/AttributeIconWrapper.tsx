@@ -161,9 +161,9 @@ const AttributeIconWrapper = ({
         if (!currentAttribute) console.warn("Attribute is undefined");
 
         //change to 'none' when state does not exist in currentAttribute or currentAttribute's state is either 'editing' triggered by contextMeun's add button on Attributeor 'showOptions' triggered by clicking options
-        if (currentAttribute?.state == 'showOptions' || currentAttribute?.state == 'editing' || !currentAttribute?.state) {
+        if (currentAttribute?.state == 'showOptions' || currentAttribute?.state == 'editing' ) {
             handleUpdateAttributeContent('none')
-        } else if (currentAttribute?.state == 'none') {
+        } else if (currentAttribute?.state == 'none' || !currentAttribute?.state ) {
             handleUpdateAttributeContent('showOptions')
         }
     }
@@ -272,7 +272,7 @@ const AttributeIconWrapper = ({
                     //     </button>}
                     // </div>
                     <div className="flex">
-                        <AttributeContentWrapper content={content} handleUpdateAttributeContent={handleUpdateAttributeContent} />
+                        <AttributeContentWrapper content={content} handleUpdateAttributeContent={handleUpdateAttributeContent} nodeId={nodeId} attributeId={attribute.id}/>
                         {attribute.state == 'showOptions' && <button
                             title="Remove"
                             className="bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold ml-1 px-2 rounded-xl ml-auto"

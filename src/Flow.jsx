@@ -19,13 +19,19 @@ import { type } from '@testing-library/user-event/dist/type';
 import { useStoreApi } from './hook/useStore';  // does not work since it is above the store level 
 
 const NodeIndexInArray = {
-  '#dfe7f5': '0', //ZoomPane
-  '#ffa8d5': '0-0',  //NodeRenderer
-  '#f26d1f': '0-0-0', //EdgeRenderer
-  '#49abf5': '0-0-0-0', //Pane
-  '#e8c390': '0-0-0-1',  //Zoom
-  '#ffdc6b': '0-1', //Store
+  '1qlx7vx-jj26d3': '#dfe7f5', //ZoomPane
+  '1qlx7vx-107d1f' : '#ffa8d5',  //NodeRenderer
+  '1qlx7vx-011409' : '#f26d1f', //EdgeRenderer
+  '1qlx7vx-def456' : '#49abf5', //Pane
+  '1qlx7vx-093e0a' : '#e8c390',  //Zoom
+  '1qlx7vx-99k6j3' : '#ffdc6b', //Store
 }
+
+const generateRandomHexColor = ()=> {
+  const randomColor = Math.floor(Math.random() * 16777215).toString(16);
+  return `#${randomColor.padStart(6, '0')}`;
+};
+
 
 const attributeColors = ['import', 'reactInBuilt', 'variable', 'function', 'hook', 'create type',]
 
@@ -430,13 +436,16 @@ function Flow() {
   const interactingIdRef = useRef(null);
   const [contextMenu, setContextMenu] = useState(null);
 
+  useEffect(()=>{
+    if(contextMenu) console.log("contextMenu is set as ", contextMenu)
+  },[contextMenu])
 
   function performUpdateElement(root, id, type, data = null) {
 
     const newChild = {
       title: 'NewNode',
       numbersOfPropsGoingIn: 1,
-      color: '#abcdef',
+      color: generateRandomHexColor(),
       id: generateUniqueId(),
       pipes: [
         {
@@ -483,6 +492,11 @@ function Flow() {
           type == 'Node' ? newChild : ghostChild,
         ];
       }
+
+      //add newly craete Node into NodeIndexInArray
+      NodeIndexInArray[newChild.id] = {};
+      NodeIndexInArray[newChild.id] = newChild.color;
+      //console.log("NodeIndexInArray", NodeIndexInArray);
     }
   }
 
@@ -566,7 +580,7 @@ function Flow() {
 
     const target = event.target;
     const elementWithDatatype = findElementWithDatatype(target);
-    //console.log("elementWithDatatype", elementWithDatatype);
+    console.log("elementWithDatatype", elementWithDatatype.getAttribute('datatype'), elementWithDatatype);
 
     const nodeDataId = target.getAttribute('data-id') ? target.getAttribute('data-id') : target.parentElement?.getAttribute('data-id');
     const nodeDataType = target.getAttribute('datatype') ? target.getAttribute('datatype') : target.parentElement?.getAttribute('datatype');
@@ -600,6 +614,13 @@ function Flow() {
         top: event.clientY
       })
 
+    }else if(elementWithDatatype.getAttribute('datatype') === 'AttributeContent'){
+      setContextMenu({
+        nodeId: elementWithDatatype.getAttribute('data-id'),
+        nodeType: 'AttributeContent',
+        left: event.clientX,
+        top: event.clientY
+      })
     }
   }
 
@@ -837,6 +858,21 @@ function Flow() {
           <button onClick={() => addAttributeContent()}> Add </button>
           <button onClick={()=>deleteElement('Attribute')}> Delete </button>
         </div>}
+      {/* {contextMenu && contextMenu.nodeType === 'AttributeContent' &&
+        <div
+        style={{
+          backgroundColor: 'white',
+          width: '50px',
+          height: '50px',
+          position: 'absolute',
+          left: `${contextMenu.left}px`,
+          top: `${contextMenu.top}px`,
+          zIndex: '9999'
+        }}
+        >
+          <button> Assign Parent </button>
+        </div>
+      } */}
       <AlgoFlow
         ref={flowRef}
         nodes={nodes}
