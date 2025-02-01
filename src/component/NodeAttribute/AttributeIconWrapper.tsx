@@ -140,7 +140,8 @@ const AttributeIconWrapper = ({
 
         if(!currentAttribute) console.warn("Attribute is undefined");
 
-        if(currentAttribute?.state == 'showOptions' || currentAttribute?.state == 'editing'){
+        //change to 'none' when state does not exist in currentAttribute or currentAttribute's state is either 'editing' triggered by contextMeun's add button on Attributeor 'showOptions' triggered by clicking options
+        if(currentAttribute?.state == 'showOptions' || currentAttribute?.state == 'editing' || !currentAttribute?.state){ 
             handleUpdateAttributeContent('none')
         }else if(currentAttribute?.state == 'none'){
             handleUpdateAttributeContent('showOptions')

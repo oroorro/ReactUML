@@ -465,6 +465,7 @@ function Flow() {
             {
               name: 'initialNodes',
               belongsTo: 'X2D',
+              id: generateUniqueId()
             }
           ]
         },
@@ -602,7 +603,7 @@ function Flow() {
     }
   }
 
-  const addAttributeValue = () => {
+  const addAttributeContent = () => {
     const ids = contextMenu.nodeId.split('+');
     // const stateManger = {
     //   id: ids[1]
@@ -669,6 +670,25 @@ function Flow() {
   }
 
 
+  function findNodeParent(childNodeId, startingNode){
+
+    //get startingNode's children into initalnodes:[]
+      //shallow copy
+      //const initialnodes = [...startingNode.children]
+
+    //iterate initalnodes{
+    //initialnodes.forEach((node)=>{ 
+      //if inital Node was the target childNodeId then return the initial Node  
+        //if(node.id == childNodeId) return startingNode
+      //if the initial Node wasn't empty call findNodeParent 
+        //else return findNodeParent(childNodeId, child)
+      //if the initial Node was empty then just  return
+    //}) 
+
+    //return 
+
+  }
+
 
 
 
@@ -696,6 +716,43 @@ function Flow() {
     // Return undefined if the node was not found
     return undefined;
   }
+
+  /**
+   * delete Node
+   *  get Node's parent Node then remove Node from the parent Node 
+   *  or 
+   *  get the Node then make it as 'ghost' if Node had Prop going into itself 
+   * 
+   * delete Attribute
+   *  get Attribute and it's Node that has The Attribute then remove the attribute in the Node
+   * 
+   * delete Prop 
+   *  get Prop and it's Node that has the Prop then remove the Prop from the Node 
+   */
+  const deleteElement = (type) =>{
+
+    if(type == 'Attribute'){
+      const copiedRoot = [...nodes[0].data.children]
+
+      const ids = contextMenu.nodeId.split('+');// ids[0] is nodeid and ids[1] is attribute id 
+      if(!ids) console.warn("No ids exist");
+
+      //get Node 
+      let foundNode = findNodeById(ids[0], copiedRoot);
+      if(!foundNode) console.warn("Node couldn't be found")
+
+      //filter out Attribute except deleting Attribute 
+      const filtered = foundNode.attributes.filter((attrib)=> attrib.id != ids[1]);
+      foundNode.attributes = [...filtered];
+    }
+
+    //update the nodes 
+    const updatedNode = [...nodes];
+    setNodes(updatedNode);
+    setContextMenu(null);
+
+  }
+
 
   return (
     <div className='Flow' style={{ width: "100vw", height: "100vh" }}
@@ -777,8 +834,8 @@ function Flow() {
             zIndex: '9999'
           }}
         >
-          <button onClick={() => addAttributeValue()}> Add </button>
-          <button> Delete </button>
+          <button onClick={() => addAttributeContent()}> Add </button>
+          <button onClick={()=>deleteElement('Attribute')}> Delete </button>
         </div>}
       <AlgoFlow
         ref={flowRef}
