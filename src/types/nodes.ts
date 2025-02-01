@@ -177,16 +177,20 @@ export type Attribute = {
   totalNumberOfAttribute: number,
   AttributeContents: AttributeContent[] | ReactInBuiltAttributeContent[],
   id: UniqueId,
-  mute?: MuteOption,
+  mute?: AllState, //muteState
+  state?: 'editing' | 'none' | 'selected' | 'showOptions'
+  //other state , copy 
 }
 
 export type AttributeContent = {
+  id: UniqueId,
   name: string, 
   type?: string, // type of the attribute 
-  belongsTo: string, //id of Node that created props for the first time 
+  belongsTo: UniqueId, //id of Node that created props for the first time 
 }
 
 export type ReactInBuiltAttributeContent = {
+  id:UniqueId,
   typeOfReactInbuilt: string, //can be useEffect, useRef(Hook), cache(API) ... 
   reactInbuiltAttributes: ReactInbuiltAttributes[], //ex for useEffect)name of useEffect would be showing dependecny array [var1, array2],
 }                                                   //type would be [var1:string, array2:number[]]
@@ -202,6 +206,8 @@ export type InteractionData = {
   id?: string
 }
 
+export type TargetElement = 'attribute' | 'node' | 'prop';
+
 //used when updating elements in Node, Attribute and Prop
 export type updateOption = {
   target: 'attribute' | 'node' | 'prop',
@@ -211,14 +217,31 @@ export type updateOption = {
 
 export type UpdateOptionV2 = {
   target: 'attribute' | 'node' | 'prop',
-  state: NodeState,
-  detailOptions?: DetailOptions, 
+  state: NodeState, // indicates node's state  //maybe add targetState
+  detailOptions?: DetailOptions,     
+}
+
+
+export type updateOptions = {
+  target: 'attribute' | 'node' | 'prop',
+  nodeState: NodeState, // indicates node's state  
+  targetPreviousState?: AllState,
+  targetStateChangingInto?: AllState, 
+  detailOptions?: muteDetailOptions,     
+}
+
+export type AllState = NodeState; //will contain all of the states use for all elements 
+export type muteDetailOptions = UnmutingData;
+
+export type UnmutingData = {
+  updatedMutedAttributes: Attribute[],
+      unMutedAttributes: Attribute[],
 }
 
 export type DetailOptions = {
 
   muteOptions:{
-    muteState?: MuteOption,
+    muteState?: MuteOption, //used to change target element's state into this value 
     unmutingData:{
       updatedMutedAttributes: Attribute[],
       unMutedAttributes: Attribute[],
@@ -233,4 +256,40 @@ export type AttributeIconWrapperProps = {
   isExpanded: boolean,
   handleClickOnAttribute: (attributeName: string) => void,
   attributeColors: Record<string, string>,
+  nodeId: UniqueId,
 }
+
+export type ReactChildrenWrapperProps = {
+  reactChildren: ReactChild[]
+  renderChildren: (hildren: ReactChild[] | undefined, level: number, parentId: UniqueId, state: NodeState) => JSX.Element | null, 
+  expandedAttributes: string[]
+  expandedprops: string[],
+  state: NodeState,
+  level: number,
+  parentId: UniqueId,
+  handleUnmute: (id: UniqueId) => void,
+  findElementWithTypes: (nodeId: UniqueId, otherElementId: UniqueId, elementType: TargetElement) => ReactChild | Attribute | undefined, //new one 
+  handleClickOnAttribute: (id: string) => void,
+  attributeColors: Record<string, string>,
+  updateNode: (nodeId: UniqueId, id: UniqueId, updateOption: updateOption) => void,
+  updateNodeV2: (nodeId: string, id: UniqueId, updateOption: UpdateOptionV2) => void,
+  handlePropGoingInToChild: (pipe: Pipe) => void,
+  displayPropsData: (pipe: Pipe) => void,
+  
+}
+
+export type AttributeContentWrapperProps = {
+  content: AttributeContent | ReactInBuiltAttributeContent,
+  handleUpdateAttributeContent: (option: string, contentId: UniqueId, data?: AttributeData)=> void,
+  //attributeState: 'editing' | 'none' | 'selected' | 'showOptions' | undefined
+  nodeId: UniqueId,
+  attributeId: UniqueId,
+}
+
+
+export type AttributeData = {
+  changingContent:{
+    name: string,
+    type: string
+  }
+} | null;

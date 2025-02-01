@@ -24,7 +24,8 @@ import type {
     SelectionDragHandler,
     NodeInternals,
     NodeProps,
-    WrapNodeProps, 
+    WrapNodeProps,
+    UniqueId, 
 } from './nodes';
 
 
