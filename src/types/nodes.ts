@@ -178,7 +178,7 @@ export type Attribute = {
   AttributeContents: AttributeContent[] | ReactInBuiltAttributeContent[],
   id: UniqueId,
   mute?: AllState, //muteState
-  state?: 'editing' | 'none' | 'selected'
+  state?: 'editing' | 'none' | 'selected' | 'showOptions'
   //other state , copy 
 }
 
@@ -190,6 +190,7 @@ export type AttributeContent = {
 }
 
 export type ReactInBuiltAttributeContent = {
+  id:UniqueId,
   typeOfReactInbuilt: string, //can be useEffect, useRef(Hook), cache(API) ... 
   reactInbuiltAttributes: ReactInbuiltAttributes[], //ex for useEffect)name of useEffect would be showing dependecny array [var1, array2],
 }                                                   //type would be [var1:string, array2:number[]]
