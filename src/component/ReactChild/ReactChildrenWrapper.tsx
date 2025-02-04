@@ -171,7 +171,7 @@ const ReactChildrenWrapper = ({
                                 {child.pipes.map((pipe, i) => {
                                     const isExpanded = expandedAttributes.includes(pipe.id);
                                     const showProps = expandedprops.includes(pipe.id);
-
+                                    
                                     return (
                                         <div id="pipes" className="flex -left-2 relative gap-0.5" key={i}
                                             style={{ transition: 'all 0.3s ease' }}
@@ -199,8 +199,10 @@ const ReactChildrenWrapper = ({
 
                                             {/** rendering each pipes except the tail */}
                                             {i != child.pipes.length - 1 &&
-                                                <div className='flex'>
-
+                                                <div  className='flex'
+                                                datatype='pipe'
+                                                data-id={`${child.id}+${pipe.id}`}
+                                                >    
                                                     <div
                                                         style={{
                                                             height: !showProps ? `${PIPE_HEIGHT_HORIZONTAL}px` : '',
@@ -212,7 +214,7 @@ const ReactChildrenWrapper = ({
                                                         } as React.CSSProperties & { [key: string]: any }}
                                                         onClick={(e) => { handlePropGoingInToChild(pipe) }}
                                                         className='pipeElement'
-                                                        datatype='pipe'
+                                                        
                                                     >
 
                                                     </div>
@@ -223,9 +225,10 @@ const ReactChildrenWrapper = ({
 
 
                                             { // circle data when pipe is clicked 
-                                                showProps &&
+                                                (showProps || pipe.state == 'editing') &&
                                                 <div
-                                                    className='pipeElement'
+                                                    id="propContent"
+                                                    className={(showProps || pipe.state == 'editing') ? 'pipeElementExpanded py-1' :'pipeElement'}
                                                     style={{
                                                         "--bg-color": pipe.color,
                                                         // width: '13px', 
@@ -236,16 +239,41 @@ const ReactChildrenWrapper = ({
                                                         [key: string]: any
                                                     }}
                                                 >
-                                                    {pipe.props && pipe.props.map(prop => (
-                                                        <div>
-                                                            <span>{prop.name}</span>
-                                                            <span>{prop.type}</span>
-
-                                                        </div>
-                                                    ))}
-
+                                                    {pipe.props && pipe.props.map(prop => {
+                                                            return(
+                                                                <div 
+                                                                
+                                                                className="attributeContentWrapper border-2 border-transparent hover:bg-[#FFFFFF]">
+                                                                    <span className="hover:bg-[#E8E8E8] transition duration-300 rounded-md px-1">{prop.name}</span>
+                                                                    <span>: </span>
+                                                                    <span className="hover:bg-[#E8E8E8] transition duration-300 rounded-md px-1" >{prop.type}</span>
+                                                                </div>
+                                                            )
+                                                    }                      
+                                                    )}
+                                                    { pipe.state == 'editing' && 
+                                                            <div className="relative">
+                                                                <input style={{width: '120px'}}/>
+                                                                <span>: </span>
+                                                                <input style={{width: '120px'}}/>
+                                                                <div className="absolute bg-white right-[-15px] top-[0px]">
+                                                                    <button>+</button>
+                                                                    {/**change current pipe'state to be 'none' */}
+                                                                    <button>x</button>
+                                                                </div>
+                                                            </div>
+                                                    }  
                                                 </div>
                                             }
+                                            { pipe.state == 'editing' && <div> 
+                                                {/**change current pipe'state to be 'none' */}
+                                                <button className="bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold  px-2 rounded-md"
+
+                                                >C</button>
+                                                {/**set  showProps to be false */}
+                                                <button className="bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold  px-2 rounded-md" title="Minimize">M</button>
+                                            </div>}
+                                            
 
                                             {/** redering tail: 
                                              *    when pipe's number is bigger than 1, render -- vertical arrow of parent's color pipe

@@ -18,6 +18,7 @@ import { type } from '@testing-library/user-event/dist/type';
 
 import { useStoreApi } from './hook/useStore';  // does not work since it is above the store level 
 
+
 const NodeIndexInArray = {
   '1qlx7vx-jj26d3': '#dfe7f5', //ZoomPane
   '1qlx7vx-107d1f' : '#ffa8d5',  //NodeRenderer
@@ -201,7 +202,7 @@ let initialNodes = [
               color: '#dfe7f5',
               numbersOfProps: 18,
               name: "Node",
-              id: 'X2'
+              id: '194c3ff3761-09dc10'
             },
           ],
           children: [
@@ -215,12 +216,13 @@ let initialNodes = [
                 {
                   color: '#dfe7f5',
                   numbersOfProps: 8,
-                  //props
+                  id: '194c3ff3761-07d567',
                   name: "Node",
                 },
                 {
                   color: '#ffa8d5',
                   numbersOfProps: 7,
+                  id: '194c3ff3761-183b89',
                   name: "Edge",
                 },
               ],
@@ -266,7 +268,7 @@ let initialNodes = [
                       color: '#dfe7f5',
                       numbersOfProps: 4,
                       name: "Node",
-                      id: 'XI',
+                      id: '194c3ff3761-1597d2',
                       props: [
                         { name: "Attribute_1", type: "string", belongsTo: "AB" },
                         { name: "Attribute_2", type: "number", belongsTo: "CD" },
@@ -278,7 +280,7 @@ let initialNodes = [
                       color: '#ffa8d5',
                       numbersOfProps: 11,
                       name: "Edge",
-                      id: 'G8',
+                      id: '194c3ff3762-094898',
                       props: [
                         { name: "Attribute_8", type: "boolean", belongsTo: "OP" },
                         { name: "Attribute_9", type: "Date", belongsTo: "QR" },
@@ -298,7 +300,7 @@ let initialNodes = [
                       color: 'blue',
                       numbersOfProps: 6,
                       name: "Edge",
-                      id: 'L0',
+                      id: '194c3ff3762-16f298',
                       props: [
                         { name: "FirstName", type: "string", belongsTo: "AB" },
                         { name: "LastName", type: "string", belongsTo: "CD" },
@@ -312,7 +314,7 @@ let initialNodes = [
                       color: '#f26d1f',
                       numbersOfProps: 11,
                       name: "ZoomScale",
-                      id: 'K6',
+                      id: '194c3ff3762-037d40',
                       props: [
                         { name: "PhoneNumber", type: "string", belongsTo: "MN" },
                         { name: "Email", type: "string", belongsTo: "OP" },
@@ -339,31 +341,31 @@ let initialNodes = [
                       color: '#dfe7f5',
                       numbersOfProps: 5,
                       name: "Node",
-                      id: 'E3'
+                      id: '194c3ff3762-068b33'
                     },
                     {
                       color: '#ffa8d5',
                       numbersOfProps: 52,
                       name: "Edge",
-                      id: 'P3'
+                      id: '194c3ff3762-1390bf'
                     },
                     {
                       color: 'green',
                       numbersOfProps: 3,
                       name: "Edge",
-                      id: 'H3'
+                      id: '194c3ff3762-02e023'
                     },
                     {
                       color: 'blue',
                       numbersOfProps: 11,
                       name: "Edge",
-                      id: 'U3'
+                      id: '194c3ff3762-12cc15'
                     },
                     {
                       color: '#f26d1f',
                       numbersOfProps: 1,
                       name: "ZoomScale",
-                      id: 'R3'
+                      id: '194c3ff3762-0d0e6a'
                     },
                   ],
                 },
@@ -376,7 +378,7 @@ let initialNodes = [
                       color: '#dfe7f5',
                       numbersOfProps: 5,
                       name: "Node",
-                      id: 'E3'
+                      id: '194c3ff3762-040828'
                     },
                   ]
                 }
@@ -394,7 +396,7 @@ let initialNodes = [
               color: '#dfe7f5',
               numbersOfProps: 2,
               name: "InitialNodes[]",
-              id: 'K3'
+              id: '194c3ff3762-091b09'
             },
           ],
         },
@@ -413,6 +415,7 @@ function generateUniqueId() {
 }
 
 
+//used for creating Pipe 
 const ghostChild = {
   title: 'ghost',
   numbersOfPropsGoingIn: 1,
@@ -423,7 +426,7 @@ const ghostChild = {
       color: '#dfe7f5',
       numbersOfProps: 18,
       name: "Node",
-      id: 'X2'
+      id: generateUniqueId(),
     },
   ],
   attributes: [],
@@ -479,6 +482,9 @@ function Flow() {
           ]
         },
       ];
+    }
+    else if(type == 'Pipe'){
+
     }
     //creating Node and Prop
     else {
@@ -670,9 +676,10 @@ function Flow() {
   const updateElementState = (target, root, nodeId, state) => { 
     const updatedRoot = [...root];
     // let currentNode = updatedRoot;
-    let foundNode = findNodeById(nodeId, updatedRoot);
+    // let foundNode = findNodeById(nodeId, updatedRoot);
 
     if(target == 'node'){
+      let foundNode = findNodeById(nodeId, updatedRoot);
       if (state == 'mute') {
         foundNode.muteAll = true;
       }
@@ -681,10 +688,18 @@ function Flow() {
       }
     }else if(target == 'attribute'){
       const ids = contextMenu.nodeId.split('+');// id[0] is nodeid and id[1] is attribute id 
-
+      let foundNode = findNodeById(ids[0], updatedRoot);
       const attribute = foundNode.attributes.find((attrib)=> attrib.id == ids[1]);
       attribute.state = state;
-      console.log("found attribute", attribute);
+      // console.log("found attribute", attribute);
+    }else if(target == 'pipe'){
+      const ids = contextMenu.nodeId.split('+'); // id[0] is nodeid and id[1] is pipe id
+      let foundNode = findNodeById(ids[0], updatedRoot);
+      const pipe = foundNode.pipes.find((pipe)=> pipe.id == ids[1]);
+
+      pipe.state = state;
+      //console.log("pipe attribute", pipe);
+
     }
     
 
@@ -842,6 +857,7 @@ function Flow() {
           datatype="contextMenu"
         >
           <button datatype="contextMenu" onClick={() => updateElement()}>create</button>
+          <button datatype="contextMenu" onClick={() => elementStateHandler('pipe', 'editing')} >add</button>
         </div>}
       {contextMenu && contextMenu.nodeType === 'Attribute' &&
         <div

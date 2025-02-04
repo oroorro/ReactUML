@@ -2,6 +2,10 @@
     background-color: var(--bg-color);
 }
 
+.pipeElementExpanded {
+  background-color: var(--bg-color);
+}
+
 .pipeElement:hover{
     background-color: color-mix(in srgb, var(--bg-color), white 40%);
 }
