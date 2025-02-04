@@ -1,7 +1,7 @@
 import type { ReactChildrenWrapperProps, Attribute, Node, NodeState } from "../../types";
 import { useStoreApi } from "../../hook/useStore";
 import AttributeIconWrapper from "../NodeAttribute/AttributeIconWrapper";
-
+import PipeContentWrapper from '../Pipe/PipeContentWrapper'
 const PIPE_WIDTH_VERTICAL = 13;
 const PIPE_HEIGHT_VERTICAL = 5;
 const PIPE_WIDTH_HORIZONTAL = 5;
@@ -16,20 +16,20 @@ const ReactChildrenWrapper = ({
     state,
     level,
     parentId,
-    handleUnmute, 
+    handleUnmute,
     handleClickOnAttribute,
     attributeColors,
-    updateNode, 
-    updateNodeV2, 
+    updateNode,
+    updateNodeV2,
     handlePropGoingInToChild,
     displayPropsData
 
-}:ReactChildrenWrapperProps) => {
+}: ReactChildrenWrapperProps) => {
 
     const store = useStoreApi();
     const { setNodes, getNodes, indexMap } = store.getState();
 
-    return(
+    return (
         <div>
             {reactChildren && reactChildren.map((child, index) => {
 
@@ -169,9 +169,9 @@ const ReactChildrenWrapper = ({
 
 
                                 {child.pipes.map((pipe, i) => {
-                                    const isExpanded = expandedAttributes.includes(pipe.id);
-                                    const showProps = expandedprops.includes(pipe.id);
-                                    
+                                    const isExpanded: boolean = expandedAttributes.includes(pipe.id);
+                                    const showProps: boolean = expandedprops.includes(pipe.id);
+
                                     return (
                                         <div id="pipes" className="flex -left-2 relative gap-0.5" key={i}
                                             style={{ transition: 'all 0.3s ease' }}
@@ -199,10 +199,10 @@ const ReactChildrenWrapper = ({
 
                                             {/** rendering each pipes except the tail */}
                                             {i != child.pipes.length - 1 &&
-                                                <div  className='flex'
-                                                datatype='pipe'
-                                                data-id={`${child.id}+${pipe.id}`}
-                                                >    
+                                                <div className='flex'
+                                                    datatype='pipe'
+                                                    data-id={`${child.id}+${pipe.id}`}
+                                                >
                                                     <div
                                                         style={{
                                                             height: !showProps ? `${PIPE_HEIGHT_HORIZONTAL}px` : '',
@@ -214,7 +214,7 @@ const ReactChildrenWrapper = ({
                                                         } as React.CSSProperties & { [key: string]: any }}
                                                         onClick={(e) => { handlePropGoingInToChild(pipe) }}
                                                         className='pipeElement'
-                                                        
+
                                                     >
 
                                                     </div>
@@ -224,15 +224,16 @@ const ReactChildrenWrapper = ({
                                             }
 
 
-                                            { // circle data when pipe is clicked 
+                                            {  // circle data when pipe is clicked , showing input when in 'editing' state 
                                                 (showProps || pipe.state == 'editing') &&
-                                                <div
+                                                    <PipeContentWrapper pipe={pipe} showProps={showProps} nodeId={child.id}/>
+                                            }
+                                            {/*    <div
                                                     id="propContent"
-                                                    className={(showProps || pipe.state == 'editing') ? 'pipeElementExpanded py-1' :'pipeElement'}
+                                                    className={(showProps || pipe.state == 'editing') ? 'pipeElementExpanded py-1' : 'pipeElement'}
                                                     style={{
                                                         "--bg-color": pipe.color,
-                                                        // width: '13px', 
-                                                        // height: '13px', 
+                                                      
                                                         borderRadius: '15px',
                                                         lineHeight: '13px'
                                                     } as React.CSSProperties & {
@@ -240,32 +241,35 @@ const ReactChildrenWrapper = ({
                                                     }}
                                                 >
                                                     {pipe.props && pipe.props.map(prop => {
-                                                            return(
-                                                                <div 
-                                                                
+                                                        return (
+                                                            <div
+
                                                                 className="attributeContentWrapper border-2 border-transparent hover:bg-[#FFFFFF]">
-                                                                    <span className="hover:bg-[#E8E8E8] transition duration-300 rounded-md px-1">{prop.name}</span>
-                                                                    <span>: </span>
-                                                                    <span className="hover:bg-[#E8E8E8] transition duration-300 rounded-md px-1" >{prop.type}</span>
-                                                                </div>
-                                                            )
-                                                    }                      
-                                                    )}
-                                                    { pipe.state == 'editing' && 
-                                                            <div className="relative">
-                                                                <input style={{width: '120px'}}/>
+                                                                <span className="hover:bg-[#E8E8E8] transition duration-300 rounded-md px-1">{prop.name}</span>
                                                                 <span>: </span>
-                                                                <input style={{width: '120px'}}/>
-                                                                <div className="absolute bg-white right-[-15px] top-[0px]">
-                                                                    <button>+</button>
-                                                                    {/**change current pipe'state to be 'none' */}
-                                                                    <button>x</button>
-                                                                </div>
+                                                                <span className="hover:bg-[#E8E8E8] transition duration-300 rounded-md px-1" >{prop.type}</span>
                                                             </div>
-                                                    }  
+                                                        )
+                                                    }
+                                                    )}
+
+                                                    {pipe.state == 'editing' &&
+                                                        <div className="relative">
+                                                            <input style={{ width: '120px' }} />
+                                                            <span>: </span>
+                                                            <input style={{ width: '120px' }} />
+                                                            <div className="absolute bg-white right-[-15px] top-[0px]">
+                                                                <button >+</button>
+                                                               
+                                                                <button>x</button>
+                                                            </div>
+                                                        </div>
+                                                    }
+
                                                 </div>
-                                            }
-                                            { pipe.state == 'editing' && <div> 
+                                            } */}
+                                            
+                                            {pipe.state == 'editing' && <div>
                                                 {/**change current pipe'state to be 'none' */}
                                                 <button className="bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold  px-2 rounded-md"
 
@@ -273,7 +277,7 @@ const ReactChildrenWrapper = ({
                                                 {/**set  showProps to be false */}
                                                 <button className="bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold  px-2 rounded-md" title="Minimize">M</button>
                                             </div>}
-                                            
+
 
                                             {/** redering tail: 
                                              *    when pipe's number is bigger than 1, render -- vertical arrow of parent's color pipe
@@ -339,7 +343,7 @@ const ReactChildrenWrapper = ({
                                                         datatype='Node'
                                                         data-id={`${pipe.color}`}
                                                     >
-                                                        
+
                                                         {/* {state == 'select' && 
                                                         
                                                         <div className='flex absolute top-[0px] right-[0px] flex-col'>
@@ -358,11 +362,11 @@ const ReactChildrenWrapper = ({
                                                         </div>
                                                         } */}
                                                         {state == 'select' && child.type != 'ghost' &&
-                                                                <button className='absolute top-[0px] right-[0px] bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded'
-                                                                    onClick={() => updateNode(child.id, child.id, { target: 'node', state: 'mute', muteOptions: 'mute' })}
-                                                                    title="Mute Node"
-                                                                >M</button> 
-                                                            }
+                                                            <button className='absolute top-[0px] right-[0px] bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded'
+                                                                onClick={() => updateNode(child.id, child.id, { target: 'node', state: 'mute', muteOptions: 'mute' })}
+                                                                title="Mute Node"
+                                                            >M</button>
+                                                        }
 
                                                         <div
                                                             className="childNode"
