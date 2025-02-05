@@ -272,7 +272,12 @@ const AttributeIconWrapper = ({
                     //     </button>}
                     // </div>
                     <div className="flex">
-                        <AttributeContentWrapper content={content} handleUpdateAttributeContent={handleUpdateAttributeContent} nodeId={nodeId} attributeId={attribute.id}/>
+                        <AttributeContentWrapper 
+                            content={content} 
+                            handleUpdateAttributeContent={handleUpdateAttributeContent} 
+                            nodeId={nodeId} 
+                            attributeId={attribute.id}
+                        />
                         {attribute.state == 'showOptions' && <button
                             title="Remove"
                             className="bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold ml-1 px-2 rounded-xl ml-auto"

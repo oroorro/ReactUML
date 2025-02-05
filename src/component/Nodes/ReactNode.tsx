@@ -229,9 +229,9 @@ const ReactNode = ({
     }
 
     const handlePropGoingInToChild = (pipe: Pipe) => {
-        console.log("pipe clicked ", pipe);
+       
         setExpandedAttributes((prev) => {
-            // If already expanded, remove it from the array
+            console.log("pipe clicked ", pipe, prev);
             if (prev.includes(pipe.id)) {
                 return prev.filter((name) => name !== pipe.id);
             }
@@ -256,9 +256,9 @@ const ReactNode = ({
     //        2. remove stored stateManager.id in setExpandedAttributes
     const handleClickOnAttribute = (id: string) => {
 
-        const nodes: Node[] = getNodes();
-        nodes[0].data.stateManager.id = "";
-        setNodes(nodes);
+        // const nodes: Node[] = getNodes();
+        // nodes[0].data.stateManager.id = "";
+        // setNodes(nodes);
 
         setExpandedAttributes((prev) => {
             // If already expanded, remove it from the array

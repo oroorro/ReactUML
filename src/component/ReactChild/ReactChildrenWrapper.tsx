@@ -175,9 +175,7 @@ const ReactChildrenWrapper = ({
                                     return (
                                         <div id="pipes" className="flex -left-2 relative gap-0.5" key={i}
                                             style={{ transition: 'all 0.3s ease' }}
-
                                         >
-
                                             { // circle data when pipe is clicked 
                                                 isExpanded &&
                                                 <div
@@ -216,17 +214,13 @@ const ReactChildrenWrapper = ({
                                                         className='pipeElement'
 
                                                     >
-
                                                     </div>
                                                     {state == 'select' && <input style={{ width: '13px', height: '13px' }} type="checkbox" />}
                                                 </div>
-
                                             }
-
-
                                             {  // circle data when pipe is clicked , showing input when in 'editing' state 
                                                 (showProps || pipe.state == 'editing') &&
-                                                    <PipeContentWrapper pipe={pipe} showProps={showProps} nodeId={child.id}/>
+                                                    <PipeContentWrapper pipe={pipe} showProps={showProps} nodeId={child.id} handlePropGoingInToChild={handlePropGoingInToChild}/>
                                             }
                                             {/*    <div
                                                     id="propContent"
@@ -269,14 +263,16 @@ const ReactChildrenWrapper = ({
                                                 </div>
                                             } */}
                                             
-                                            {pipe.state == 'editing' && <div>
+                                            {false && pipe.state == 'editing' && 
+                                            <div>
                                                 {/**change current pipe'state to be 'none' */}
                                                 <button className="bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold  px-2 rounded-md"
 
                                                 >C</button>
                                                 {/**set  showProps to be false */}
                                                 <button className="bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold  px-2 rounded-md" title="Minimize">M</button>
-                                            </div>}
+                                            </div>
+                                            }
 
 
                                             {/** redering tail: 

@@ -270,10 +270,10 @@ let initialNodes = [
                       name: "Node",
                       id: '194c3ff3761-1597d2',
                       props: [
-                        { name: "Attribute_1", type: "string", belongsTo: "AB" },
-                        { name: "Attribute_2", type: "number", belongsTo: "CD" },
-                        { name: "Attribute_3", type: "boolean", belongsTo: "EF" },
-                        { name: "Attribute_4", type: "Date", belongsTo: "GH" },
+                        { name: "Attribute_1", type: "string", id: '194c3ff3762-185170'},
+                        { name: "Attribute_2", type: "number", id: '194c3ff3762-04eb6c'},
+                        { name: "Attribute_3", type: "boolean", id: '194c3ff3762-0bf8ac' },
+                        { name: "Attribute_4", type: "Date",  id: '194c3ff3762-09dcac' },
                       ]
                     },
                     {
@@ -282,18 +282,18 @@ let initialNodes = [
                       name: "Edge",
                       id: '194c3ff3762-094898',
                       props: [
-                        { name: "Attribute_8", type: "boolean", belongsTo: "OP" },
-                        { name: "Attribute_9", type: "Date", belongsTo: "QR" },
-                        { name: "Attribute_10", type: "object", belongsTo: "ST" },
-                        { name: "Attribute_11", type: "string", belongsTo: "UV" },
-                        { name: "Attribute_12", type: "number", belongsTo: "WX" },
-                        { name: "Attribute_13", type: "boolean", belongsTo: "YZ" },
-                        { name: "Attribute_14", type: "Date", belongsTo: "AA" },
-                        { name: "Attribute_15", type: "object", belongsTo: "BB" },
-                        { name: "Attribute_16", type: "string", belongsTo: "CC" },
-                        { name: "Attribute_17", type: "number", belongsTo: "DD" },
-                        { name: "Attribute_18", type: "boolean", belongsTo: "EE" },
-                        { name: "Attribute_19", type: "Date", belongsTo: "FF" },
+                        { name: "Attribute_8", type: "boolean", belongsTo: "OP", id: "194d3686e6a-12d4f9" },
+                        { name: "Attribute_9", type: "Date", belongsTo: "QR", id: "194d3686e6a-125ce6" },
+                        { name: "Attribute_10", type: "object", belongsTo: "ST", id: "194d3686e6a-00a0c5" },
+                        { name: "Attribute_11", type: "string", belongsTo: "UV", id: "194d3686e6a-144c1b" },
+                        { name: "Attribute_12", type: "number", belongsTo: "WX", id: "194d3686e6a-0eda68" },
+                        { name: "Attribute_13", type: "boolean", belongsTo: "YZ", id: "194d3686e6a-0b9c3a" },
+                        { name: "Attribute_14", type: "Date", belongsTo: "AA", id: "194d3686e6a-04b7df" },
+                        { name: "Attribute_15", type: "object", belongsTo: "BB", id: "194d3686e6a-0f1e64" },
+                        { name: "Attribute_16", type: "string", belongsTo: "CC", id: "194d3686e6a-05d9c3" },
+                        { name: "Attribute_17", type: "number", belongsTo: "DD", id: "194d3686e6a-06c9a4" },
+                        { name: "Attribute_18", type: "boolean", belongsTo: "EE", id: "194d3686e6a-0a12b7" },
+                        { name: "Attribute_19", type: "Date", belongsTo: "FF", id: "194d3686e6a-08fd6e" }
                       ]
                     },
                     {
@@ -302,12 +302,12 @@ let initialNodes = [
                       name: "Edge",
                       id: '194c3ff3762-16f298',
                       props: [
-                        { name: "FirstName", type: "string", belongsTo: "AB" },
-                        { name: "LastName", type: "string", belongsTo: "CD" },
-                        { name: "Age", type: "number", belongsTo: "EF" },
-                        { name: "IsActive", type: "boolean", belongsTo: "GH" },
-                        { name: "CreatedAt", type: "Date", belongsTo: "IJ" },
-                        { name: "Address", type: "object", belongsTo: "KL" },
+                        { name: "FirstName", type: "string", belongsTo: "AB", id: "194d36a4fa3-08dae3" },
+                        { name: "LastName", type: "string", belongsTo: "CD", id: "194d36a4fa3-02e7fb" },
+                        { name: "Age", type: "number", belongsTo: "EF", id: "194d36a4fa3-03286e" },
+                        { name: "IsActive", type: "boolean", belongsTo: "GH", id: "194d36a4fa3-0128af" },
+                        { name: "CreatedAt", type: "Date", belongsTo: "IJ", id: "194d36a4fa3-0ab8d9" },
+                        { name: "Address", type: "object", belongsTo: "KL", id: "194d36a4fa3-0f983d" }
                       ]
                     },
                     {
@@ -316,17 +316,17 @@ let initialNodes = [
                       name: "ZoomScale",
                       id: '194c3ff3762-037d40',
                       props: [
-                        { name: "PhoneNumber", type: "string", belongsTo: "MN" },
-                        { name: "Email", type: "string", belongsTo: "OP" },
-                        { name: "Salary", type: "number", belongsTo: "QR" },
-                        { name: "IsVerified", type: "boolean", belongsTo: "ST" },
-                        { name: "HireDate", type: "Date", belongsTo: "UV" },
-                        { name: "Department", type: "string", belongsTo: "WX" },
-                        { name: "Role", type: "string", belongsTo: "YZ" },
-                        { name: "ProjectDetails", type: "object", belongsTo: "AA" },
-                        { name: "Country", type: "string", belongsTo: "BB" },
-                        { name: "City", type: "string", belongsTo: "CC" },
-                        { name: "PostalCode", type: "string", belongsTo: "DD" },
+                        { name: "PhoneNumber", type: "string", belongsTo: "MN", id: "194d36c42f2-055ae8" },
+                        { name: "Email", type: "string", belongsTo: "OP", id: "194d36c42f2-03f881" },
+                        { name: "Salary", type: "number", belongsTo: "QR", id: "194d36c42f2-072e2c" },
+                        { name: "IsVerified", type: "boolean", belongsTo: "ST", id: "194d36c42f2-09398c" },
+                        { name: "HireDate", type: "Date", belongsTo: "UV", id: "194d36c42f2-111ac1" },
+                        { name: "Department", type: "string", belongsTo: "WX", id: "194d36c42f2-05ad85" },
+                        { name: "Role", type: "string", belongsTo: "YZ", id: "194d36c42f2-01d8b0" },
+                        { name: "ProjectDetails", type: "object", belongsTo: "AA", id: "194d36c42f2-06b112" },
+                        { name: "Country", type: "string", belongsTo: "BB", id: "194d36c42f2-13ab7e" },
+                        { name: "City", type: "string", belongsTo: "CC", id: "194d36c42f2-079302" },
+                        { name: "PostalCode", type: "string", belongsTo: "DD", id: "194d36c42f2-14cf29" }
                       ]
                     },
                   ],

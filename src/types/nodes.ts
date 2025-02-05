@@ -187,7 +187,7 @@ export type AttributeContent = {
   id: UniqueId,
   name: string, 
   type?: string, // type of the attribute 
-  belongsTo: UniqueId, //id of Node that created props for the first time 
+  belongsTo?: UniqueId, //id of Node that created props for the first time 
 }
 
 export type ReactInBuiltAttributeContent = {
@@ -298,7 +298,8 @@ export type AttributeData = {
 export type PipeContentWrapperProps = {
   showProps: boolean,
   pipe: Pipe,
-  nodeId: UniqueId
+  nodeId: UniqueId,
+  handlePropGoingInToChild: (pipe: Pipe) => void,
 }
 
 export type PipeContentPropWrapperProps = {
