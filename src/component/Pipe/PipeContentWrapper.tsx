@@ -13,10 +13,9 @@ const PipeContentWrapper = ({
     pipe,
     showProps,
     nodeId,
-    handlePropGoingInToChild
+    displayPropsData
 }: PipeContentWrapperProps) => {
 
-    console.log("showProps", showProps, pipe);
     const store = useStoreApi();
     const { setNodes, getNodes } = store.getState();
     const { findNodeById } = useFindNodeById();
@@ -130,7 +129,7 @@ const PipeContentWrapper = ({
         handleUpdateAttributeContent('none');
         //2.
         if (showProps) {
-            handlePropGoingInToChild(pipe);
+            displayPropsData(pipe);
         }
     }
 
@@ -178,14 +177,24 @@ const PipeContentWrapper = ({
                     >+</button>}
 
                 {pipe.state == 'editing' &&
-                    <div className="relative">
+                    <div className="relative flex">
                         <input ref={contentNameRef} style={{ width: '120px' }} />
                         <span>: </span>
                         <input ref={contentTypeRef} style={{ width: '120px' }} />
-                        <div className="absolute bg-white right-[-15px] top-[0px]">
-                            <button onClick={() => handleUpdateAttributeContent('add')}>+</button>
+                        <div >
+                            <button 
+                                className="bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold px-2 rounded-xl"
+                                onClick={() => handleUpdateAttributeContent('add')}
+                            >
+                                +
+                            </button>
                             {/**change current pipe'state to be 'none' */}
-                            <button onClick={() => handleUpdateAttributeContent('cancelAdd')}>x</button>
+                            <button 
+                                className="bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold px-2 rounded-xl"
+                                onClick={() => handleUpdateAttributeContent('cancelAdd')}
+                            >
+                                x
+                            </button>
                         </div>
                     </div>
                 }

@@ -231,7 +231,6 @@ const ReactNode = ({
     const handlePropGoingInToChild = (pipe: Pipe) => {
        
         setExpandedAttributes((prev) => {
-            console.log("pipe clicked ", pipe, prev);
             if (prev.includes(pipe.id)) {
                 return prev.filter((name) => name !== pipe.id);
             }
@@ -239,6 +238,7 @@ const ReactNode = ({
             return [...prev, pipe.id];
         });
     }
+    
 
     const displayPropsData = (pipe: Pipe) => {
         setExpandedProps((prev) => {

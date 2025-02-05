@@ -220,7 +220,7 @@ const ReactChildrenWrapper = ({
                                             }
                                             {  // circle data when pipe is clicked , showing input when in 'editing' state 
                                                 (showProps || pipe.state == 'editing') &&
-                                                    <PipeContentWrapper pipe={pipe} showProps={showProps} nodeId={child.id} handlePropGoingInToChild={handlePropGoingInToChild}/>
+                                                    <PipeContentWrapper pipe={pipe} showProps={showProps} nodeId={child.id} displayPropsData={displayPropsData}/>
                                             }
                                             {/*    <div
                                                     id="propContent"

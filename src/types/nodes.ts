@@ -299,7 +299,7 @@ export type PipeContentWrapperProps = {
   showProps: boolean,
   pipe: Pipe,
   nodeId: UniqueId,
-  handlePropGoingInToChild: (pipe: Pipe) => void,
+  displayPropsData: (pipe: Pipe) => void,
 }
 
 export type PipeContentPropWrapperProps = {
