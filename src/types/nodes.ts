@@ -304,5 +304,9 @@ export type PipeContentWrapperProps = {
 
 export type PipeContentPropWrapperProps = {
   propContent: AttributeContent,
+  nodeId: UniqueId,
+  pipeId: UniqueId,
   handleUpdateAttributeContent?: (option: string, contentId: UniqueId, data?: AttributeData)=> void,
+  setIsWriting: React.Dispatch<React.SetStateAction<string[]>>,
+  isWriting: string[],
 }

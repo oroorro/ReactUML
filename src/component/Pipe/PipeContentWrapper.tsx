@@ -22,6 +22,7 @@ const PipeContentWrapper = ({
 
     const contentNameRef = useRef<HTMLInputElement>(null);
     const contentTypeRef = useRef<HTMLInputElement>(null);
+    const [isWriting, setIsWriting] = useState<string[]>([]);
 
     const handleUpdateAttributeContent = (option: string, contentId: UniqueId = '-', data?: AttributeData) => {
 
@@ -153,8 +154,12 @@ const PipeContentWrapper = ({
                         // <AttributeContentWrapper content={propContent} />
                         <div className="flex">
                             <PipeContentPropWrapper
+                                nodeId={nodeId}
+                                pipeId={pipe.id}
                                 propContent={propContent}
                                 handleUpdateAttributeContent={handleUpdateAttributeContent}
+                                setIsWriting={setIsWriting}
+                                isWriting={isWriting}
                             />
                             {/** removing prop's content when options button is clicked within this pipe */}
                             {pipe.state == 'showOptions' && <button

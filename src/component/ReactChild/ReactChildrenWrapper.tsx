@@ -2,9 +2,14 @@ import type { ReactChildrenWrapperProps, Attribute, Node, NodeState } from "../.
 import { useStoreApi } from "../../hook/useStore";
 import AttributeIconWrapper from "../NodeAttribute/AttributeIconWrapper";
 import PipeContentWrapper from '../Pipe/PipeContentWrapper'
-const PIPE_WIDTH_VERTICAL = 13;
-const PIPE_HEIGHT_VERTICAL = 5;
-const PIPE_WIDTH_HORIZONTAL = 5;
+// const PIPE_WIDTH_VERTICAL = 13;
+// const PIPE_HEIGHT_VERTICAL = 5;
+// const PIPE_WIDTH_HORIZONTAL = 5;
+// const PIPE_HEIGHT_HORIZONTAL = 13;
+
+const PIPE_WIDTH_VERTICAL = 20;
+const PIPE_HEIGHT_VERTICAL = 7;
+const PIPE_WIDTH_HORIZONTAL = 10;
 const PIPE_HEIGHT_HORIZONTAL = 13;
 
 
