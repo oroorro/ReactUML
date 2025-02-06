@@ -163,7 +163,7 @@ export type Pipe = {
   props: AttributeContent[], //will be using AttributeContent type since, it has all of necessary data type, we may change the name of AttributeContent in the future 
   //props = {name:string, type:string, belongsTo:string }
   mute?: boolean,
-  state?: 'editing' | 'none' | 'selected' | 'showOptions'
+  state?: 'editing' | 'none' | 'selected' | 'showOptions' | 'selecting'
 }
 
 export type ReactNodeType = {
@@ -171,7 +171,7 @@ export type ReactNodeType = {
 }
 
 export type MuteOption = 'muting' | 'notMuted' | 'mute';
-export type NodeState = MuteOption | 'copy' | 'delete' | 'select' | 'none';
+export type NodeState = MuteOption | 'copy' | 'delete' | 'select' | 'none' | 'selectingPipe';
 
 export type Attribute = {
   nameOfAttribute: string, // can be Hook, var, function, reactInbuilt (API, Hook), import, export 

@@ -525,10 +525,11 @@ function Flow() {
 
   const moveToSubMenu = (type) => {
 
+    console.log("moveToSubMenu", type);
     setContextMenu(prev => {
       return {
         nodeId: prev.nodeId,
-        nodeType: 'Node',
+        nodeType: prev.nodeType,
         left: prev.left,
         top: prev.top,
         detail: type,
@@ -695,14 +696,16 @@ function Flow() {
     }else if(target == 'pipe'){
       const ids = contextMenu.nodeId.split('+'); // id[0] is nodeid and id[1] is pipe id
       let foundNode = findNodeById(ids[0], updatedRoot);
-      const pipe = foundNode.pipes.find((pipe)=> pipe.id == ids[1]);
-
-      pipe.state = state;
-      //console.log("pipe attribute", pipe);
-
+      if(state == 'selectingPipe'){
+        console.log("selectingPipe");
+        foundNode.state = state;
+      }else{
+        const pipe = foundNode.pipes.find((pipe)=> pipe.id == ids[1]);
+        pipe.state = state;
+      }
+      console.log("foundNode", foundNode);
+      // console.log("pipe", pipe, "state changing into", state);
     }
-    
-
   }
 
 
@@ -812,6 +815,7 @@ function Flow() {
           {!contextMenu.detail && <button onClick={() => moveToSubMenu("create")}>Create</button>}
           {!contextMenu.detail && <button >Delete</button>}
           {!contextMenu.detail && <button onClick={() => moveToSubMenu("mute-2nd")}> Mute </button>}
+
           {contextMenu.detail == 'create' && <button onClick={() => updateElement('Node')}> Node </button>}
           {contextMenu.detail == 'create' && <button onClick={() => updateElement('Prop')}> Prop </button>}
           {contextMenu.detail == 'create' && <button onClick={() => moveToSubMenu("create-attribute-2nd")}> Attribute </button>}
@@ -845,7 +849,7 @@ function Flow() {
       {contextMenu && contextMenu.nodeType === 'pipe' &&
         <div
           style={{
-            backgroundColor: 'grey',
+            backgroundColor: 'aliceblue',
             width: '50px',
             height: '50px',
             position: 'absolute',
@@ -856,9 +860,17 @@ function Flow() {
           id={contextMenu.nodeId}
           datatype="contextMenu"
         >
-          <button datatype="contextMenu" onClick={() => updateElement()}>create</button>
-          <button datatype="contextMenu" onClick={() => elementStateHandler('pipe', 'editing')} >add</button>
-        </div>}
+         { !contextMenu.detail && <button datatype="contextMenu" onClick={() => moveToSubMenu("mute-2nd-pipe")}>Mute</button>}
+          {!contextMenu.detail &&<button datatype="contextMenu" onClick={() => elementStateHandler('pipe', 'editing')} >add</button>}
+
+          {contextMenu.detail == 'mute-2nd-pipe' &&
+            <div className='flex flex-col' datatype="contextMenu">
+              <button onClick={() => elementStateHandler('node', 'mute')}> all </button>
+              <button onClick={() => elementStateHandler('pipe', 'selectingPipe')}> select </button>
+            </div>
+          }
+        </div>
+      }
       {contextMenu && contextMenu.nodeType === 'Attribute' &&
         <div
           style={{

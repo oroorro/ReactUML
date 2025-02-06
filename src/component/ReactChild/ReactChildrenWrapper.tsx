@@ -18,7 +18,7 @@ const ReactChildrenWrapper = ({
     renderChildren,
     expandedAttributes,
     expandedprops,
-    state,
+    state, //refers to current node's parent state 
     level,
     parentId,
     handleUnmute,
@@ -136,6 +136,7 @@ const ReactChildrenWrapper = ({
                     //console.log(child.title, "filtered unmuted:", filteredUnMutedAttribute, "filtered muted",filteredMutedAttribute, "filtered muting", filteredMutingAttribute)
                 }
 
+                console.log("child", child, state);
                 return (
 
                     <div
@@ -164,12 +165,19 @@ const ReactChildrenWrapper = ({
                             >
 
                                 {/** rendering numbers of props going in to child*/}
-                                {state == 'select' && <input style={{ width: '18px', height: '18px' }} type="checkbox" />}
-                                <div
-                                    datatype='pipe'
-                                    className='bg-white hover:bg-gray-300'
-                                    style={{ width: '18px', height: '18px', position: 'relative', left: '-5px' }}>
-                                    {child.numbersOfPropsGoingIn}
+                                {(state == 'select') && <input style={{ width: '18px', height: '18px' }} type="checkbox" />}
+                                
+                                <div className="flex">
+                                    <div
+                                        datatype='pipe'
+                                        className='bg-white hover:bg-gray-300'
+                                        style={{ width: '18px', height: '18px', position: 'relative', left: '-5px' }}>
+                                        {child.numbersOfPropsGoingIn}
+                                        
+                                    </div>
+                                    {child.state == 'selectingPipe' && 
+                                        <span className='bg-white hover:bg-gray-200 ml-2 px-1 rounded '>Done</span>
+                                    }
                                 </div>
 
 
@@ -220,53 +228,15 @@ const ReactChildrenWrapper = ({
 
                                                     >
                                                     </div>
-                                                    {state == 'select' && <input style={{ width: '13px', height: '13px' }} type="checkbox" />}
+                                                    {(state == 'select' || child.state == 'selectingPipe')&& 
+                                                        <input style={{ width: '13px', height: '13px' }} type="checkbox" 
+                                                    />}
                                                 </div>
                                             }
                                             {  // circle data when pipe is clicked , showing input when in 'editing' state 
                                                 (showProps || pipe.state == 'editing') &&
                                                     <PipeContentWrapper pipe={pipe} showProps={showProps} nodeId={child.id} displayPropsData={displayPropsData}/>
                                             }
-                                            {/*    <div
-                                                    id="propContent"
-                                                    className={(showProps || pipe.state == 'editing') ? 'pipeElementExpanded py-1' : 'pipeElement'}
-                                                    style={{
-                                                        "--bg-color": pipe.color,
-                                                      
-                                                        borderRadius: '15px',
-                                                        lineHeight: '13px'
-                                                    } as React.CSSProperties & {
-                                                        [key: string]: any
-                                                    }}
-                                                >
-                                                    {pipe.props && pipe.props.map(prop => {
-                                                        return (
-                                                            <div
-
-                                                                className="attributeContentWrapper border-2 border-transparent hover:bg-[#FFFFFF]">
-                                                                <span className="hover:bg-[#E8E8E8] transition duration-300 rounded-md px-1">{prop.name}</span>
-                                                                <span>: </span>
-                                                                <span className="hover:bg-[#E8E8E8] transition duration-300 rounded-md px-1" >{prop.type}</span>
-                                                            </div>
-                                                        )
-                                                    }
-                                                    )}
-
-                                                    {pipe.state == 'editing' &&
-                                                        <div className="relative">
-                                                            <input style={{ width: '120px' }} />
-                                                            <span>: </span>
-                                                            <input style={{ width: '120px' }} />
-                                                            <div className="absolute bg-white right-[-15px] top-[0px]">
-                                                                <button >+</button>
-                                                               
-                                                                <button>x</button>
-                                                            </div>
-                                                        </div>
-                                                    }
-
-                                                </div>
-                                            } */}
                                             
                                             {false && pipe.state == 'editing' && 
                                             <div>
@@ -331,37 +301,10 @@ const ReactChildrenWrapper = ({
                                                             </div>
                                                         </div>}
 
-                                                    {/* {state == 'select' && child.type != 'ghost' &&
-                                                        <button className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded'
-                                                            onClick={() => updateNode(child.color, '-', { target: 'node', state: 'mute', muteOptions: 'mute' })}
-                                                            title="Mute Node"
-                                                        >M</button>
-                                                    } */}
-
-
-
                                                     {child.type != 'ghost' && <div className='NodePositionWrapper relative'
                                                         datatype='Node'
                                                         data-id={`${pipe.color}`}
                                                     >
-
-                                                        {/* {state == 'select' && 
-                                                        
-                                                        <div className='flex absolute top-[0px] right-[0px] flex-col'>
-                                                            <div className='bg-white hover:bg-gray-300 px-1.5'
-                                                                onClick={() => updateNode(parentId, child.id, { target: 'node', state: 'mute', muteOptions: 'notMuted' })}
-                                                                title='unmute Node'
-                                                            >
-                                                                U
-                                                            </div>
-                                                            <div className='bg-white hover:bg-gray-300 px-1.5'
-                                                                onClick={() => updateNode(parentId, child.id, { target: 'node', state: 'mute', muteOptions: 'mute' })}
-                                                                title='mute back Node'
-                                                            >
-                                                                {"<"}
-                                                            </div>
-                                                        </div>
-                                                        } */}
                                                         {state == 'select' && child.type != 'ghost' &&
                                                             <button className='absolute top-[0px] right-[0px] bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded'
                                                                 onClick={() => updateNode(child.id, child.id, { target: 'node', state: 'mute', muteOptions: 'mute' })}
