@@ -163,7 +163,7 @@ export type Pipe = {
   props: AttributeContent[], //will be using AttributeContent type since, it has all of necessary data type, we may change the name of AttributeContent in the future 
   //props = {name:string, type:string, belongsTo:string }
   mute?: boolean,
-  state?: 'editing' | 'none' | 'selected' | 'showOptions' | 'selecting'
+  state?: 'editing' | 'none' | 'selected' | 'showOptions' | 'selecting' | 'muted'
 }
 
 export type ReactNodeType = {
@@ -309,4 +309,30 @@ export type PipeContentPropWrapperProps = {
   handleUpdateAttributeContent?: (option: string, contentId: UniqueId, data?: AttributeData)=> void,
   setIsWriting: React.Dispatch<React.SetStateAction<string[]>>,
   isWriting: string[],
+}
+
+export type PipeWrapperProps =  Pick<ReactChildrenWrapperProps,
+ | 'updateNode'
+ | 'renderChildren'
+ | 'displayPropsData'
+ | 'handlePropGoingInToChild'
+ | 'parentId'
+ | 'level'
+ | 'handleUnmute' 
+ | 'state'
+ | 'handleClickOnAttribute'
+ | 'attributeColors'
+ | 'expandedAttributes'
+ | 'expandedprops'
+  > & {
+  pipe: Pipe,
+  indexOfCurrentPipe: number,
+  child: ReactChild,
+  mutedAttributeCount: number,
+  filteredMutingAttribute: Attribute[],
+  filteredUnMutedAttribute: Attribute[],
+  changeMutingToMuted:()=> void,
+  updateStatesInArray: ()=> void,
+  setUpdatingPipeIds: React.Dispatch<React.SetStateAction<UniqueId[]>>,
+  mutedPipeAmount: number,
 }

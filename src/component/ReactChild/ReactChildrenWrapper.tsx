@@ -1,7 +1,10 @@
-import type { ReactChildrenWrapperProps, Attribute, Node, NodeState } from "../../types";
+import type { ReactChildrenWrapperProps, Pipe, Attribute, Node, NodeState, UniqueId, ReactChild } from "../../types";
 import { useStoreApi } from "../../hook/useStore";
 import AttributeIconWrapper from "../NodeAttribute/AttributeIconWrapper";
 import PipeContentWrapper from '../Pipe/PipeContentWrapper'
+import PipeWrapper from "../Pipe/PipeWrapper";
+import { useState, useEffect } from "react";
+import { useFindNodeById } from "../../hook/useFindNodeById";
 // const PIPE_WIDTH_VERTICAL = 13;
 // const PIPE_HEIGHT_VERTICAL = 5;
 // const PIPE_WIDTH_HORIZONTAL = 5;
@@ -31,8 +34,12 @@ const ReactChildrenWrapper = ({
 
 }: ReactChildrenWrapperProps) => {
 
+
     const store = useStoreApi();
     const { setNodes, getNodes, indexMap } = store.getState();
+    const [updatingPipeIds, setUpdatingPipeIds] = useState<UniqueId[]>([]);
+    const {findNodeById} = useFindNodeById();
+    
 
     return (
         <div>
@@ -134,11 +141,45 @@ const ReactChildrenWrapper = ({
                     mutedAttributeCount = filteredMutedAttribute.length;
                     //console.log("mutedAttributeCount", mutedAttributeCount);
                     //console.log(child.title, "filtered unmuted:", filteredUnMutedAttribute, "filtered muted",filteredMutedAttribute, "filtered muting", filteredMutingAttribute)
+                } 
+
+
+
+                const updatePipeState = () =>{
+                    //get Node with child.id 
+                    const nodes = getNodes();
+
+                    const reactChild: ReactChild[] = [nodes[0].data];
+
+                    let node = findNodeById(child.id, reactChild);
+
+                    if(node){
+                        //get it's pipes 
+                        //shallow copy the pipes 
+                        const copiedPipes:Pipe[] = [...node?.pipes];
+
+                        //iterate pipes and see if it exist in updatingPipeIds
+                        copiedPipes.forEach((pipe)=>{
+                            //if it does exist, change it's state in shallow copied pipes 
+                            const targetPipe = updatingPipeIds.find((id)=> id == pipe.id);
+                            if(targetPipe){
+                                pipe.state = 'muted'
+                            }
+                        })
+                        console.log("copiedPipes", copiedPipes);
+                        //re-assign shallow copied pipes as retrived node's pipes 
+
+                        //call setNodes to update the changes 
+
+                    }else{
+                        console.warn('node couldnt be found');
+                    }
                 }
 
-                console.log("child", child, state);
-                return (
+                //filter muted 
+                const mutedPipe = child.pipes.filter((pipe)=> pipe.state == 'muted');
 
+                return (
                     <div
                         key={index}
                         style={{
@@ -176,12 +217,14 @@ const ReactChildrenWrapper = ({
                                         
                                     </div>
                                     {child.state == 'selectingPipe' && 
-                                        <span className='bg-white hover:bg-gray-200 ml-2 px-1 rounded '>Done</span>
+                                        <span className='bg-white hover:bg-gray-200 ml-2 px-1 rounded '
+                                            onClick={()=>updatePipeState()}
+                                        >Done</span>
                                     }
                                 </div>
 
-
-                                {child.pipes.map((pipe, i) => {
+                                
+                                {false && child.pipes.map((pipe, i) => {
                                     const isExpanded: boolean = expandedAttributes.includes(pipe.id);
                                     const showProps: boolean = expandedprops.includes(pipe.id);
 
@@ -430,6 +473,55 @@ const ReactChildrenWrapper = ({
                                     )
 
                                 })}
+
+                                {child.pipes.map((pipe, i) => {
+
+                                    return (
+                                    <PipeWrapper
+                                        key={i} 
+                                        pipe={pipe}
+                                        attributeColors={attributeColors}
+                                        parentId={parentId}
+                                        displayPropsData={displayPropsData}
+                                        handlePropGoingInToChild={handlePropGoingInToChild}
+                                        indexOfCurrentPipe={i}
+                                        child={child}
+                                        state={state}
+                                        mutedAttributeCount={mutedAttributeCount}
+                                        filteredMutingAttribute={filteredMutingAttribute}
+                                        filteredUnMutedAttribute={filteredUnMutedAttribute}
+                                        updateNode={updateNode}
+                                        renderChildren={renderChildren}
+                                        level={level}
+                                        handleUnmute={handleUnmute}
+                                        handleClickOnAttribute={handleClickOnAttribute}
+                                        expandedAttributes={expandedAttributes}
+                                        expandedprops={expandedprops}
+                                        updateStatesInArray={updateStatesInArray}
+                                        changeMutingToMuted={changeMutingToMuted}
+                                        setUpdatingPipeIds={setUpdatingPipeIds}
+                                        mutedPipeAmount={mutedPipe.length}
+                                    />
+                                    )
+                                })}
+                                {/* {mutedPipe && 
+                                    <div>
+                                        <div
+                                            style={{
+                                                height: `${PIPE_HEIGHT_HORIZONTAL}px`,
+                                                width: `${PIPE_WIDTH_HORIZONTAL}px`,
+                                                position: 'relative',
+                                                backgroundColor: 'white',
+                                                
+                                                boxShadow: '0 -5px 5px -5px #333',
+                                            } as React.CSSProperties & { [key: string]: any }}
+                                           
+                                            className='pipeElement'
+
+                                        >
+                                        </div>
+                                    </div>
+                                } */}
 
                             </div>
                         </div>
