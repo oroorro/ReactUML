@@ -18,6 +18,7 @@ import { type } from '@testing-library/user-event/dist/type';
 
 import { useStoreApi } from './hook/useStore';  // does not work since it is above the store level 
 
+
 const NodeIndexInArray = {
   '1qlx7vx-jj26d3': '#dfe7f5', //ZoomPane
   '1qlx7vx-107d1f' : '#ffa8d5',  //NodeRenderer
@@ -201,7 +202,7 @@ let initialNodes = [
               color: '#dfe7f5',
               numbersOfProps: 18,
               name: "Node",
-              id: 'X2'
+              id: '194c3ff3761-09dc10'
             },
           ],
           children: [
@@ -215,12 +216,13 @@ let initialNodes = [
                 {
                   color: '#dfe7f5',
                   numbersOfProps: 8,
-                  //props
+                  id: '194c3ff3761-07d567',
                   name: "Node",
                 },
                 {
                   color: '#ffa8d5',
                   numbersOfProps: 7,
+                  id: '194c3ff3761-183b89',
                   name: "Edge",
                 },
               ],
@@ -266,65 +268,65 @@ let initialNodes = [
                       color: '#dfe7f5',
                       numbersOfProps: 4,
                       name: "Node",
-                      id: 'XI',
+                      id: '194c3ff3761-1597d2',
                       props: [
-                        { name: "Attribute_1", type: "string", belongsTo: "AB" },
-                        { name: "Attribute_2", type: "number", belongsTo: "CD" },
-                        { name: "Attribute_3", type: "boolean", belongsTo: "EF" },
-                        { name: "Attribute_4", type: "Date", belongsTo: "GH" },
+                        { name: "Attribute_1", type: "string", id: '194c3ff3762-185170'},
+                        { name: "Attribute_2", type: "number", id: '194c3ff3762-04eb6c'},
+                        { name: "Attribute_3", type: "boolean", id: '194c3ff3762-0bf8ac' },
+                        { name: "Attribute_4", type: "Date",  id: '194c3ff3762-09dcac' },
                       ]
                     },
                     {
                       color: '#ffa8d5',
                       numbersOfProps: 11,
                       name: "Edge",
-                      id: 'G8',
+                      id: '194c3ff3762-094898',
                       props: [
-                        { name: "Attribute_8", type: "boolean", belongsTo: "OP" },
-                        { name: "Attribute_9", type: "Date", belongsTo: "QR" },
-                        { name: "Attribute_10", type: "object", belongsTo: "ST" },
-                        { name: "Attribute_11", type: "string", belongsTo: "UV" },
-                        { name: "Attribute_12", type: "number", belongsTo: "WX" },
-                        { name: "Attribute_13", type: "boolean", belongsTo: "YZ" },
-                        { name: "Attribute_14", type: "Date", belongsTo: "AA" },
-                        { name: "Attribute_15", type: "object", belongsTo: "BB" },
-                        { name: "Attribute_16", type: "string", belongsTo: "CC" },
-                        { name: "Attribute_17", type: "number", belongsTo: "DD" },
-                        { name: "Attribute_18", type: "boolean", belongsTo: "EE" },
-                        { name: "Attribute_19", type: "Date", belongsTo: "FF" },
+                        { name: "Attribute_8", type: "boolean", belongsTo: "OP", id: "194d3686e6a-12d4f9" },
+                        { name: "Attribute_9", type: "Date", belongsTo: "QR", id: "194d3686e6a-125ce6" },
+                        { name: "Attribute_10", type: "object", belongsTo: "ST", id: "194d3686e6a-00a0c5" },
+                        { name: "Attribute_11", type: "string", belongsTo: "UV", id: "194d3686e6a-144c1b" },
+                        { name: "Attribute_12", type: "number", belongsTo: "WX", id: "194d3686e6a-0eda68" },
+                        { name: "Attribute_13", type: "boolean", belongsTo: "YZ", id: "194d3686e6a-0b9c3a" },
+                        { name: "Attribute_14", type: "Date", belongsTo: "AA", id: "194d3686e6a-04b7df" },
+                        { name: "Attribute_15", type: "object", belongsTo: "BB", id: "194d3686e6a-0f1e64" },
+                        { name: "Attribute_16", type: "string", belongsTo: "CC", id: "194d3686e6a-05d9c3" },
+                        { name: "Attribute_17", type: "number", belongsTo: "DD", id: "194d3686e6a-06c9a4" },
+                        { name: "Attribute_18", type: "boolean", belongsTo: "EE", id: "194d3686e6a-0a12b7" },
+                        { name: "Attribute_19", type: "Date", belongsTo: "FF", id: "194d3686e6a-08fd6e" }
                       ]
                     },
                     {
                       color: 'blue',
                       numbersOfProps: 6,
                       name: "Edge",
-                      id: 'L0',
+                      id: '194c3ff3762-16f298',
                       props: [
-                        { name: "FirstName", type: "string", belongsTo: "AB" },
-                        { name: "LastName", type: "string", belongsTo: "CD" },
-                        { name: "Age", type: "number", belongsTo: "EF" },
-                        { name: "IsActive", type: "boolean", belongsTo: "GH" },
-                        { name: "CreatedAt", type: "Date", belongsTo: "IJ" },
-                        { name: "Address", type: "object", belongsTo: "KL" },
+                        { name: "FirstName", type: "string", belongsTo: "AB", id: "194d36a4fa3-08dae3" },
+                        { name: "LastName", type: "string", belongsTo: "CD", id: "194d36a4fa3-02e7fb" },
+                        { name: "Age", type: "number", belongsTo: "EF", id: "194d36a4fa3-03286e" },
+                        { name: "IsActive", type: "boolean", belongsTo: "GH", id: "194d36a4fa3-0128af" },
+                        { name: "CreatedAt", type: "Date", belongsTo: "IJ", id: "194d36a4fa3-0ab8d9" },
+                        { name: "Address", type: "object", belongsTo: "KL", id: "194d36a4fa3-0f983d" }
                       ]
                     },
                     {
                       color: '#f26d1f',
                       numbersOfProps: 11,
                       name: "ZoomScale",
-                      id: 'K6',
+                      id: '194c3ff3762-037d40',
                       props: [
-                        { name: "PhoneNumber", type: "string", belongsTo: "MN" },
-                        { name: "Email", type: "string", belongsTo: "OP" },
-                        { name: "Salary", type: "number", belongsTo: "QR" },
-                        { name: "IsVerified", type: "boolean", belongsTo: "ST" },
-                        { name: "HireDate", type: "Date", belongsTo: "UV" },
-                        { name: "Department", type: "string", belongsTo: "WX" },
-                        { name: "Role", type: "string", belongsTo: "YZ" },
-                        { name: "ProjectDetails", type: "object", belongsTo: "AA" },
-                        { name: "Country", type: "string", belongsTo: "BB" },
-                        { name: "City", type: "string", belongsTo: "CC" },
-                        { name: "PostalCode", type: "string", belongsTo: "DD" },
+                        { name: "PhoneNumber", type: "string", belongsTo: "MN", id: "194d36c42f2-055ae8" },
+                        { name: "Email", type: "string", belongsTo: "OP", id: "194d36c42f2-03f881" },
+                        { name: "Salary", type: "number", belongsTo: "QR", id: "194d36c42f2-072e2c" },
+                        { name: "IsVerified", type: "boolean", belongsTo: "ST", id: "194d36c42f2-09398c" },
+                        { name: "HireDate", type: "Date", belongsTo: "UV", id: "194d36c42f2-111ac1" },
+                        { name: "Department", type: "string", belongsTo: "WX", id: "194d36c42f2-05ad85" },
+                        { name: "Role", type: "string", belongsTo: "YZ", id: "194d36c42f2-01d8b0" },
+                        { name: "ProjectDetails", type: "object", belongsTo: "AA", id: "194d36c42f2-06b112" },
+                        { name: "Country", type: "string", belongsTo: "BB", id: "194d36c42f2-13ab7e" },
+                        { name: "City", type: "string", belongsTo: "CC", id: "194d36c42f2-079302" },
+                        { name: "PostalCode", type: "string", belongsTo: "DD", id: "194d36c42f2-14cf29" }
                       ]
                     },
                   ],
@@ -339,31 +341,31 @@ let initialNodes = [
                       color: '#dfe7f5',
                       numbersOfProps: 5,
                       name: "Node",
-                      id: 'E3'
+                      id: '194c3ff3762-068b33'
                     },
                     {
                       color: '#ffa8d5',
                       numbersOfProps: 52,
                       name: "Edge",
-                      id: 'P3'
+                      id: '194c3ff3762-1390bf'
                     },
                     {
                       color: 'green',
                       numbersOfProps: 3,
                       name: "Edge",
-                      id: 'H3'
+                      id: '194c3ff3762-02e023'
                     },
                     {
                       color: 'blue',
                       numbersOfProps: 11,
                       name: "Edge",
-                      id: 'U3'
+                      id: '194c3ff3762-12cc15'
                     },
                     {
                       color: '#f26d1f',
                       numbersOfProps: 1,
                       name: "ZoomScale",
-                      id: 'R3'
+                      id: '194c3ff3762-0d0e6a'
                     },
                   ],
                 },
@@ -376,7 +378,7 @@ let initialNodes = [
                       color: '#dfe7f5',
                       numbersOfProps: 5,
                       name: "Node",
-                      id: 'E3'
+                      id: '194c3ff3762-040828'
                     },
                   ]
                 }
@@ -394,7 +396,7 @@ let initialNodes = [
               color: '#dfe7f5',
               numbersOfProps: 2,
               name: "InitialNodes[]",
-              id: 'K3'
+              id: '194c3ff3762-091b09'
             },
           ],
         },
@@ -413,6 +415,7 @@ function generateUniqueId() {
 }
 
 
+//used for creating Pipe 
 const ghostChild = {
   title: 'ghost',
   numbersOfPropsGoingIn: 1,
@@ -423,7 +426,7 @@ const ghostChild = {
       color: '#dfe7f5',
       numbersOfProps: 18,
       name: "Node",
-      id: 'X2'
+      id: generateUniqueId(),
     },
   ],
   attributes: [],
@@ -480,6 +483,9 @@ function Flow() {
         },
       ];
     }
+    else if(type == 'Pipe'){
+
+    }
     //creating Node and Prop
     else {
 
@@ -519,10 +525,11 @@ function Flow() {
 
   const moveToSubMenu = (type) => {
 
+    console.log("moveToSubMenu", type);
     setContextMenu(prev => {
       return {
         nodeId: prev.nodeId,
-        nodeType: 'Node',
+        nodeType: prev.nodeType,
         left: prev.left,
         top: prev.top,
         detail: type,
@@ -670,9 +677,10 @@ function Flow() {
   const updateElementState = (target, root, nodeId, state) => { 
     const updatedRoot = [...root];
     // let currentNode = updatedRoot;
-    let foundNode = findNodeById(nodeId, updatedRoot);
+    // let foundNode = findNodeById(nodeId, updatedRoot);
 
     if(target == 'node'){
+      let foundNode = findNodeById(nodeId, updatedRoot);
       if (state == 'mute') {
         foundNode.muteAll = true;
       }
@@ -681,13 +689,23 @@ function Flow() {
       }
     }else if(target == 'attribute'){
       const ids = contextMenu.nodeId.split('+');// id[0] is nodeid and id[1] is attribute id 
-
+      let foundNode = findNodeById(ids[0], updatedRoot);
       const attribute = foundNode.attributes.find((attrib)=> attrib.id == ids[1]);
       attribute.state = state;
-      console.log("found attribute", attribute);
+      // console.log("found attribute", attribute);
+    }else if(target == 'pipe'){
+      const ids = contextMenu.nodeId.split('+'); // id[0] is nodeid and id[1] is pipe id
+      let foundNode = findNodeById(ids[0], updatedRoot);
+      if(state == 'selectingPipe'){
+        console.log("selectingPipe");
+        foundNode.state = state;
+      }else{
+        const pipe = foundNode.pipes.find((pipe)=> pipe.id == ids[1]);
+        pipe.state = state;
+      }
+      console.log("foundNode", foundNode);
+      // console.log("pipe", pipe, "state changing into", state);
     }
-    
-
   }
 
 
@@ -797,6 +815,7 @@ function Flow() {
           {!contextMenu.detail && <button onClick={() => moveToSubMenu("create")}>Create</button>}
           {!contextMenu.detail && <button >Delete</button>}
           {!contextMenu.detail && <button onClick={() => moveToSubMenu("mute-2nd")}> Mute </button>}
+
           {contextMenu.detail == 'create' && <button onClick={() => updateElement('Node')}> Node </button>}
           {contextMenu.detail == 'create' && <button onClick={() => updateElement('Prop')}> Prop </button>}
           {contextMenu.detail == 'create' && <button onClick={() => moveToSubMenu("create-attribute-2nd")}> Attribute </button>}
@@ -830,7 +849,7 @@ function Flow() {
       {contextMenu && contextMenu.nodeType === 'pipe' &&
         <div
           style={{
-            backgroundColor: 'grey',
+            backgroundColor: 'aliceblue',
             width: '50px',
             height: '50px',
             position: 'absolute',
@@ -841,8 +860,17 @@ function Flow() {
           id={contextMenu.nodeId}
           datatype="contextMenu"
         >
-          <button datatype="contextMenu" onClick={() => updateElement()}>create</button>
-        </div>}
+         { !contextMenu.detail && <button datatype="contextMenu" onClick={() => moveToSubMenu("mute-2nd-pipe")}>Mute</button>}
+          {!contextMenu.detail &&<button datatype="contextMenu" onClick={() => elementStateHandler('pipe', 'editing')} >add</button>}
+
+          {contextMenu.detail == 'mute-2nd-pipe' &&
+            <div className='flex flex-col' datatype="contextMenu">
+              <button onClick={() => elementStateHandler('node', 'mute')}> all </button>
+              <button onClick={() => elementStateHandler('pipe', 'selectingPipe')}> select </button>
+            </div>
+          }
+        </div>
+      }
       {contextMenu && contextMenu.nodeType === 'Attribute' &&
         <div
           style={{

@@ -48,12 +48,12 @@ const AttributeContentWrapper = ({
             }
         }
 
-        handleUpdateAttributeContent('changeValue', content.id, attribData);
+        handleUpdateAttributeContent!('changeValue', content.id, attribData);
     };
 
 
     return (
-        // <div>
+
             <div
                 onDoubleClick={handleDoubleClick}
             >
@@ -88,15 +88,10 @@ const AttributeContentWrapper = ({
                                 <span>: </span>
                                 <span  className="hover:bg-[#ebebeb] transition duration-300 rounded-md px-1">{content.type ?? "N/A"}</span>
                             </div>
-
                         }
                     </>
-                )}
-
-                
+                )} 
             </div>
-           
-        // </div>
     )
 }
 

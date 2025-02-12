@@ -159,10 +159,11 @@ export type Pipe = {
   color: string,
   numbersOfProps: number // number of props that is associated with current pipe color
   name?: string //name of prop that is associated with current pipe color
-  id: string //unique id that each pipe has 
+  id: UniqueId //unique id that each pipe has 
   props: AttributeContent[], //will be using AttributeContent type since, it has all of necessary data type, we may change the name of AttributeContent in the future 
   //props = {name:string, type:string, belongsTo:string }
   mute?: boolean,
+  state?: 'editing' | 'none' | 'selected' | 'showOptions' | 'selecting' | 'muted'
 }
 
 export type ReactNodeType = {
@@ -170,7 +171,7 @@ export type ReactNodeType = {
 }
 
 export type MuteOption = 'muting' | 'notMuted' | 'mute';
-export type NodeState = MuteOption | 'copy' | 'delete' | 'select' | 'none';
+export type NodeState = MuteOption | 'copy' | 'delete' | 'select' | 'none' | 'selectingPipe';
 
 export type Attribute = {
   nameOfAttribute: string, // can be Hook, var, function, reactInbuilt (API, Hook), import, export 
@@ -186,7 +187,7 @@ export type AttributeContent = {
   id: UniqueId,
   name: string, 
   type?: string, // type of the attribute 
-  belongsTo: UniqueId, //id of Node that created props for the first time 
+  belongsTo?: UniqueId, //id of Node that created props for the first time 
 }
 
 export type ReactInBuiltAttributeContent = {
@@ -280,7 +281,7 @@ export type ReactChildrenWrapperProps = {
 
 export type AttributeContentWrapperProps = {
   content: AttributeContent | ReactInBuiltAttributeContent,
-  handleUpdateAttributeContent: (option: string, contentId: UniqueId, data?: AttributeData)=> void,
+  handleUpdateAttributeContent?: (option: string, contentId: UniqueId, data?: AttributeData)=> void,
   //attributeState: 'editing' | 'none' | 'selected' | 'showOptions' | undefined
   nodeId: UniqueId,
   attributeId: UniqueId,
@@ -293,3 +294,46 @@ export type AttributeData = {
     type: string
   }
 } | null;
+
+export type PipeContentWrapperProps = {
+  showProps: boolean,
+  pipe: Pipe,
+  nodeId: UniqueId,
+  displayPropsData: (pipe: Pipe) => void,
+}
+
+export type PipeContentPropWrapperProps = {
+  propContent: AttributeContent,
+  nodeId: UniqueId,
+  pipeId: UniqueId,
+  handleUpdateAttributeContent?: (option: string, contentId: UniqueId, data?: AttributeData)=> void,
+  setIsWriting: React.Dispatch<React.SetStateAction<string[]>>,
+  isWriting: string[],
+}
+
+export type PipeWrapperProps =  Pick<ReactChildrenWrapperProps,
+ | 'updateNode'
+ | 'renderChildren'
+ | 'displayPropsData'
+ | 'handlePropGoingInToChild'
+ | 'parentId'
+ | 'level'
+ | 'handleUnmute' 
+ | 'state'
+ | 'handleClickOnAttribute'
+ | 'attributeColors'
+ | 'expandedAttributes'
+ | 'expandedprops'
+  > & {
+  pipe: Pipe,
+  indexOfCurrentPipe: number,
+  child: ReactChild,
+  mutedAttributeCount: number,
+  filteredMutingAttribute: Attribute[],
+  filteredUnMutedAttribute: Attribute[],
+  changeMutingToMuted:()=> void,
+  updateStatesInArray: ()=> void,
+  setUpdatingPipeIds: React.Dispatch<React.SetStateAction<UniqueId[]>>,
+  mutedPipeAmount: number,
+  updatePipeState: (type:string) => void,
+}
