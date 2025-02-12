@@ -561,7 +561,6 @@ const ReactNode = ({
                     </div>
                 }
                 {/* //filter children by it's state being mute|muting|unmuted or undefined  */}
-
                 
                 {filteredMutingReactChilds &&
                     <ReactChildrenWrapper

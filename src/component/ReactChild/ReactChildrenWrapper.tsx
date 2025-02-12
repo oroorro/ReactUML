@@ -145,7 +145,7 @@ const ReactChildrenWrapper = ({
 
 
 
-                const updatePipeState = () =>{
+                const updatePipeState = (type:string) =>{
                     //get Node with child.id 
                     const nodes = getNodes();
 
@@ -154,7 +154,8 @@ const ReactChildrenWrapper = ({
                     let node = findNodeById(child.id, reactChild);
 
                     if(node){
-                        //get it's pipes 
+                        if(type == 'mute'){
+                            //get it's pipes 
                         //shallow copy the pipes 
                         const copiedPipes:Pipe[] = [...node?.pipes];
 
@@ -166,15 +167,34 @@ const ReactChildrenWrapper = ({
                                 pipe.state = 'muted'
                             }
                         })
-                        console.log("copiedPipes", copiedPipes);
-                        //re-assign shallow copied pipes as retrived node's pipes 
+                        node.state = 'none';
+                        //console.log("copiedPipes", copiedPipes);
+
+                        //empty updatingPipeIds for future use, updatingPipeIds deletes any duplicate ids 
+                        setUpdatingPipeIds([]);
+                        }else if(type == 'unmute'){
+
+                            const copiedPipes:Pipe[] = [...node?.pipes];
+
+                            copiedPipes.forEach((pipe)=>{
+                                //if it does exist, change it's state in shallow copied pipes 
+                                //const targetPipe = updatingPipeIds.find((id)=> id == pipe.id);
+                                if(pipe.state == 'muted'){
+                                    pipe.state = 'none'
+                                }
+                            })
+
+                        }
+                        
 
                         //call setNodes to update the changes 
-
+                        setNodes(nodes);
                     }else{
                         console.warn('node couldnt be found');
                     }
+
                 }
+
 
                 //filter muted 
                 const mutedPipe = child.pipes.filter((pipe)=> pipe.state == 'muted');
@@ -212,13 +232,13 @@ const ReactChildrenWrapper = ({
                                     <div
                                         datatype='pipe'
                                         className='bg-white hover:bg-gray-300'
-                                        style={{ width: '18px', height: '18px', position: 'relative', left: '-5px' }}>
+                                        style={{ width: '18px', height: '18px', position: 'relative', left: '-10px' }}>
                                         {child.numbersOfPropsGoingIn}
                                         
                                     </div>
                                     {child.state == 'selectingPipe' && 
                                         <span className='bg-white hover:bg-gray-200 ml-2 px-1 rounded '
-                                            onClick={()=>updatePipeState()}
+                                            onClick={()=>updatePipeState('mute')}
                                         >Done</span>
                                     }
                                 </div>
@@ -501,6 +521,7 @@ const ReactChildrenWrapper = ({
                                         changeMutingToMuted={changeMutingToMuted}
                                         setUpdatingPipeIds={setUpdatingPipeIds}
                                         mutedPipeAmount={mutedPipe.length}
+                                        updatePipeState={updatePipeState}
                                     />
                                     )
                                 })}

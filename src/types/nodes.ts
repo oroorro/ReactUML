@@ -335,4 +335,5 @@ export type PipeWrapperProps =  Pick<ReactChildrenWrapperProps,
   updateStatesInArray: ()=> void,
   setUpdatingPipeIds: React.Dispatch<React.SetStateAction<UniqueId[]>>,
   mutedPipeAmount: number,
+  updatePipeState: (type:string) => void,
 }

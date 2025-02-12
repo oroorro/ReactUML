@@ -31,7 +31,8 @@ const PipeWrapper = ({
     updateStatesInArray,
     changeMutingToMuted,
     setUpdatingPipeIds,
-    mutedPipeAmount
+    mutedPipeAmount,
+    updatePipeState
 }:PipeWrapperProps) => {
 
     // const [updatingPipeIds, setUpdatingPipeIds] = useState<UniqueId[]>([]);
@@ -52,8 +53,9 @@ const PipeWrapper = ({
             });
       };
 
+
     return (
-        <div id="pipes" className="flex -left-2 relative gap-0.5" key={indexOfCurrentPipe}
+        <div id="pipes" className={ indexOfCurrentPipe == child.pipes.length - 1 ? "flex-col flex -left-2 relative": "flex -left-2 relative gap-0.5"} key={indexOfCurrentPipe}
             style={{ transition: 'all 0.3s ease' }}
         >
             { // circle data when pipe is clicked 
@@ -131,6 +133,36 @@ const PipeWrapper = ({
                     datatype='Node'
                     data-id={parentId}
                 >
+                    {/** render muted pipes, just need to display ... and when this is clicked, it shows muted ones and have options to go back or not, just like Attribute  */}
+                    {mutedPipeAmount != 0 && 
+                    
+                    <div
+                    style={{
+                        
+                        position: 'relative',
+                        // backgroundColor: pipe.color,
+                        height: `${20}px`,
+                        width: `${PIPE_HEIGHT_HORIZONTAL}px`,
+                        "--bg-color": 'gray',
+                        boxShadow: '0 -5px 5px -5px #333',
+                    } as React.CSSProperties & { [key: string]: any }}
+                    className='pipeElement '
+                    >
+                        <button className="flex flex-col bg-white border-x  border-black  border-solid rounded-xl"
+                            style={{ 
+                                writingMode: "vertical-rl", 
+                                textOrientation: "mixed", 
+                                letterSpacing: "1px", 
+                                lineHeight: "9px",
+                                textIndent: "2px"
+                            }}
+                            onClick={()=>updatePipeState('unmute')}
+                        >
+                            ...
+                        </button>
+                    </div>
+                
+                }
                     {child.pipes.length > 1 &&
                         <div
                             className='pipeElement'
@@ -158,8 +190,6 @@ const PipeWrapper = ({
                             }}>
                         </div>
                     }
-                    {/** render muted pipes, just need to display ... and when this is clicked, it shows muted ones and have options to go back or not, just like Attribute  */}
-
 
                     {/** rendering Node  */}
                     {/**showing header of current state of muting current Node */}
@@ -189,8 +219,7 @@ const PipeWrapper = ({
                         }
 
                         <div
-                            className="childNode"
-                            datatype='Node'
+                            className="childNode" datatype='Node'
                             data-id={child.id}
                             style={{
                                 backgroundColor: child.color,
@@ -202,8 +231,7 @@ const PipeWrapper = ({
                                 minWidth: '100px',
                                 minHeight: '70px',
                                 padding: '0px 5px 5px 5px',
-                                boxShadow: '5px 5px 10px'
-                            }}>  {/*child's outer boundary*/}
+                                boxShadow: '5px 5px 10px'}}>  {/*child's outer boundary*/}
 
 
                             {/** Child's boundary */}
