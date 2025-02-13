@@ -1,4 +1,3 @@
-
 import type { PipeWrapperProps, NodeState, Attribute, UniqueId } from "../../types"
 import PipeContentWrapper from "./PipeContentWrapper";
 import AttributeIconWrapper from "../NodeAttribute/AttributeIconWrapper";
@@ -190,7 +189,6 @@ const PipeWrapper = ({
                             }}>
                         </div>
                     }
-
                     {/** rendering Node  */}
                     {/**showing header of current state of muting current Node */}
                     {child.state == 'select' &&

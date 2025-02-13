@@ -1,5 +1,5 @@
 
-import React, { forwardRef } from 'react';
+import React, { Children, forwardRef } from 'react';
 import { useCallback, useRef, useEffect, useState } from 'react';
 // import {ReactFlow, 
 // MiniMap,
@@ -403,6 +403,12 @@ let initialNodes = [
       ],
     },
   },
+  {
+    id: '4',
+    position: { x: 150, y: 50 },
+    data: {
+    }
+  },
 ];
 
 const initialEdges = [{ id: 'e1-2', source: '1', target: '2' }];
@@ -438,6 +444,7 @@ function Flow() {
   const flowRef = useRef(null);
   const interactingIdRef = useRef(null);
   const [contextMenu, setContextMenu] = useState(null);
+  const nodeId = useRef(5);
 
   useEffect(()=>{
     if(contextMenu) console.log("contextMenu is set as ", contextMenu)
@@ -770,6 +777,11 @@ function Flow() {
    */
   const deleteElement = (type) =>{
 
+    const test = nodes.map(node => node.data);
+
+    console.log("test", test);
+    const testNode = [...test];
+
     if(type == 'Attribute'){
       const copiedRoot = [...nodes[0].data.children]
 
@@ -777,7 +789,7 @@ function Flow() {
       if(!ids) console.warn("No ids exist");
 
       //get Node 
-      let foundNode = findNodeById(ids[0], copiedRoot);
+      let foundNode = findNodeById(ids[0], testNode);
       if(!foundNode) console.warn("Node couldn't be found")
 
       //filter out Attribute except deleting Attribute 
@@ -789,6 +801,75 @@ function Flow() {
     const updatedNode = [...nodes];
     setNodes(updatedNode);
     setContextMenu(null);
+
+  }
+
+
+  function deepCopyWithNewIds(node) {
+    //console.log(node);
+    const copiedNode = {
+      ...node,
+      id: generateUniqueId(), // Generate new ID for ReactChild
+      pipes: node.pipes ? node.pipes.map(pipe => ({
+        ...pipe,
+        id: generateUniqueId(), // Generate new ID for Pipe
+      })): [],
+      attributes: node.attributes ? node.attributes.map(attribute => ({
+        ...attribute,
+        id: generateUniqueId(), // Generate new ID for Attribute
+      })) : [],
+      children: node.children ? node.children.map(child => deepCopyWithNewIds(child)) : [],
+    };
+  
+    // Debugging: Log the copied node before returning
+    //console.log("Copied Node:", JSON.stringify(copiedNode, null, 2));
+  
+    return copiedNode;
+  }
+  
+
+  const copyNode = () => {
+    //get context-menued Node id 
+    const ids = contextMenu.nodeId.split('+');
+
+    const test = nodes.map(node => node.data);
+
+    console.log("test", test);
+    const testNode = [...test];
+    const updatedRoot = [...nodes[0].data.children];
+
+    let foundNode = findNodeById(ids[0], testNode);
+
+    //copy foundNode and add into nodes[0].data.children 
+    let newlyAssignedIdNode = deepCopyWithNewIds(foundNode);
+    //nodes[0].data.children = [...nodes[0].data.children, foundNode]; //wrong , it adds to current Node 
+
+    //we need to change all of the ids 
+    const newNode = {
+      id: nodeId.current + "",
+      position: { x: 150, y: 50 },
+      type: 'ReactNode',
+      data: {
+        label: nodeId.current + "",
+        title: newlyAssignedIdNode.title,
+        color: newlyAssignedIdNode.color,
+        indexMap: NodeIndexInArray,
+        stateManager: stateManger,
+        id: generateUniqueId(),
+        children: [...newlyAssignedIdNode.children],
+        attributes:[]
+      }
+    }
+
+    nodeId.current = nodeId.current  + 1;
+    console.log("nodeId", nodeId.current)
+
+    const updatedNodes = [...nodes, newNode];
+    //nodes.push(newNode);
+    setNodes(updatedNodes);
+    setContextMenu(null);
+    // console.log("nodes updated after copy", nodes);
+    // console.warn("nodes now", foundNode, newlyAssignedIdNode);
 
   }
 
@@ -814,6 +895,7 @@ function Flow() {
           
           {!contextMenu.detail && <button onClick={() => moveToSubMenu("create")}>Create</button>}
           {!contextMenu.detail && <button >Delete</button>}
+          {!contextMenu.detail && <button onClick={()=>copyNode()}>Copy</button>}
           {!contextMenu.detail && <button onClick={() => moveToSubMenu("mute-2nd")}> Mute </button>}
 
           {contextMenu.detail == 'create' && <button onClick={() => updateElement('Node')}> Node </button>}
