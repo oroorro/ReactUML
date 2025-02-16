@@ -30,9 +30,9 @@ const AttributeIconWrapper = ({
     const getCurrentAttribute = (): Attribute | undefined => {
         const nodes = getNodes();
 
-        const reactChild: ReactChild[] = [nodes[0].data];
-
-        let node = findNodeById(nodeId, reactChild);
+        //const reactChild: ReactChild[] = [nodes[0].data];
+        const currentNodes: ReactChild[] = nodes.map(node => node.data);
+        let node = findNodeById(nodeId, currentNodes);
 
         const targetAttribute = node?.attributes.find((attri) => attri.id == attribute.id);
 
@@ -72,9 +72,10 @@ const AttributeIconWrapper = ({
 
         const nodes = getNodes();
 
-        const reactChild: ReactChild[] = [nodes[0].data];
+        //const reactChild: ReactChild[] = [nodes[0].data];
+        const currentNodes: ReactChild[] = nodes.map(node => node.data);
 
-        let node = findNodeById(nodeId, reactChild);
+        let node = findNodeById(nodeId, currentNodes);
 
         const targetAttribute = node?.attributes.find((attri) => attri.id == attribute.id);
 

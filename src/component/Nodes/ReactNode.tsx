@@ -36,7 +36,7 @@ const ReactNode = ({
 }: NodeProps) => {
     const store = useStoreApi();
     const { setNodes, getNodes, indexMap } = store.getState();
-    const { children, title, color, attributes } = data;
+    const { children, title, color, attributes, id } = data;
     const [expandedAttributes, setExpandedAttributes] = useState<string[]>([]);
     const [expandedprops, setExpandedProps] = useState<string[]>([]);
 
@@ -46,9 +46,10 @@ const ReactNode = ({
 
         const nodes: Node[] = getNodes();
 
-        const reactChild: ReactChild[] = [nodes[0].data];
+        const currentNodes: ReactChild[] = nodes.map(node => node.data);
+        //const reactChild: ReactChild[] = [nodes[0].data];
 
-        const queue: ReactChild[] = [...reactChild];
+        const queue: ReactChild[] = [...currentNodes];
 
         while (queue.length > 0) {
             const currentNode = queue.shift(); // Dequeue the first node
@@ -73,7 +74,7 @@ const ReactNode = ({
         return undefined;
     }
 
- 
+
     function findNodeById(nodeId: UniqueId, initialNodes: ReactChild[]): ReactChild | undefined {
         // Use a queue for Breadth-First Search
         const queue: ReactChild[] = [...initialNodes];
@@ -118,13 +119,14 @@ const ReactNode = ({
 
         const nodes: Node[] = getNodes();
 
-        const reactChild: ReactChild[] = [nodes[0].data];
+        const currentNodes:ReactChild[] = nodes.map(node => node.data);
+        //const reactChild: ReactChild[] = [nodes[0].data];
 
-        let node = findNodeById(id, reactChild);
+        let node = findNodeById(id, currentNodes);
 
         console.log("found node in handleUnmute", node);
         //get the id of node 
-   
+
 
         //update mute flag then setNode to update the display 
         // let format = {
@@ -202,10 +204,11 @@ const ReactNode = ({
         //console.log("updateNode", nodeId, targetId, updateOption);
         const nodes: Node[] = getNodes();
 
+        
+        const currentNodes: ReactChild[] = nodes.map(node => node.data);
+        //const reactChild: ReactChild[] = [nodes[0].data];
 
-        const reactChild: ReactChild[] = [nodes[0].data];
-
-        let foundNode = findNodeById(nodeId, reactChild); 
+        let foundNode = findNodeById(nodeId, currentNodes);
         //console.log("foundNode", foundNode);
 
         if (foundNode) {
@@ -222,14 +225,14 @@ const ReactNode = ({
                     reactChild.state = updateOption.state;
                 }
             }
-        }else{
+        } else {
             console.warn("Node can't be found in updateNode");
         }
         setNodes(nodes);
     }
 
     const handlePropGoingInToChild = (pipe: Pipe) => {
-       
+
         setExpandedAttributes((prev) => {
             if (prev.includes(pipe.id)) {
                 return prev.filter((name) => name !== pipe.id);
@@ -238,7 +241,7 @@ const ReactNode = ({
             return [...prev, pipe.id];
         });
     }
-    
+
 
     const displayPropsData = (pipe: Pipe) => {
         setExpandedProps((prev) => {
@@ -316,16 +319,17 @@ const ReactNode = ({
         //this function receives parentId and find that Node then
         //re-set it's children with filteredMutingReactChilds, filteredUnMutedReactChilds, filteredMutedReactChilds
         //this function is used when clicking on 'muted' child which is the child of parentId
-        function updateChildrenInParentNode(parentId: UniqueId) { 
+        function updateChildrenInParentNode(parentId: UniqueId) {
             const nodes: Node[] = getNodes();
 
-            const reactChild: ReactChild[] = [nodes[0].data];
+            const currentNodes: ReactChild[] = nodes.map(node => node.data);
+            //const reactChild: ReactChild[] = [nodes[0].data];
             //get the id of parent Node 
-            const parentNode = findNodeById(parentId, reactChild) 
+            const parentNode = findNodeById(parentId, currentNodes)
 
-            if(parentNode){
-                    parentNode.children = [...filteredMutingReactChilds, ...filteredUnMutedReactChilds, ...filteredMutedReactChilds];
-            }else{
+            if (parentNode) {
+                parentNode.children = [...filteredMutingReactChilds, ...filteredUnMutedReactChilds, ...filteredMutedReactChilds];
+            } else {
                 console.warn("parentNode couldn't be found in updateChildrenInParentNode(parentId: UniqueId)");
             }
 
@@ -561,7 +565,7 @@ const ReactNode = ({
                     </div>
                 }
                 {/* //filter children by it's state being mute|muting|unmuted or undefined  */}
-                
+
                 {filteredMutingReactChilds &&
                     <ReactChildrenWrapper
                         reactChildren={filteredMutingReactChilds}
@@ -607,19 +611,59 @@ const ReactNode = ({
     };
 
     return (
-        <div style={{ backgroundColor: color }}
+
+        <div
+
+            style={{
+                backgroundColor: color,
+                marginLeft: '20px',
+                marginRight: '20px',
+                marginBottom: '5px',
+                // boxShadow: 'inset 0 -5px 5px -5px #333, inset -5px 0 5px -5px #333, inset 5px 0 5px -5px #333'
+            }}
             datatype='Node'
-            data-id={color}
+            data-id={id}
         >
-            <h3>{title}</h3>
-            <div style={{ display: 'flex' }}>
-                {attributes.map((attr: Attribute) => (
-                    <div>
-                        <div>{attr.nameOfAttribute}</div>
-                        <div>{attr.totalNumberOfAttribute}</div>
-                    </div>
-                ))}
+            <div
+                style={{
+                    marginLeft: '20px',
+                    marginRight: '20px',
+                    marginBottom: '5px',
+                    boxShadow: 'inset 0 -5px 5px -5px #333, inset -5px 0 5px -5px #333, inset 5px 0 5px -5px #333'
+                }}
+            >
+                <div className='NodeTitle'
+                    style={{
+                        height: '30px',
+                        fontSize: 'x-large',
+                        fontWeight: '900',
+                        padding: '0px 5px',
+                        maxWidth: '200px'
+                    }}
+                    //contentEditable='true'
+                    datatype='Node'
+                    data-id={id}
+                >
+                    {title}
+                </div>
             </div>
+
+            <div style={{ display: 'flex', }}>
+
+                {attributes.map((attr: Attribute) => {
+
+                    const isExpanded = expandedAttributes.includes(attr.id);
+                    return (
+                        <div>
+                            {/* <div>{attr.nameOfAttribute}</div>
+                            <div>{attr.totalNumberOfAttribute}</div> */}
+                            <AttributeIconWrapper nodeId={id} attribute={attr} isExpanded={isExpanded} handleClickOnAttribute={handleClickOnAttribute} attributeColors={attributeColors} />
+                        </div>
+                    );
+                })}
+
+            </div>
+
             {renderChildren(children, 1, color, children.state)}
         </div>
     );

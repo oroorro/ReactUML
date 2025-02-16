@@ -403,12 +403,6 @@ let initialNodes = [
       ],
     },
   },
-  {
-    id: '4',
-    position: { x: 150, y: 50 },
-    data: {
-    }
-  },
 ];
 
 const initialEdges = [{ id: 'e1-2', source: '1', target: '2' }];
@@ -519,7 +513,10 @@ function Flow() {
   const updateElement = (type, data = null) => {
     //we need to format data in order to add Node correctly,
     //making data to be the root 
-    performUpdateElement(nodes[0].data.children, contextMenu.nodeId, type, data);
+
+    const currentNodes = [...nodes.map(node => node.data)];
+   //performUpdateElement(nodes[0].data.children, contextMenu.nodeId, type, data);
+    performUpdateElement(currentNodes, contextMenu.nodeId, type, data);
 
     const updatedNode = [...nodes];
 
@@ -649,7 +646,10 @@ function Flow() {
     //console.log("updatedReactChild WITH DATA", initialNodes)
     //update node
 
-    updateElementState('attribute', nodes[0].data.children, ids[0], 'editing');
+    const currentNodes = [...nodes.map(node => node.data)];
+    //updateElementState('attribute', nodes[0].data.children, ids[0], 'editing');
+    updateElementState('attribute', currentNodes, ids[0], 'editing');
+
     setNodes(updatedNode);
    
     setContextMenu(null)
@@ -673,7 +673,9 @@ function Flow() {
   //option: NodeState
   const elementStateHandler = (target, option) => {
     //getting id of Node from interactingIdRef.current, which was saved when contextMenu on Node got triggered 
-    updateElementState(target, nodes[0].data.children, interactingIdRef.current, option);
+    const currentNodes = [...nodes.map(node => node.data)];
+    //updateElementState(target, nodes[0].data.children, interactingIdRef.current, option);
+    updateElementState(target, currentNodes, interactingIdRef.current, option);
     const updatedNode = [...nodes]; //shallow copy 
     setNodes(updatedNode);
     setContextMenu(null);
@@ -783,7 +785,6 @@ function Flow() {
     const testNode = [...test];
 
     if(type == 'Attribute'){
-      const copiedRoot = [...nodes[0].data.children]
 
       const ids = contextMenu.nodeId.split('+');// ids[0] is nodeid and ids[1] is attribute id 
       if(!ids) console.warn("No ids exist");
@@ -806,7 +807,7 @@ function Flow() {
 
 
   function deepCopyWithNewIds(node) {
-    //console.log(node);
+    console.warn("deepcopt", node);
     const copiedNode = {
       ...node,
       id: generateUniqueId(), // Generate new ID for ReactChild
@@ -833,10 +834,8 @@ function Flow() {
     const ids = contextMenu.nodeId.split('+');
 
     const test = nodes.map(node => node.data);
-
-    console.log("test", test);
     const testNode = [...test];
-    const updatedRoot = [...nodes[0].data.children];
+    //const updatedRoot = [...nodes[0].data.children];
 
     let foundNode = findNodeById(ids[0], testNode);
 
@@ -857,7 +856,7 @@ function Flow() {
         stateManager: stateManger,
         id: generateUniqueId(),
         children: [...newlyAssignedIdNode.children],
-        attributes:[]
+        attributes:[...newlyAssignedIdNode.attributes]
       }
     }
 
@@ -868,7 +867,7 @@ function Flow() {
     //nodes.push(newNode);
     setNodes(updatedNodes);
     setContextMenu(null);
-    // console.log("nodes updated after copy", nodes);
+     console.log("nodes updated after copy", updatedNodes);
     // console.warn("nodes now", foundNode, newlyAssignedIdNode);
 
   }
