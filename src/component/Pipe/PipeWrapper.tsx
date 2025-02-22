@@ -261,7 +261,7 @@ const PipeWrapper = ({
                                     style={{
                                         display: 'flex',
                                         gap: '5px',
-                                        flexWrap: 'wrap',
+                                        // flexWrap: 'wrap',
                                         // alignItems: 'flex-start',
                                         padding: '4px 2px'
                                     }}
@@ -323,7 +323,7 @@ const PipeWrapper = ({
                                     })}
                                 </div>}
                             {child.muteAll == true && <button onClick={() => handleUnmute(child.id)}>...</button>}
-                            {!child.muteAll && renderChildren(child.children, level + 1, child.id, child.state as NodeState)}
+                            {!child.muteAll && renderChildren(child.children, level + 1, child.id, child.state as NodeState, child.renderChildrenDirection)}
                         </div>
                     </div>}
                 </div>

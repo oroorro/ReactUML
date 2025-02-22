@@ -36,11 +36,11 @@ const ReactNode = ({
 }: NodeProps) => {
     const store = useStoreApi();
     const { setNodes, getNodes, indexMap } = store.getState();
-    const { children, title, color, attributes, id } = data;
+    const { children, title, color, attributes, id, renderChildrenDirection } = data;
     const [expandedAttributes, setExpandedAttributes] = useState<string[]>([]);
     const [expandedprops, setExpandedProps] = useState<string[]>([]);
 
-
+    console.log("Dara", data);
 
     function findElementWithTypes(nodeId: UniqueId, otherElementId: UniqueId, elementType: TargetElement): ReactChild | Attribute | undefined {
 
@@ -275,10 +275,12 @@ const ReactNode = ({
     };
 
     // Recursive function to render children
-    const renderChildren = (children: ReactChild[] | undefined, level: number, parentId: UniqueId, state: NodeState): JSX.Element | null => {
+    const renderChildren = (children: ReactChild[] | undefined, level: number, parentId: UniqueId, state: NodeState, renderDirection: string): JSX.Element | null => {
         if (!children || children.length === 0) {
             return null;
         }
+
+
 
         const addPaddingBottom = children[children.length - 1].type && children[children.length - 1].type == 'ghost';
 
@@ -583,6 +585,7 @@ const ReactNode = ({
                         updateNodeV2={updateNodeV2}
                         handlePropGoingInToChild={handlePropGoingInToChild}
                         displayPropsData={displayPropsData}
+                        renderDirection={renderDirection}
                     />
                 }
                 {filteredUnMutedReactChilds &&
@@ -602,6 +605,7 @@ const ReactNode = ({
                         updateNodeV2={updateNodeV2}
                         handlePropGoingInToChild={handlePropGoingInToChild}
                         displayPropsData={displayPropsData}
+                        renderDirection={renderDirection}
                     />
                 }
 
@@ -664,7 +668,7 @@ const ReactNode = ({
 
             </div>
 
-            {renderChildren(children, 1, color, children.state)}
+            {renderChildren(children, 1, id, children.state, renderChildrenDirection)}
         </div>
     );
 };

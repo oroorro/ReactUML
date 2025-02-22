@@ -59,7 +59,7 @@ const AttributeContentWrapper = ({
             >
 
                 {isEditing ? (
-                    <>
+                    <div className="flex">
                         <input
                             name="name"
                             value={editableContent.name}
@@ -76,7 +76,7 @@ const AttributeContentWrapper = ({
                             onBlur={()=>handleBlur()}
                             className="border rounded px-1"
                         />
-                    </>
+                    </div>
                 ) : (
                     <>
                         {"name" in content &&

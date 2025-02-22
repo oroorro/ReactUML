@@ -30,8 +30,8 @@ const ReactChildrenWrapper = ({
     updateNode,
     updateNodeV2,
     handlePropGoingInToChild,
-    displayPropsData
-
+    displayPropsData,
+    renderDirection
 }: ReactChildrenWrapperProps) => {
 
 
@@ -40,9 +40,10 @@ const ReactChildrenWrapper = ({
     const [updatingPipeIds, setUpdatingPipeIds] = useState<UniqueId[]>([]);
     const {findNodeById} = useFindNodeById();
     
-
+    console.log("reactChildren", reactChildren, renderDirection, renderDirection == 'horizontal');
+   
     return (
-        <div>
+        <div className={ renderDirection == 'horizontal' ? 'flex nodeDirection flex-col' : 'flex nodeDirection '}>
             {reactChildren && reactChildren.map((child, index) => {
 
                 //set current Node's attribute to be currently saved filteredMutingAttribute, filteredUnMutedAttribute and filteredMutedAttribute
@@ -484,7 +485,7 @@ const ReactChildrenWrapper = ({
                                                                     })}
                                                                 </div>}
                                                             {child.muteAll == true && <button onClick={() => handleUnmute(child.id)}>...</button>}
-                                                            {!child.muteAll && renderChildren(child.children, level + 1, child.id, child.state as NodeState)}
+                                                            {!child.muteAll && renderChildren(child.children, level + 1, child.id, child.state as NodeState, child.renderChildrenDirection)}
                                                         </div>
                                                     </div>}
                                                 </div>

@@ -117,7 +117,7 @@ const AlgoFlow = forwardRef<AlgoFlowRefType, AlgoFlowProps>(
         edgesUpdatable,
         elementsSelectable,
         defaultViewport = initDefaultViewport,
-        minZoom = 0.5,
+        minZoom = 0.1,
         maxZoom = 2,
         translateExtent = infiniteExtent,
         preventScrolling = true,

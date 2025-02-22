@@ -128,6 +128,7 @@ let initialNodes = [
           color: '#ffa8d5',
           state: 'select',
           id: '1qlx7vx-107d1f',
+          renderChildrenDirection: 'horizontal',
           attributes: [
             {
               nameOfAttribute: 'import',
@@ -633,6 +634,17 @@ function Flow() {
         top: event.clientY
       })
     }
+    else if(elementWithDatatype.getAttribute('datatype') === 'AttributeContent'){
+      setContextMenu({
+        nodeId: elementWithDatatype.getAttribute('data-id'),
+        nodeType: 'Node',
+        left: event.clientX,
+        top: event.clientY
+      })
+    }
+    //need for node type for row, column display 
+
+
   }
 
   const addAttributeContent = () => {
@@ -696,6 +708,10 @@ function Flow() {
       else if (state == 'select') {
         foundNode.state = 'select';
       }
+      else if(state == 'renderDirection'){
+        if(!foundNode.renderChildrenDirection) foundNode.renderChildrenDirection = {};
+        foundNode.renderChildrenDirection = foundNode.renderChildrenDirection == 'horizontal' ? 'vertical': 'horizontal';
+      } 
     }else if(target == 'attribute'){
       const ids = contextMenu.nodeId.split('+');// id[0] is nodeid and id[1] is attribute id 
       let foundNode = findNodeById(ids[0], updatedRoot);
@@ -896,6 +912,7 @@ function Flow() {
           {!contextMenu.detail && <button >Delete</button>}
           {!contextMenu.detail && <button onClick={()=>copyNode()}>Copy</button>}
           {!contextMenu.detail && <button onClick={() => moveToSubMenu("mute-2nd")}> Mute </button>}
+          {!contextMenu.detail && <button onClick={() => moveToSubMenu("renderDirection")}> Display </button>}
 
           {contextMenu.detail == 'create' && <button onClick={() => updateElement('Node')}> Node </button>}
           {contextMenu.detail == 'create' && <button onClick={() => updateElement('Prop')}> Prop </button>}
@@ -906,6 +923,14 @@ function Flow() {
             <div className='flex flex-col' datatype="contextMenu">
               <button onClick={() => elementStateHandler('node', 'mute')}> all </button>
               <button onClick={() => elementStateHandler('node', 'select')}> select </button>
+            </div>
+          }
+
+          {/** display; renderdirection sub-menu */}
+          {contextMenu.detail == 'renderDirection' &&
+            <div className='flex flex-col' datatype="contextMenu">
+              <button onClick={() => elementStateHandler('node', 'renderDirection')}> Horizontal </button>
+              <button onClick={() => elementStateHandler('node', 'renderDirection')}> Vertical </button>
             </div>
           }
 

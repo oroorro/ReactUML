@@ -217,7 +217,7 @@ const AttributeIconWrapper = ({
 
                 {/** showing button to minimize AttributeWrapper */}
                 {isExpanded &&
-                    <div>
+                    <div className="flex">
                         <button
                             title='Options'
                             className="bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold  px-4 rounded-xl ml-auto"

@@ -152,7 +152,8 @@ export type ReactChild = {
   type?: 'ghost',
   state?: NodeState,
   id: UniqueId,
-  indexMap?: { [key: string]: string };
+  indexMap?: { [key: string]: string },
+  renderChildrenDirection: string,
 }
 
 export type Pipe = {
@@ -262,7 +263,7 @@ export type AttributeIconWrapperProps = {
 
 export type ReactChildrenWrapperProps = {
   reactChildren: ReactChild[]
-  renderChildren: (hildren: ReactChild[] | undefined, level: number, parentId: UniqueId, state: NodeState) => JSX.Element | null, 
+  renderChildren: (hildren: ReactChild[] | undefined, level: number, parentId: UniqueId, state: NodeState, renderDirection: string) => JSX.Element | null, 
   expandedAttributes: string[]
   expandedprops: string[],
   state: NodeState,
@@ -276,7 +277,7 @@ export type ReactChildrenWrapperProps = {
   updateNodeV2: (nodeId: string, id: UniqueId, updateOption: UpdateOptionV2) => void,
   handlePropGoingInToChild: (pipe: Pipe) => void,
   displayPropsData: (pipe: Pipe) => void,
-  
+  renderDirection: string,
 }
 
 export type AttributeContentWrapperProps = {
