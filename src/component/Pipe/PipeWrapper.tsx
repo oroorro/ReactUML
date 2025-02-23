@@ -37,6 +37,23 @@ const PipeWrapper = ({
     // const [updatingPipeIds, setUpdatingPipeIds] = useState<UniqueId[]>([]);
     const isExpanded: boolean = expandedAttributes.includes(pipe.id);
     const showProps: boolean = expandedprops.includes(pipe.id);
+    const [isEditing, setIsEditing] = useState(false);
+    const [currentNodetitle, setCurrentNodetitle] = useState<string>(child.title);
+
+    const handleDoubleClick = () => {
+        console.log("clicked on ", child.title)
+        setIsEditing(true);
+    }
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        setCurrentNodetitle(value);
+    };
+
+    const handleBlur = () => {
+        setIsEditing(false);
+        updateNode(child.id, child.id, { target: 'node', state: 'changingTitle', titleToUpdateTo: currentNodetitle })
+    };
 
 
     //add selected pipe's id when Node's state change into 'selectingPipe' 
@@ -241,19 +258,28 @@ const PipeWrapper = ({
                                     boxShadow: 'inset 0 -5px 5px -5px #333, inset -5px 0 5px -5px #333, inset 5px 0 5px -5px #333'
                                 }}
                             >
-                                <div className='NodeTitle'
+                                <div className='NodeTitle '
                                     style={{
                                         height: '30px',
                                         fontSize: 'x-large',
                                         fontWeight: '900',
                                         padding: '0px 5px',
-                                        maxWidth: '200px'
+                                        // maxWidth: '200px'
+                                        
                                     }}
-                                    //contentEditable='true'
+                                    onDoubleClick={handleDoubleClick}
                                     datatype='Node'
                                     data-id={child.id}
                                 >
-                                    {child.title}
+                                    {!isEditing && currentNodetitle}
+                                    {isEditing && 
+                                        <input
+                                        className="text-center w-full bg-transparent outline-none"
+                                        value={currentNodetitle}
+                                        onChange={handleChange}
+                                        onBlur={()=>handleBlur()}
+                                        />
+                                    }
                                 </div>
                             </div>
                             {!child.muteAll &&

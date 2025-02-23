@@ -213,8 +213,9 @@ export type TargetElement = 'attribute' | 'node' | 'prop';
 //used when updating elements in Node, Attribute and Prop
 export type updateOption = {
   target: 'attribute' | 'node' | 'prop',
-  state: NodeState,
+  state: NodeState | 'changingTitle',
   muteOptions?: MuteOption, 
+  titleToUpdateTo?: string, //used for changing Node's title
 }
 
 export type UpdateOptionV2 = {

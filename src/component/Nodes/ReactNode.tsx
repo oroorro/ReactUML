@@ -40,7 +40,6 @@ const ReactNode = ({
     const [expandedAttributes, setExpandedAttributes] = useState<string[]>([]);
     const [expandedprops, setExpandedProps] = useState<string[]>([]);
 
-    console.log("Dara", data);
 
     function findElementWithTypes(nodeId: UniqueId, otherElementId: UniqueId, elementType: TargetElement): ReactChild | Attribute | undefined {
 
@@ -220,7 +219,12 @@ const ReactNode = ({
             else if (updateOption.target == 'node') {
                 if (updateOption.state == 'mute') {
                     foundNode.state = updateOption.muteOptions;
-                } else {
+                }
+                else if(updateOption.state == 'changingTitle'){
+                    const reactChild: ReactChild = foundNode;
+                    reactChild.title = updateOption.titleToUpdateTo as string;
+                }
+                else {
                     const reactChild: ReactChild = foundNode;
                     reactChild.state = updateOption.state;
                 }
@@ -642,7 +646,7 @@ const ReactNode = ({
                         fontSize: 'x-large',
                         fontWeight: '900',
                         padding: '0px 5px',
-                        maxWidth: '200px'
+                        // maxWidth: '200px'
                     }}
                     //contentEditable='true'
                     datatype='Node'

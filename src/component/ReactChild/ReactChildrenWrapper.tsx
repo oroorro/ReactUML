@@ -40,8 +40,7 @@ const ReactChildrenWrapper = ({
     const [updatingPipeIds, setUpdatingPipeIds] = useState<UniqueId[]>([]);
     const {findNodeById} = useFindNodeById();
     
-    console.log("reactChildren", reactChildren, renderDirection, renderDirection == 'horizontal');
-   
+    
     return (
         <div className={ renderDirection == 'horizontal' ? 'flex nodeDirection flex-col' : 'flex nodeDirection '}>
             {reactChildren && reactChildren.map((child, index) => {
@@ -403,7 +402,7 @@ const ReactChildrenWrapper = ({
                                                                     boxShadow: 'inset 0 -5px 5px -5px #333, inset -5px 0 5px -5px #333, inset 5px 0 5px -5px #333'
                                                                 }}
                                                             >
-                                                                <div className='NodeTitle'
+                                                                <div className='Title'
                                                                     style={{
                                                                         height: '30px',
                                                                         fontSize: 'x-large',
@@ -411,7 +410,7 @@ const ReactChildrenWrapper = ({
                                                                         padding: '0px 5px',
                                                                         maxWidth: '200px'
                                                                     }}
-                                                                    //contentEditable='true'
+                                                                    contentEditable='true'
                                                                     datatype='Node'
                                                                     data-id={child.id}
                                                                 >
