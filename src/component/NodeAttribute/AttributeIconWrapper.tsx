@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { AttributeIcon } from "./AttributeIcon"
 import { AttributeIconWrapperProps, AttributeContent, ReactInBuiltAttributeContent, Attribute, AttributeData } from "../../types"
 import { useStoreApi } from "../../hook/useStore";
@@ -18,7 +18,7 @@ const AttributeIconWrapper = ({
 
     const store = useStoreApi();
     const { setNodes, getNodes } = store.getState();
-
+    const [scale, setScale] = useState<number>(1);
     const contentNameRef = useRef<HTMLInputElement>(null);
     const contentTypeRef = useRef<HTMLInputElement>(null);
     
@@ -169,6 +169,12 @@ const AttributeIconWrapper = ({
         }
     }
 
+    const handleZoom = (event: React.WheelEvent<HTMLDivElement>) =>{
+        event.preventDefault();
+        console.log("Wheel scrolled!", event.deltaY, attribute.id);
+        setScale((prev) => prev * (event.deltaY < 0 ? 1.1 : 0.9));
+    }
+
     return (
 
         <div
@@ -177,7 +183,7 @@ const AttributeIconWrapper = ({
             style={{
                 // display: 'flex',
                 alignItems: 'baseline',
-
+                transform: `scale(${scale})`,
                 borderRadius: '5px',
                 flexDirection: 'column',
                 gap: '2px',
@@ -187,6 +193,7 @@ const AttributeIconWrapper = ({
             datatype='Attribute'
             //id nodeId-attributeId
             data-id={`${nodeId}+${attribute.id}`}
+            onWheel={(event) => handleZoom(event)}
             onClick={!isExpanded ? () => handleClickOnAttribute(attribute.id) : undefined} // Disable onClick if isExpanded
         >
 

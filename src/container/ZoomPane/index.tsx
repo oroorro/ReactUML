@@ -48,6 +48,7 @@ const selector = (s: ReactFlowState) => ({
   d3Selection: s.d3Selection,
   d3ZoomHandler: s.d3ZoomHandler,
   userSelectionActive: s.userSelectionActive,
+  isZoom: s.isZoom,
 });
 
 const ZoomPane = ({
@@ -79,7 +80,7 @@ const ZoomPane = ({
   const zoomedWithRightMouseButton = useRef(false);
   const zoomPane = useRef<HTMLDivElement>(null);
   const prevTransform = useRef<Viewport>({ x: 0, y: 0, zoom: 0 });
-  const { d3Zoom, d3Selection, d3ZoomHandler, userSelectionActive } = useStore(selector, shallow);
+  const { d3Zoom, d3Selection, d3ZoomHandler, userSelectionActive, isZoom } = useStore(selector, shallow);
   const zoomActivationKeyPressed = useKeyPress(zoomActivationKeyCode);
   const mouseButton = useRef<number>(0);
   const isPanScrolling = useRef(false);
@@ -314,6 +315,7 @@ const ZoomPane = ({
         const zoomScroll = zoomActivationKeyPressed || zoomOnScroll;
         const pinchZoom = zoomOnPinch && event.ctrlKey;
 
+        console.log("zoompane here ", isZoom);
         if (
           (panOnDrag === true || (Array.isArray(panOnDrag) && panOnDrag.includes(1))) &&
           event.button === 1 &&
@@ -329,7 +331,7 @@ const ZoomPane = ({
         }
 
         // during a selection we prevent all other interactions
-        if (userSelectionActive) {
+        if (userSelectionActive || isZoom) {
           return false;
         }
 
@@ -388,6 +390,7 @@ const ZoomPane = ({
     panOnDrag,
     elementsSelectable,
     zoomActivationKeyPressed,
+    isZoom
   ]);
 
   return (

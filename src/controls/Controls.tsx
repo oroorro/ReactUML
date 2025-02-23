@@ -21,6 +21,7 @@ const selector = (s: ReactFlowState) => ({
   isInteractive: s.nodesDraggable || s.nodesConnectable || s.elementsSelectable,
   minZoomReached: s.transform[2] <= s.minZoom,
   maxZoomReached: s.transform[2] >= s.maxZoom,
+  toggleZoom: s.isZoom,
 });
 
 const Controls: FC<PropsWithChildren<ControlProps>> = ({
@@ -39,7 +40,7 @@ const Controls: FC<PropsWithChildren<ControlProps>> = ({
 }) => {
   const store = useStoreApi();
   const [isVisible, setIsVisible] = useState<boolean>(false);
-  const { isInteractive, minZoomReached, maxZoomReached } = useStore(selector, shallow);
+  const { isInteractive, minZoomReached, maxZoomReached, toggleZoom } = useStore(selector, shallow);
   const { zoomIn, zoomOut, fitView } = useReactFlow();
 
   useEffect(() => {
@@ -77,6 +78,11 @@ const Controls: FC<PropsWithChildren<ControlProps>> = ({
     });
 
     onInteractiveChange?.(!isInteractive);
+  };
+
+  const onToggleZoom = () => {
+    console.log("toggleZoom", toggleZoom);
+    store.setState({isZoom: !toggleZoom});
   };
 
   return (
@@ -135,6 +141,14 @@ const Controls: FC<PropsWithChildren<ControlProps>> = ({
           aria-label="create Node"
         >
          <CreateNode/> 
+       </ControlButton>
+       <ControlButton
+          className="react-flow__controls-createnode"
+          onClick={onToggleZoom}
+          title="toggle zoom"
+          aria-label="toggle zoom"
+        >
+         Z
        </ControlButton>
       {children}
     </Panel>

@@ -233,6 +233,7 @@ export type ReactFlowActions = {
   
     isValidConnection?: IsValidConnection;
     indexMap?: { [key: string]: string };
+    isZoom?: boolean;
   }; 
   
   export type ReactFlowState = ReactFlowStore & ReactFlowActions;  
