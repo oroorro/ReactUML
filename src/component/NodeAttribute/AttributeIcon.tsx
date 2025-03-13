@@ -5,6 +5,7 @@ type AttributeIconProps = {
     nameOfIcon: string,
     size?: number,
     isExpanded?: boolean,
+    scale?: number,
 }
 
 
@@ -80,10 +81,38 @@ const AttributeIcon = (props: AttributeIconProps) => {
     if(!props.isExpanded){
         return (
             <div  className="icon-container">
-                <div className={!isAttributeEmpty ? "circle" : 'emptyCircle'} style={{width: '20px', height: '20px'}}>
-                    <div className="inner-circle" style={{backgroundColor: isAttributeEmpty ? '' : props.color, width: '17px', height: '17px', boxShadow: isAttributeEmpty ? '' : `0px 4.5px 2px ${modifiedColor} inset , 1px 1.5px 1px ${extraModifiedColor} inset`}}>
-                        {!isAttributeEmpty && <span  className="icon" style={{fontSize:'15px', transform: 'scaleX(1.2)'}}>{iconFirstLetter}</span>}
-                        {isAttributeEmpty && <span  className="icon" style={{fontSize:'15px', transform: 'scaleX(1.2)'}}></span>}
+                <div className={!isAttributeEmpty ? "circle" : 'emptyCircle'} 
+                  style={{
+                    width: `${20 * props.scale!}px`,
+                    height: `${20 * props.scale!}px`,
+                  }}
+                >
+                    <div className="inner-circle" 
+                    style={{
+                      backgroundColor: isAttributeEmpty ? '' : props.color, 
+                      width: `${17 * props.scale!}px`,
+                      height: `${17 * props.scale!}px`,
+                      boxShadow: isAttributeEmpty ? '' : `0px ${4.5 * props.scale!}px ${2 * props.scale!}px ${modifiedColor} inset , ${1 * props.scale!}px ${1.5 * props.scale!}px ${1 * props.scale!}px ${extraModifiedColor} inset`
+                      }}
+                    >
+                      {!isAttributeEmpty && 
+                        <span  className="icon" 
+                          style={{
+                            fontSize: `${15 * props.scale!}px`, 
+                            transform: 'scaleX(1.2)'
+                            }}
+                        >
+                          {iconFirstLetter}
+                        </span>
+                      }
+                      {isAttributeEmpty && 
+                        <span className="icon" 
+                          style={{
+                            fontSize:'15px', 
+                            transform: 'scaleX(1.2)'
+                            }}
+                        >
+                        </span>}
                     </div>
                 </div>
             </div>

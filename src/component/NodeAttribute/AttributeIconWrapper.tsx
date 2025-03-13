@@ -183,7 +183,7 @@ const AttributeIconWrapper = ({
             style={{
                 // display: 'flex',
                 alignItems: 'baseline',
-                transform: `scale(${scale})`,
+                
                 borderRadius: '5px',
                 flexDirection: 'column',
                 gap: '2px',
@@ -204,6 +204,7 @@ const AttributeIconWrapper = ({
                         color={attributeColors[attribute.nameOfAttribute]}
                         nameOfIcon={attribute.nameOfAttribute}
                         isExpanded={isExpanded}
+                        scale={scale}
                     />
 
                     {/** numbers of attribute for this  Icon */}
@@ -218,7 +219,14 @@ const AttributeIconWrapper = ({
                     }
                     {/** showing number of Attribute when not expanded  */}
                     <div>
-                        <span style={{ marginLeft: '3px', fontSize: '18px', fontWeight: '500' }}>{attribute.AttributeContents.length}</span>
+                        <span 
+                            style={{ 
+                                marginLeft: `${3 * scale}px`,
+                                fontSize: `${18 * scale}px`, 
+                                fontWeight: '500' 
+                            }}>
+                                {attribute.AttributeContents.length}
+                            </span>
                     </div>
                 </div>
 
