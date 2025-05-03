@@ -1,14 +1,19 @@
-# Use OpenJDK base image
 FROM openjdk:17-jdk-slim
 
-# Set working directory inside the container
+# Set base working directory
 WORKDIR /app
 
-# Copy the built JAR file into the container
-COPY target/backend-0.0.1-SNAPSHOT.jar app.jar
+# Copy frontend build into static resources
+COPY frontend/dist backend/demo/src/main/resources/static
 
-# Run the JAR file
-CMD ["java", "-jar", "app.jar"]
+# Copy backend project
+COPY backend/demo backend/demo
 
-# Expose the port
-EXPOSE 8080
+# Go into backend app folder
+WORKDIR /app/backend/demo
+
+# Build the Spring Boot app
+RUN ./mvnw clean package -DskipTests
+
+# Run the built app
+CMD ["java", "-jar", "target/demo-0.0.1-SNAPSHOT.jar"]
