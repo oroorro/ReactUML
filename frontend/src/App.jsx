@@ -3,6 +3,7 @@ import { Routes, Route, Link } from "react-router-dom";
 
 import Flow from "./Flow";
 import User from "./User";
+import Register from "./Register";
 
 const App = () => {
   return (
@@ -15,8 +16,9 @@ const App = () => {
 
       {/* Define Routes */}
       <Routes>
-        <Route path="/home" element={<Flow />} />
-        <Route path="/user" element={<User />} />
+        <Route path="/" element={<Flow/>}/>
+        <Route path="/login" element={<User/>}/>
+        <Route path="/register" element={<Register/>}/>
       </Routes>
     </div>
   );
