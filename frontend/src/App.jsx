@@ -4,6 +4,7 @@ import { Routes, Route, Link } from "react-router-dom";
 import Flow from "./Flow";
 import User from "./User";
 import Register from "./Register";
+import Home from "./Home";
 
 const App = () => {
   return (
@@ -16,6 +17,7 @@ const App = () => {
 
       {/* Define Routes */}
       <Routes>
+        <Route path="/home" element={<Home/>}/>
         <Route path="/" element={<Flow/>}/>
         <Route path="/login" element={<User/>}/>
         <Route path="/register" element={<Register/>}/>
