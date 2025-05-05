@@ -18,6 +18,7 @@ public class Node {
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
+    
     // userID from a User table 
     @Column(name = "userID")
     private Integer userId;
