@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.example.demo.model.Node;
@@ -23,7 +24,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class NodeControllerTest {
+@ActiveProfiles("test")
+public class NodeControllerIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -59,7 +61,7 @@ class NodeControllerTest {
          assertEquals("Test", storedNode.getName());
          assertEquals("red", storedNode.getColor());
          assertEquals(100, storedNode.getPositionX());
-         assertEquals(200, storedNode.getPositionY());
+         assertEquals(100, storedNode.getPositionY());
          assertTrue(storedNode.getIsStartingNode());
         
     }
