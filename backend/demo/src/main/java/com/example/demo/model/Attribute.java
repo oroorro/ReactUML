@@ -1,5 +1,7 @@
 package com.example.demo.model;
 
+import java.util.List;
+
 import jakarta.persistence.*;
 
 @Entity
@@ -18,6 +20,9 @@ public class Attribute {
     private Integer totalNumber;
 
     private Boolean mute;
+
+    @OneToMany(mappedBy = "attribute", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<AttributeContent> attributeContents;
 
 
     public Integer getId() {

@@ -9,8 +9,8 @@ public class AttributeContent {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "attributeID")
+    @ManyToOne
+    @JoinColumn(name = "attribute_id")
     private Attribute attribute;
 
     @ManyToOne(optional = false)

@@ -6,6 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import org.springframework.core.env.Environment;
+
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -35,6 +37,15 @@ public class NodeControllerIntegrationTest {
 
     @Autowired
     private NodeRepository nodeRepository;
+
+    @Autowired
+    Environment env;
+
+    @Test
+    void verifyTestProfileAndDatasource() {
+        assertEquals("test", env.getActiveProfiles()[0]);
+        assertEquals("jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1", env.getProperty("spring.datasource.url"));
+    }
 
     @Test
     void testCreateNode() throws Exception {

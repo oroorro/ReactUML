@@ -1,5 +1,7 @@
 package com.example.demo.model;
 
+import java.util.List;
+
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,6 +19,9 @@ public class User {
 
     @Column(nullable = false, unique = true)
     private String username;
+
+    @OneToMany(mappedBy = "user")
+    private List<Node> nodes;
 
     @Column(nullable = false)
     private String password;

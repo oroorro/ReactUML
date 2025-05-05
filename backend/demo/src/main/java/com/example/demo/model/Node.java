@@ -15,6 +15,9 @@ public class Node {
     @OneToMany(mappedBy = "node", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Attribute> attributes;
 
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
     // userID from a User table 
     @Column(name = "userID")
     private Integer userId;
