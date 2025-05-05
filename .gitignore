@@ -13,6 +13,11 @@
 # dist
 /dist
 
+# frontend dist files 
+/frontend/dist
+
+.txt
+
 # misc
 .DS_Store
 .env.local
