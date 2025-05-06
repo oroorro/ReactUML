@@ -32,6 +32,7 @@ public class NodeController {
     @PostMapping("/create/{userId}")
     public ResponseEntity<Node> createNode(@PathVariable Integer userId, @RequestBody Node node) {
         Node created = nodeService.createNode(userId, node);
+        //System.out.println("CREATED: " + created); 
         return ResponseEntity.ok(created);
     }
 
@@ -57,5 +58,13 @@ public class NodeController {
         } else {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    @GetMapping("/test-return")
+    public ResponseEntity<Node> testReturn() {
+        Node test = new Node();
+        test.setName("Hardcoded");
+        test.setUid("abc-123");
+        return ResponseEntity.ok(test);
     }
 }

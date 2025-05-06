@@ -1,6 +1,11 @@
 package com.example.demo.model;
 
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import jakarta.persistence.*;
 
 @Entity
@@ -12,9 +17,11 @@ public class Node {
     @Column(name = "ID")
     private Integer id;
 
+    @JsonManagedReference
     @OneToMany(mappedBy = "node", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Attribute> attributes;
 
+    @JsonBackReference
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
@@ -82,8 +89,12 @@ public class Node {
         return userId;
     }
 
-    public void setUserId(Integer userId) {
-        this.userId = userId;
+    public void setUser(User user) {
+        this.user = user;
+    }
+    
+    public User getUser() {
+        return user;
     }
 
     public Integer getParentId() {
@@ -134,7 +145,7 @@ public class Node {
     public void setUid(String uid) {
         this.uid = uid;
     }
-    
+
     public String getName() {
         return name;
     }

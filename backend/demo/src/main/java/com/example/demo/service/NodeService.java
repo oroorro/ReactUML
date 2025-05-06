@@ -3,7 +3,9 @@ package com.example.demo.service;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.model.Node;
+import com.example.demo.model.User;
 import com.example.demo.repository.NodeRepository;
+import com.example.demo.repository.UserRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -12,9 +14,11 @@ import java.util.Optional;
 public class NodeService {
 
     private final NodeRepository nodeRepository;
+    private final UserRepository userRepository;
 
-    public NodeService(NodeRepository nodeRepository) {
+    public NodeService(NodeRepository nodeRepository, UserRepository userRepository) {
         this.nodeRepository = nodeRepository;
+        this.userRepository = userRepository;
     }
 
     public List<Node> getAllNodesWithAttributesAndContents(Integer userId) {
@@ -22,7 +26,10 @@ public class NodeService {
     }
 
     public Node createNode(Integer userId, Node node) {
-        node.setUserId(userId); 
+        // node.setUserId(userId); 
+        User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+        node.setUser(user); 
         return nodeRepository.save(node);
     }
 

@@ -3,6 +3,7 @@ package com.example.demo;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -18,7 +19,9 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.example.demo.model.Node;
+import com.example.demo.model.User;
 import com.example.demo.repository.NodeRepository;
+import com.example.demo.repository.UserRepository;
 import com.example.demo.service.NodeService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -54,9 +57,12 @@ public class NodeControllerIntegrationTest {
     private NodeRepository nodeRepository;
 
     @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
     Environment env;
 
-    @MockBean
+    @Autowired
     private NodeService nodeService;
 
     @Test
@@ -67,6 +73,19 @@ public class NodeControllerIntegrationTest {
 
     @Test
     void testCreateNode() throws Exception {
+
+        User user = new User();
+        
+        user.setUsername("testuser");
+        user.setPassword("password"); 
+        //userRepository.save(user);
+
+        User savedUser = userRepository.save(user);
+        assertNotNull(savedUser.getId(), "1");
+        List<User> usersInDb = userRepository.findAll();
+        assertEquals(1, usersInDb.size());
+
+
         Node node = new Node();
         String uid = generateUniqueId();
         node.setName("Test");
@@ -77,7 +96,8 @@ public class NodeControllerIntegrationTest {
         node.setIsStartingNode(true);
         node.setNumberOfPropsIn(12);
         node.setChildrenDirection("vertical");
-
+ 
+        //persist Node into DB through calling api endpoint (nodeController -> nodeService -> nodeRepo)
         mockMvc.perform(post("/node/create/1")
                 .contentType("application/json")
                 .content(objectMapper.writeValueAsString(node)))
@@ -99,7 +119,7 @@ public class NodeControllerIntegrationTest {
          assertEquals(uid, storedNode.getUid());
          assertNotEquals(generateUniqueId(), storedNode.getUid());
          assertTrue(storedNode.getIsStartingNode());
-        
+
     }
 
     @Test

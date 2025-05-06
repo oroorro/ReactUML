@@ -48,10 +48,10 @@ public class AuthController {
         }
     }
 
-    @GetMapping("/verify")
-    public UserResponse getCurrentUser(@AuthenticationPrincipal UserDetails userDetails) {
-        User user = userRepository.findByUsername(userDetails.getUsername())
-            .orElseThrow(() -> new RuntimeException("User not found"));
-        return new UserResponse(user.getId(), user.getUsername());
-    }
+    // @GetMapping("/verify")
+    // public UserResponse getCurrentUser(@AuthenticationPrincipal UserDetails userDetails) {
+    //     User user = userRepository.findByUsername(userDetails.getUsername())
+    //         .orElseThrow(() -> new RuntimeException("User not found"));
+    //     return new UserResponse(user.getId(), user.getUsername());
+    // }
 }
