@@ -22,7 +22,7 @@ public class NodeService {
     }
 
     public Node createNode(Integer userId, Node node) {
-        node.setUserId(userId); // assuming userId is a simple field
+        node.setUserId(userId); 
         return nodeRepository.save(node);
     }
 

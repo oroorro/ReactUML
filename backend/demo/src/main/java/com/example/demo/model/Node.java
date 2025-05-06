@@ -18,10 +18,13 @@ public class Node {
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
-    
+
     // userID from a User table 
     @Column(name = "userID")
     private Integer userId;
+
+    @Column(unique = true, nullable = false, length = 20)
+    private String uid;
 
     @Column(name = "parentID")
     private Integer parentId;
@@ -123,6 +126,15 @@ public class Node {
         this.state = state;
     }
 
+
+    public String getUid() {
+        return uid;
+    }
+    
+    public void setUid(String uid) {
+        this.uid = uid;
+    }
+    
     public String getName() {
         return name;
     }

@@ -9,6 +9,9 @@ public class AttributeContent {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @Column(unique = true, nullable = false, length = 20)
+    private String uid;
+
     @ManyToOne
     @JoinColumn(name = "attribute_id")
     private Attribute attribute;

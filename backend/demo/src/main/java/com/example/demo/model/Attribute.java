@@ -11,6 +11,9 @@ public class Attribute {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @Column(unique = true, nullable = false, length = 20)
+    private String uid;
+
     @ManyToOne
     @JoinColumn(name = "nodeID", nullable = false)
     private Node node;
