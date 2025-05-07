@@ -1,6 +1,8 @@
 package com.example.demo.model;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
@@ -28,7 +30,8 @@ public class Attribute {
     private Boolean mute;
 
     @OneToMany(mappedBy = "attribute", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<AttributeContent> attributeContents;
+    //private List<AttributeContent> attributeContents;
+    private Set<AttributeContent> attributeContents = new HashSet<>();
 
 
     public Integer getId() {

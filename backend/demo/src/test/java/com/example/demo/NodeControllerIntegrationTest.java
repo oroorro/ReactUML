@@ -1,6 +1,9 @@
 package com.example.demo;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -40,6 +43,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("test")
 public class NodeControllerIntegrationTest {
 
+    @BeforeEach
+    void setUp() {
+        userRepository.deleteAll();
+    }
+
     private String generateUniqueId() {
         String timestamp = Long.toString(System.currentTimeMillis(), 36);
         String randomValue = Long.toString((long)(Math.random() * 2176782336L), 36); // base-36 with 6 digits max
@@ -64,6 +72,9 @@ public class NodeControllerIntegrationTest {
 
     @Autowired
     private NodeService nodeService;
+
+    @MockBean
+    private NodeService nodeMockService;
 
     @Test
     void verifyTestProfileAndDatasource() {
@@ -120,6 +131,9 @@ public class NodeControllerIntegrationTest {
          assertNotEquals(generateUniqueId(), storedNode.getUid());
          assertTrue(storedNode.getIsStartingNode());
 
+        nodeRepository.deleteAll();
+        userRepository.delete(user);
+
     }
 
     @Test
@@ -132,14 +146,14 @@ public class NodeControllerIntegrationTest {
         node2.setId(2);
         node2.setUid("test-uid-2");
 
-        when(nodeService.getAllNodesWithAttributesAndContents(1)).thenReturn(List.of(node1, node2));
+        when(nodeMockService.getAllNodesWithAttributesAndContents(1)).thenReturn(List.of(node1, node2));
 
         mockMvc.perform(get("/node/get/1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].uid").value("test-uid-1"))
                 .andExpect(jsonPath("$[1].uid").value("test-uid-2"));
 
-        verify(nodeService).getAllNodesWithAttributesAndContents(1);
+        verify(nodeMockService).getAllNodesWithAttributesAndContents(1);
     }
 
     @Test

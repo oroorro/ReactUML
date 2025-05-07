@@ -1,6 +1,8 @@
 package com.example.demo.model;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -25,7 +27,8 @@ public class User {
 
     @JsonManagedReference
     @OneToMany(mappedBy = "user")
-    private List<Node> nodes;
+    //private List<Node> nodes;
+    private Set<Node> nodes = new HashSet<>();
 
     @Column(nullable = false)
     private String password;

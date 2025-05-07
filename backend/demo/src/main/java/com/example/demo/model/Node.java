@@ -1,6 +1,8 @@
 package com.example.demo.model;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -19,7 +21,8 @@ public class Node {
 
     @JsonManagedReference
     @OneToMany(mappedBy = "node", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Attribute> attributes;
+    // private List<Attribute> attributes;
+    private Set<Attribute> attributes = new HashSet<>();
 
     @JsonBackReference
     @ManyToOne
@@ -91,6 +94,7 @@ public class Node {
 
     public void setUser(User user) {
         this.user = user;
+        this.userId = user.getId();
     }
     
     public User getUser() {
