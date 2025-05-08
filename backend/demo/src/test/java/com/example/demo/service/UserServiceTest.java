@@ -2,7 +2,6 @@ package com.example.demo.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
@@ -15,11 +14,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.example.demo.model.User;
 import com.example.demo.repository.UserRepository;
+import com.example.demo.service.UserService;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
@@ -50,13 +49,13 @@ class UserServiceTest {
     @Test
     void testRegisterUser_success() {
         when(userRepository.findByUsername("newUser")).thenReturn(Optional.empty()); //showing that before registration, the user doesn't existBefore registration, the user doesn't exist 
-        lenient().when(passwordEncoder.encode("password123")).thenReturn("hashedPassword");
+        when(passwordEncoder.encode("password123")).thenReturn("hashedPassword");
 
-        
         User savedUser = new User("newUser", "hashedPassword");
         when(userRepository.save(any(User.class))).thenReturn(savedUser);
-
+       
         User result = userService.registerUser("newUser", "password123");
+        verify(userRepository).findByUsername("newUser");
         verify(passwordEncoder).encode("password123");
         assertEquals("newUser", result.getUsername());
         assertEquals("hashedPassword", result.getPassword());
@@ -77,8 +76,12 @@ class UserServiceTest {
     @Test
     void testAuthenticateUser_success() {
         User user = new User("john", "hashedPassword");
+        //String encoded = passwordEncoder.encode("password123");
+        //User user = new User("john", "password123");
+
         when(userRepository.findByUsername("john")).thenReturn(Optional.of(user));
         when(passwordEncoder.matches("password123", "hashedPassword")).thenReturn(true);
+        //when(passwordEncoder.matches("password123", encoded)).thenReturn(true);
 
         User result = userService.authenticateUser("john", "password123");
 
