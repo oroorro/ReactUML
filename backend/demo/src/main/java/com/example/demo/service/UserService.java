@@ -27,4 +27,9 @@ public class UserService {
             .filter(user -> passwordEncoder.matches(password, user.getPassword()))
             .orElseThrow(() -> new RuntimeException("Invalid username or password"));
     }
+
+    public User findByUsername(String username){
+        return userRepository.findByUsername(username)
+        .orElseThrow(() -> new RuntimeException("given username does not exist"));
+    }
 }
