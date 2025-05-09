@@ -21,6 +21,9 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -122,6 +125,64 @@ public class UserControllerTest {
     @Test 
     void testGetCurrentUser_fail() throws Exception {
 
+        UserDetails mockUser = mock(UserDetails.class); //UserDetails represents authenticated user 
+        when(mockUser.getUsername()).thenReturn("john"); //with username "john"
+
+        //let john does not exist in DB 
+        when(userRepository.findByUsername("john")).thenReturn(Optional.empty());
+
+        mockMvc.perform(get("/auth/verify")
+                .with(user(mockUser)))
+            .andExpect(status().isInternalServerError())
+            .andExpect(jsonPath("$.id").doesNotExist())
+            .andExpect(jsonPath("$.username").doesNotExist());
     }
+
+    //test given user isn't autheticated logged-in user 
+    // @Test
+    // void testGetCurrentUser_fail_UnathenticatedUser() throws Exception {
+    //     User mockUser = mock(User.class);
+
+    //     mockMvc.perform(get("/auth/verify")
+    //             .with(user(mockUser.getUsername())))
+    //         .andExpect(status().isInternalServerError())
+    //         .andExpect(jsonPath("$.id").doesNotExist())
+    //         .andExpect(jsonPath("$.username").doesNotExist());
+    // }
+
+    @Test
+    void testGetCurrentUser_fail_UnathenticatedUser2() throws Exception {
+        User mockUser = mock(User.class);
+        when(mockUser.getUsername()).thenReturn("john");
+
+        mockMvc.perform(get("/auth/verify")
+                .with(user(mockUser.getUsername())))
+            .andExpect(status().isInternalServerError())
+            .andExpect(jsonPath("$.id").doesNotExist())
+            .andExpect(jsonPath("$.username").doesNotExist());
+    }
+
+    @Test
+    void testVerify_withoutAuthentication_returns500() throws Exception {
+        mockMvc.perform(get("/auth/verify"))
+            .andExpect(status().isInternalServerError()); 
+    }
+
+    // Just a plain Principal (not UserDetails) 
+    @Test
+    void testVerify_withPlainPrincipal_throwsException() throws Exception {
+        mockMvc.perform(get("/auth/verify")
+                .principal(() -> "john")) 
+            .andExpect(status().isInternalServerError())
+            .andDo(result -> {
+                //check runtime exception has occurred 
+                Exception resolvedException = result.getResolvedException();
+                assertNotNull(resolvedException);
+                //System.err.println("Exception: " + resolvedException.getClass());
+                assertTrue(resolvedException instanceof NullPointerException);
+            });
+    }
+    
+
 }
 
