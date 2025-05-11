@@ -33,20 +33,20 @@ public class AuthController {
         return response;
     }
 
-    @PostMapping("/login")
-    public Map<String, String> loginUser(@RequestBody Map<String, String> user) {
-        String username = user.get("username");
-        String password = user.get("password");
+    // @PostMapping("/login")
+    // public Map<String, String> loginUser(@RequestBody Map<String, String> user) {
+    //     String username = user.get("username");
+    //     String password = user.get("password");
 
-        try {
-            userService.authenticateUser(username, password);
-            Map<String, String> response = new HashMap<>();
-            response.put("message", "Login successful!");
-            return response;
-        } catch (RuntimeException e) {
-            throw new RuntimeException("Invalid credentials!");
-        }
-    }
+    //     try {
+    //         userService.authenticateUser(username, password);
+    //         Map<String, String> response = new HashMap<>();
+    //         response.put("message", "Login successful!");
+    //         return response;
+    //     } catch (RuntimeException e) {
+    //         throw new RuntimeException("Invalid credentials!");
+    //     }
+    // }
 
     @GetMapping("/verify")
     public UserResponse getCurrentUser(@AuthenticationPrincipal UserDetails userDetails) {
