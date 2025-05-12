@@ -14,6 +14,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 //@Profile("!test")
 //@Profile("test")
+@Profile({"default", "test"}) 
 @Configuration
 public class SecurityConfig {
 
