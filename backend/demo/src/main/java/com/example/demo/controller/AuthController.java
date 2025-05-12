@@ -5,6 +5,8 @@ import com.example.demo.model.User;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -23,35 +25,42 @@ public class AuthController {
     private UserRepository userRepository;
 
     @PostMapping("/register")
-    public Map<String, String> registerUser(@RequestBody Map<String, String> user) {
+    public ResponseEntity<Map<String, String>> registerUser(@RequestBody Map<String, String> user) {
         String username = user.get("username");
         String password = user.get("password");
-        User registeredUser = userService.registerUser(username, password);
+
+        if (username == null || username.isBlank() || password == null || password.isBlank()) {
+            Map<String, String> error = new HashMap<>();
+            error.put("error", "Invalid user credential");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+        }
+
+        userService.registerUser(username, password);
 
         Map<String, String> response = new HashMap<>();
         response.put("message", "User registered successfully!");
-        return response;
+        return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/login")
-    public Map<String, String> loginUser(@RequestBody Map<String, String> user) {
-        String username = user.get("username");
-        String password = user.get("password");
+    // @PostMapping("/login")
+    // public Map<String, String> loginUser(@RequestBody Map<String, String> user) {
+    //     String username = user.get("username");
+    //     String password = user.get("password");
 
-        try {
-            userService.authenticateUser(username, password);
-            Map<String, String> response = new HashMap<>();
-            response.put("message", "Login successful!");
-            return response;
-        } catch (RuntimeException e) {
-            throw new RuntimeException("Invalid credentials!");
-        }
-    }
-
-    // @GetMapping("/verify")
-    // public UserResponse getCurrentUser(@AuthenticationPrincipal UserDetails userDetails) {
-    //     User user = userRepository.findByUsername(userDetails.getUsername())
-    //         .orElseThrow(() -> new RuntimeException("User not found"));
-    //     return new UserResponse(user.getId(), user.getUsername());
+    //     try {
+    //         userService.authenticateUser(username, password);
+    //         Map<String, String> response = new HashMap<>();
+    //         response.put("message", "Login successful!");
+    //         return response;
+    //     } catch (RuntimeException e) {
+    //         throw new RuntimeException("Invalid credentials!");
+    //     }
     // }
+
+    @GetMapping("/verify")
+    public UserResponse getCurrentUser(@AuthenticationPrincipal UserDetails userDetails) {
+        User user = userRepository.findByUsername(userDetails.getUsername())
+            .orElseThrow(() -> new RuntimeException("User not found"));
+        return new UserResponse(user.getId(), user.getUsername());
+    }
 }

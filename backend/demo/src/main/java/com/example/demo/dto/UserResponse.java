@@ -2,15 +2,15 @@ package com.example.demo.dto;
 
 
 public class UserResponse {
-    private Long id;
+    private Integer id;
     private String username;
 
-    public UserResponse(Long id, String username) {
+    public UserResponse(Integer id, String username) {
         this.id = id;
         this.username = username;
     }
 
-    public Long getId() {
+    public Integer getId() {
         return id;
     }
 
