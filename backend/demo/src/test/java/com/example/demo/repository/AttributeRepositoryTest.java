@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -111,13 +112,23 @@ public class AttributeRepositoryTest {
         attr.setMute(false);
         attr.setTotalNumber(3);
         attr.setNode(savedNode);
-        attributeRepository.save(attr); //fails as well
 
+        Exception ex1 = assertThrows(DataIntegrityViolationException.class, () -> {
+            attributeRepository.save(attr);  // triggers Hibernate-level error
+        });
+
+        Throwable rootCause1 = ex1.getCause();
+        assertThat(rootCause1).isInstanceOf(org.hibernate.PropertyValueException.class);
+
+        entityManager.persist(attr);
         // triggers DB constraint violation on Attribute not having UID
-        assertThrows(PersistenceException.class, () -> {
-            entityManager.persist(attr);
+        Exception ex2  = assertThrows(PersistenceException.class, () -> {
+            
             entityManager.flush(); 
         });
+
+        Throwable rootCause2 = ex2.getCause();
+        assertThat(rootCause2).isInstanceOf(org.hibernate.exception.ConstraintViolationException.class);
     }
 }
 
