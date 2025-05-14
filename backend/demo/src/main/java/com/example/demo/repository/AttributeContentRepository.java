@@ -16,6 +16,8 @@ public interface AttributeContentRepository extends JpaRepository<AttributeConte
     List<AttributeContent> findByAttribute_Uid(String attributeUid);   
     
     List<AttributeContent> findByPipe(Pipe pipe);
+
+    AttributeContent findByUid(String uid);
     
     void deleteByAttribute(Attribute attribute); 
 }

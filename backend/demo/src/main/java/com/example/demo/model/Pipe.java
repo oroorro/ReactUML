@@ -15,7 +15,7 @@ public class Pipe {
     @Column(unique = true, nullable = false, length = 20)
     private String uid;
 
-    @OneToMany(mappedBy = "pipe", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "pipe", cascade = CascadeType.ALL)
     private Set<AttributeContent> attributeContents = new HashSet<>();
 
     @ManyToOne(optional = false)
