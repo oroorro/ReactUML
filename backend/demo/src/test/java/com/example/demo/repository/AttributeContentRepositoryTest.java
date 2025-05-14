@@ -411,17 +411,19 @@ public class AttributeContentRepositoryTest {
     
 
         // Delete pipe
+        pipe = pipeRepository.findById(pipe.getId()).orElseThrow();
         pipeRepository.delete(pipe);
         
         entityManager.flush();
 
         // At this point:
-        // - ac1 should be gone
-        // - ac2 still exists (has attribute)
+        // - ac1 should be gone since it only had pipe and pipe got deleted 
+        // - ac2 still exists (has attribute) 
+        // - ac3 should exist 
 
         List<AttributeContent> afterPipeDelete = attributeContentRepository.findAll();
         assertThat(afterPipeDelete)
-                .extracting(AttributeContent::getName)
+                .extracting(AttributeContent::getName) //error, "BothLinked" gets deleted as well
                 .contains("BothLinked", "OnlyAttr")
                 .doesNotContain("OnlyPipe");
 
