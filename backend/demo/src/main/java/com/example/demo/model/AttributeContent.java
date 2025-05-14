@@ -12,22 +12,34 @@ public class AttributeContent {
     @Column(unique = true, nullable = false, length = 20)
     private String uid;
 
-    @ManyToOne
+    @ManyToOne(optional = true)
     @JoinColumn(name = "attribute_id")
     private Attribute attribute;
 
+    @ManyToOne(optional = true)
+    @JoinColumn(name = "pipe_id") 
+    private Pipe pipe;
+
     @ManyToOne(optional = false)
-    @JoinColumn(name = "parentNodeID")
-    private Node parentNode;
+    @JoinColumn(name = "belonging_node_id")
+    private Node belongingNode;
+
+    @PrePersist
+    @PreUpdate
+    private void validateExclusiveLink() {
+        if (this.attribute == null && this.pipe == null) {
+            throw new IllegalStateException("AttributeContent must be linked to either an Attribute or a Pipe");
+        }
+    }
 
     private String name;
 
     // Constructors
     public AttributeContent() {}
 
-    public AttributeContent(Attribute attribute, Node parentNode, String name) {
+    public AttributeContent(Attribute attribute, Node belongingNode, String name) {
         this.attribute = attribute;
-        this.parentNode = parentNode;
+        this.belongingNode = belongingNode;
         this.name = name;
     }
 
@@ -48,12 +60,12 @@ public class AttributeContent {
         this.attribute = attribute;
     }
 
-    public Node getParentNode() {
-        return parentNode;
+    public Node getBelongingNode() {
+        return belongingNode;
     }
 
-    public void setParentNode(Node parentNode) {
-        this.parentNode = parentNode;
+    public void setBelongingNode(Node belongingNode) {
+        this.belongingNode = belongingNode;
     }
 
     public String getName() {
@@ -70,6 +82,14 @@ public class AttributeContent {
     
     public void setUid(String uid) {
         this.uid = uid;
+    }
+
+    public Pipe getPipe() {
+        return pipe;
+    }
+    
+    public void setPipe(Pipe pipe) {
+        this.pipe = pipe;
     }
 }
 

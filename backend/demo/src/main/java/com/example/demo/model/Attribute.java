@@ -29,7 +29,7 @@ public class Attribute {
 
     private Boolean mute;
 
-    @OneToMany(mappedBy = "attribute", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "attribute", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     //private List<AttributeContent> attributeContents;
     private Set<AttributeContent> attributeContents = new HashSet<>();
 

@@ -1,5 +1,8 @@
 package com.example.demo.model;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import jakarta.persistence.*;
 
 @Entity
@@ -12,9 +15,16 @@ public class Pipe {
     @Column(unique = true, nullable = false, length = 20)
     private String uid;
 
+    @OneToMany(mappedBy = "pipe", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<AttributeContent> attributeContents = new HashSet<>();
+
     @ManyToOne(optional = false)
-    @JoinColumn(name = "nodeID") 
-    private Node node;
+    @JoinColumn(name = "source_node_id", nullable = false)
+    private Node sourceNode;
+
+    @ManyToOne(optional = true)
+    @JoinColumn(name = "target_node_id", nullable = true)
+    private Node targetNode;
 
     private String name;
 
@@ -24,8 +34,8 @@ public class Pipe {
 
     public Pipe() {}  
 
-    public Pipe(Node node, String name, Character color, Boolean mute) {
-        this.node = node;
+    public Pipe(Node sourceNode, String name, Character color, Boolean mute) {
+        this.sourceNode = sourceNode;
         this.name = name;
         this.color = color;
         this.mute = mute;
@@ -36,17 +46,35 @@ public class Pipe {
         return id;
     }
 
+    public String getUid() {
+        return uid;
+    }
+    
+    public void setUid(String uid) {
+        this.uid = uid;
+    }
+
     public void setId(Integer id) {
         this.id = id;
     }
 
-    public Node getNode() {
-        return node;
+    public Node getSourceNode() {
+        return sourceNode;
     }
 
-    public void setNode(Node node) {
-        this.node = node;
+    public void setSourceNode(Node sourceNode) {
+        this.sourceNode = sourceNode;
     }
+
+    public Node getTargetNode() {
+        return targetNode;
+    }
+
+    public void setTargetNode(Node targetNode) {
+        this.targetNode = targetNode;
+    }
+
+    
 
     public String getName() {
         return name;
