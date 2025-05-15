@@ -81,4 +81,12 @@ public class Attribute {
     public void setUid(String uid) {
         this.uid = uid;
     }
+
+    public Set<AttributeContent> getAttributeContents() {
+        return attributeContents;
+    }
+    
+    public void setAttributeContents(Set<AttributeContent> attributeContents) {
+        this.attributeContents = attributeContents;
+    }
 }

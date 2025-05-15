@@ -1,6 +1,7 @@
 package com.example.demo.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -17,7 +18,7 @@ public interface AttributeContentRepository extends JpaRepository<AttributeConte
     
     List<AttributeContent> findByPipe(Pipe pipe);
 
-    AttributeContent findByUid(String uid);
+    Optional <AttributeContent> findByUid(String uid);
     
     void deleteByAttribute(Attribute attribute); 
 }

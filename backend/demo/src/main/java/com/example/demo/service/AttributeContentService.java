@@ -20,7 +20,7 @@ public class AttributeContentService {
     public void checkDuplicateUid(String uid) {
         boolean exists = attributeContentRepository.findByUid(uid).isPresent();
         if (exists) {
-            throw new DuplicateKeyException("UID already exists: " + uid);
+            throw new RuntimeException("UID already exists");
         }
     }
 
@@ -38,8 +38,6 @@ public class AttributeContentService {
         return attributeContentRepository.save(content);
     }
 
-    
-
     public void cleanUpOrphanedAttributeContents() {
         List<AttributeContent> orphanedContents = attributeContentRepository.findAll().stream()
             .filter(ac -> ac.getPipe() == null && ac.getAttribute() == null)
@@ -47,4 +45,12 @@ public class AttributeContentService {
 
         attributeContentRepository.deleteAll(orphanedContents);
     }
+
+     // Delete by UID
+     @Transactional
+     public void deleteByUid(String uid) {
+         AttributeContent content = attributeContentRepository.findByUid(uid)
+             .orElseThrow(() -> new IllegalArgumentException("AttributeContent not found with UID: " + uid));
+         attributeContentRepository.delete(content);
+     }
 }
