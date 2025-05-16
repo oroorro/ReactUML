@@ -1,6 +1,7 @@
 package com.example.demo.model;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 import jakarta.persistence.*;
@@ -41,6 +42,14 @@ public class Pipe {
         this.mute = mute;
     }
 
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Node node = (Node) o;
+        return Objects.equals(uid, node.getUid());
+    }
 
     public Integer getId() {
         return id;
