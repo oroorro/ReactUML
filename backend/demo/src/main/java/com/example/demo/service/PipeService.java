@@ -45,6 +45,12 @@ public class PipeService {
 
     @Transactional
     public Pipe editPipe(Pipe updatedPipe) {
+
+        if (updatedPipe == null || updatedPipe.getUid() == null || updatedPipe.getSourceNode() == null
+                || updatedPipe.getSourceNode().equals(updatedPipe.getTargetNode())) {
+            throw new IllegalArgumentException("invalid data to create pipe");
+        }
+
         Pipe existing = pipeRepository.findById(updatedPipe.getId())
                 .orElseThrow(() -> new EntityNotFoundException("Pipe not found with ID: " + updatedPipe.getId()));
 
@@ -65,7 +71,7 @@ public class PipeService {
             modified = true;
         }
 
-        if (!Objects.equals(existing.getSourceNode(), updatedPipe.getSourceNode())) {
+        if (!Objects.equals(existing.getSourceNode().getUid(), updatedPipe.getSourceNode().getUid())) {
             existing.setSourceNode(updatedPipe.getSourceNode());
             modified = true;
         }
@@ -74,6 +80,12 @@ public class PipeService {
             existing.setTargetNode(updatedPipe.getTargetNode());
             modified = true;
         }
+
+        if (!Objects.equals(existing.getAttributeContents(), updatedPipe.getAttributeContents())) {
+            existing.setAttributeContents(updatedPipe.getAttributeContents());
+            modified = true;
+        }
+        
 
         return modified ? pipeRepository.save(existing) : existing;
     }

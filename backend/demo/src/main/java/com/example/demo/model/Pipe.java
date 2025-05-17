@@ -83,6 +83,13 @@ public class Pipe {
         this.targetNode = targetNode;
     }
 
+    public void setAttributeContents(Set<AttributeContent> attributeContents) {
+        this.attributeContents = attributeContents;
+    }
+    
+    public Set<AttributeContent> getAttributeContents() {
+        return attributeContents;
+    }
     
 
     public String getName() {
