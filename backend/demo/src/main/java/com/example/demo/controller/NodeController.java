@@ -52,7 +52,7 @@ public class NodeController {
     // PUT /node/edit/{nodeId}
     @PutMapping("/edit/{nodeId}")
     public ResponseEntity<Node> editNode(@PathVariable Integer nodeId, @RequestBody Node updatedNode) {
-        Node updated = nodeService.editNode(nodeId, updatedNode);
+        Node updated = nodeService.editNode(updatedNode);
         if (updated != null) {
             return ResponseEntity.ok(updated);
         } else {

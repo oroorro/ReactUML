@@ -42,7 +42,10 @@ public class NodeService {
         return false;
     }
 
-    public Node editNode(Integer nodeId, Node updated) {
+    public Node editNode(Node updated) {
+
+        Integer nodeId = updated.getId();
+
         Node existing = nodeRepository.findById(nodeId)
                 .orElseThrow(() -> new RuntimeException("Node not found"));
 

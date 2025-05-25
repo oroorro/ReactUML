@@ -47,7 +47,7 @@ public class AttributeContentServiceTest {
     void testCreate_throwsIfBothPipeAndAttributeAreNull() {
         AttributeContent ac = new AttributeContent();
         ac.setUid("uid-1");
-        assertThrows(IllegalArgumentException.class, () -> service.create(ac, null, null));
+        assertThrows(IllegalArgumentException.class, () -> service.createAttributeContent(ac));
     }
 
     //testing creating AttributeContent that only linked to Pipe successfully
@@ -56,11 +56,13 @@ public class AttributeContentServiceTest {
         AttributeContent ac = new AttributeContent();
         ac.setUid("uid-2");
         Pipe pipe = new Pipe();
+        ac.setPipe(pipe);
 
         when(attributeContentRepository.findByUid("uid-2")).thenReturn(Optional.empty());
         when(attributeContentRepository.save(ac)).thenReturn(ac);
 
-        AttributeContent result = service.create(ac, pipe, null);
+        //AttributeContent result = service.createAttributeContent(ac, pipe, null);
+        AttributeContent result = service.createAttributeContent(ac);
 
         assertEquals(pipe, result.getPipe());
         assertThat(result.getUid()).isEqualTo("uid-2");
@@ -73,11 +75,13 @@ public class AttributeContentServiceTest {
         AttributeContent ac = new AttributeContent();
         ac.setUid("uid-3");
         Attribute attr = new Attribute();
+        ac.setAttribute(attr);
 
         when(attributeContentRepository.findByUid("uid-3")).thenReturn(Optional.empty());
         when(attributeContentRepository.save(ac)).thenReturn(ac);
 
-        AttributeContent result = service.create(ac, null, attr);
+        //AttributeContent result = service.createAttributeContent(ac, null, attr);
+        AttributeContent result = service.createAttributeContent(ac);
 
         assertEquals(attr, result.getAttribute());
         assertNull(result.getPipe());
@@ -90,13 +94,15 @@ public class AttributeContentServiceTest {
         ac.setUid("uid-3");
         Attribute attr = new Attribute();
         attr.setUid("attr-uid");
+        ac.setAttribute(attr);
         Pipe pipe = new Pipe();
         pipe.setUid("pipe-uid");
+        ac.setPipe(pipe);
 
         when(attributeContentRepository.findByUid("uid-3")).thenReturn(Optional.empty());
         when(attributeContentRepository.save(ac)).thenReturn(ac);
 
-        AttributeContent result = service.create(ac, pipe, attr);
+        AttributeContent result = service.createAttributeContent(ac);
 
         assertEquals(attr, result.getAttribute());
         assertThat(result.getUid()).isEqualTo("uid-3");
