@@ -40,6 +40,19 @@ public class PipeService {
             throw new IllegalArgumentException("invalid data to create pipe");
         }
 
+        //if passed parameter, pipe only specified the uid of SourceNode that is's linked to, find the instance of the sourceNode then attache to pipe
+        if (pipe.getSourceNode() != null && pipe.getSourceNode().getUid() != null) {
+            Node source = nodeRepository.findByUid(pipe.getSourceNode().getUid())
+                .orElseThrow(() -> new EntityNotFoundException("Source node not found"));
+            pipe.setSourceNode(source); // attach managed entity
+        }
+
+        if (pipe.getTargetNode() != null && pipe.getTargetNode().getUid() != null) {
+            Node target = nodeRepository.findByUid(pipe.getTargetNode().getUid())
+                .orElseThrow(() -> new EntityNotFoundException("Target node not found"));
+            pipe.setTargetNode(target); // attach managed entity
+        }
+
         return pipeRepository.save(pipe);
     }
 

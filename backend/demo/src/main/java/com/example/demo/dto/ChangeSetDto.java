@@ -24,6 +24,7 @@ public class ChangeSetDto {
         public List<Integer> nodeIds;
         public List<String> pipeUids;
         public List<String> attributeUids;
+        public List<String> nodeUids;
         public List<String> attributeContentUids;
         
     }

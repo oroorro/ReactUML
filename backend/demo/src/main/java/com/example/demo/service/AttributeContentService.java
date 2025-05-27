@@ -9,16 +9,30 @@ import org.springframework.stereotype.Service;
 
 import com.example.demo.model.Attribute;
 import com.example.demo.model.AttributeContent;
+import com.example.demo.model.Node;
 import com.example.demo.model.Pipe;
 import com.example.demo.repository.AttributeContentRepository;
+import com.example.demo.repository.AttributeRepository;
+import com.example.demo.repository.NodeRepository;
+import com.example.demo.repository.PipeRepository;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 
 @Service
 public class AttributeContentService {
+
     @Autowired
     private AttributeContentRepository attributeContentRepository;
+
+    @Autowired
+    private AttributeRepository attributeRepository;
+
+    @Autowired
+    private NodeRepository nodeRepository;
+
+    @Autowired
+    private PipeRepository pipeRepository;
 
     // Check for duplicate UID
     public void checkDuplicateUid(String uid) {
@@ -33,9 +47,30 @@ public class AttributeContentService {
 
         Pipe pipe = content.getPipe();
         Attribute attribute = content.getAttribute();
+        Node belongingNode = content.getBelongingNode();
 
         if (pipe == null && attribute == null) {
             throw new IllegalArgumentException("AttributeContent must be linked to either an Attribute or a Pipe");
+        }
+
+        if (pipe != null && pipe.getUid() != null) {
+            Pipe resolvedPipe = pipeRepository.findByUid(pipe.getUid())
+                    .orElseThrow(() -> new EntityNotFoundException("Pipe not found with UID: " + pipe.getUid()));
+            content.setPipe(resolvedPipe);
+        }
+
+        //  Attach managed Attribute entity if present
+        if (attribute != null && attribute.getUid() != null) {
+            Attribute resolvedAttribute = attributeRepository.findByUid(attribute.getUid())
+                    .orElseThrow(() -> new EntityNotFoundException("Attribute not found with UID: " + attribute.getUid()));
+            content.setAttribute(resolvedAttribute);
+        }
+
+        //  Attach managed BelongingNode entity if present
+        if (belongingNode != null && belongingNode.getUid() != null) {
+            Node resolvedNode = nodeRepository.findByUid(belongingNode.getUid())
+                    .orElseThrow(() -> new EntityNotFoundException("Node not found with UID: " + belongingNode.getUid()));
+            content.setBelongingNode(resolvedNode);
         }
 
         checkDuplicateUid(content.getUid());

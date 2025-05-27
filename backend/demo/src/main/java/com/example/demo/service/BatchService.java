@@ -1,9 +1,12 @@
 package com.example.demo.service;
 
+
 import org.springframework.stereotype.Service;
 
 import com.example.demo.dto.ChangeSetDto;
+import com.example.demo.model.Attribute;
 import com.example.demo.model.AttributeContent;
+
 import com.example.demo.model.Node;
 import com.example.demo.model.Pipe;
 
@@ -14,13 +17,16 @@ public class BatchService {
 
     private final NodeService nodeService;
     private final PipeService pipeService;
+    private final AttributeService attributeService;
     private final AttributeContentService attributeContentService;
 
     public BatchService(NodeService nodeService,
                         PipeService pipeService,
+                        AttributeService attributeService,
                         AttributeContentService attributeContentService) {
         this.nodeService = nodeService;
         this.pipeService = pipeService;
+        this.attributeService = attributeService;
         this.attributeContentService = attributeContentService;
     }
 
@@ -38,9 +44,18 @@ public class BatchService {
                     pipeService.deletePipeByUid(uid);
                 }
             }
-            if (changes.deleted.nodeIds != null) {
-                for (Integer id : changes.deleted.nodeIds) {
-                    nodeService.deleteNode(userId, id);
+            if (changes.deleted.attributeUids != null) {
+                for (String uid : changes.deleted.attributeUids) {
+                    attributeService.deleteAttribute(uid);
+                }
+            }
+            if (changes.deleted.nodeUids != null) {
+                for (String uid : changes.deleted.nodeUids) {
+                    //nodeService.deleteNode(userId, id);
+                    boolean success = nodeService.deleteNodeByUid(uid);
+                    if (!success) {
+                        System.out.println("Warning: Node with UID " + uid + " not found.");
+                    }
                 }
             }
         }
@@ -74,6 +89,11 @@ public class BatchService {
             if (changes.created.pipes != null) {
                 for (Pipe pipe : changes.created.pipes) {
                     pipeService.createPipe(pipe);
+                }
+            }
+            if (changes.created.attributes != null) {
+                for (Attribute attribute : changes.created.attributes) {
+                    attributeService.createAttribute(attribute);
                 }
             }
             if (changes.created.attributeContents != null) {

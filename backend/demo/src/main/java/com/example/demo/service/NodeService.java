@@ -1,5 +1,6 @@
 package com.example.demo.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.model.Node;
@@ -7,13 +8,19 @@ import com.example.demo.model.User;
 import com.example.demo.repository.NodeRepository;
 import com.example.demo.repository.UserRepository;
 
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
+
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class NodeService {
 
+    @Autowired
     private final NodeRepository nodeRepository;
+
+    @Autowired
     private final UserRepository userRepository;
 
     public NodeService(NodeRepository nodeRepository, UserRepository userRepository) {
@@ -37,6 +44,18 @@ public class NodeService {
         Optional<Node> nodeOpt = nodeRepository.findById(nodeId);
         if (nodeOpt.isPresent() && nodeOpt.get().getUserId().equals(userId)) {
             nodeRepository.deleteById(nodeId);
+            return true;
+        }
+        return false;
+    }
+
+    @Transactional
+    public boolean deleteNodeByUid(String uid) {
+        if (uid == null || uid.isBlank()) return false;
+        
+        Optional<Node> nodeOpt = nodeRepository.findByUid(uid);
+        if (nodeOpt.isPresent()) {
+            nodeRepository.delete(nodeOpt.get());
             return true;
         }
         return false;
