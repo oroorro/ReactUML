@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.demo.dto.BatchResponse;
 import com.example.demo.dto.ChangeSetDto;
 import com.example.demo.security.CustomUserDetails;
 import com.example.demo.service.BatchService;
@@ -29,13 +30,23 @@ public class BatchController {
         
         //batchService.applyChanges(changes, userDetails.getId());
 
-        try {
-            batchService.applyChanges(changes, userDetails.getId());
-            return ResponseEntity.ok().build();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        // try {
+        //     batchService.applyChanges(changes, userDetails.getId());
+        //     return ResponseEntity.ok().build();
+        // } catch (Exception e) {
+        //     e.printStackTrace();
+        //     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        // }
+
+        BatchResponse result = batchService.applyChanges(changes, userDetails.getId());
+
+        if (result.hasErrors()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
         }
+    
+        return ResponseEntity.ok(result);
+
+
         //return ResponseEntity.ok().build();
     }
 }

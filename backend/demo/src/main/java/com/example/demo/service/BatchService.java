@@ -3,6 +3,7 @@ package com.example.demo.service;
 
 import org.springframework.stereotype.Service;
 
+import com.example.demo.dto.BatchResponse;
 import com.example.demo.dto.ChangeSetDto;
 import com.example.demo.model.Attribute;
 import com.example.demo.model.AttributeContent;
@@ -30,8 +31,14 @@ public class BatchService {
         this.attributeContentService = attributeContentService;
     }
 
+
     @Transactional
-    public void applyChanges(ChangeSetDto changes, Integer userId) {
+    public BatchResponse applyChanges(ChangeSetDto changes, Integer userId) {
+
+        BatchResponse response = new BatchResponse();
+        response.success = true;
+        response.message = "Batch processed successfully";
+
         // 1. DELETE first (avoid FK constraint issues)
         if (changes.deleted != null) {
             if (changes.deleted.attributeContentUids != null) {
@@ -54,10 +61,15 @@ public class BatchService {
                     //nodeService.deleteNode(userId, id);
                     boolean success = nodeService.deleteNodeByUid(uid);
                     if (!success) {
+                        response.addError("nodeUids", uid);
+                        response.success = false;
+                        response.message = "Some entities failed to delete";
                         System.out.println("Warning: Node with UID " + uid + " not found.");
                     }
                 }
             }
+
+            
         }
 
         // 2. UPDATE existing
@@ -102,6 +114,8 @@ public class BatchService {
                 }
             }
         }
+
+        return response;
     }
 }
 

@@ -23,6 +23,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -663,6 +664,48 @@ class BatchControllerIntegrationTest {
     Optional<Node> deleted = nodeRepository.findByUid("node-delete-uid");
     assertTrue(deleted.isEmpty());
     assertEquals(0, nodeRepository.findAll().size());
+  }
+
+  @Test
+  void testBatchDelete_withInvalidNodeUid_returnsFailureResponse() throws Exception {
+    // 1. Create and save a real user
+    User user = new User();
+    user.setUsername("testUser");
+    user.setPassword("testPass");
+    user = userRepository.save(user);
+
+    // 2. Set up authenticated context
+    CustomUserDetails userDetails = new CustomUserDetails(user.getId(), user.getUsername(), user.getPassword(),
+        List.of());
+    SecurityContext context = SecurityContextHolder.createEmptyContext();
+    context.setAuthentication(new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities()));
+    SecurityContextHolder.setContext(context);
+
+    // 3. JSON with a nodeUid that doesn't exist in the DB
+    String invalidUid = "nonexistent-node-uid";
+    String requestJson = """
+        {
+          "created": {},
+          "updated": {},
+          "deleted": {
+            "nodeUids": ["%s"]
+          }
+        }
+        """.formatted(invalidUid);
+
+    // 4. Perform the batch delete request
+    MvcResult result = mockMvc.perform(post("/batch")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(requestJson))
+        .andExpect(status().isBadRequest()) // Expect 400 for failure
+        .andReturn();
+
+    // 5. Parse response and verify
+    String responseJson = result.getResponse().getContentAsString();
+
+    assertTrue(responseJson.contains("\"success\":false"));
+    assertTrue(responseJson.contains("\"message\":\"Some entities failed to delete\""));
+    assertTrue(responseJson.contains("\"nodeUids\":[\"" + invalidUid + "\"]"));
   }
 
 }
