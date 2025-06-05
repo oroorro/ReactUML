@@ -708,4 +708,240 @@ class BatchControllerIntegrationTest {
     assertTrue(responseJson.contains("\"nodeUids\":[\"" + invalidUid + "\"]"));
   }
 
+  @Test
+  void testApplyBatchChanges_deletesPipeByUidSuccessfully() throws Exception {
+    // 1. Create and save user
+    User user = new User();
+    user.setUsername("deletePipeUser");
+    user.setPassword("pass");
+    user = userRepository.save(user);
+
+    // 2. Create and save a node (required for pipe)
+    Node node = new Node();
+    node.setUid("pipe-node-uid");
+    node.setName("PipeNode");
+    node.setUser(user);
+    node = nodeRepository.save(node);
+
+    // 3. Create and save a pipe
+    Pipe pipe = new Pipe();
+    pipe.setUid("pipe-delete-uid");
+    pipe.setName("DeletePipe");
+    pipe.setColor('B');
+    pipe.setMute(false);
+    pipe.setSourceNode(node);
+    pipe.setTargetNode(node);
+    pipe = pipeRepository.save(pipe);
+
+    assertTrue(pipeRepository.findByUid("pipe-delete-uid").isPresent());
+
+    // 4. Authenticate as that user
+    CustomUserDetails userDetails = new CustomUserDetails(user.getId(), user.getUsername(), user.getPassword(), List.of());
+    SecurityContext context = SecurityContextHolder.createEmptyContext();
+    context.setAuthentication(new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities()));
+    SecurityContextHolder.setContext(context);
+
+    // 5. JSON payload to delete the pipe by UID
+    String payload = """
+        {
+          "created": {},
+          "updated": {},
+          "deleted": {
+            "pipeUids": ["pipe-delete-uid"]
+          }
+        }
+        """;
+
+    // 6. Perform batch delete request
+    mockMvc.perform(post("/batch")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(payload))
+        .andExpect(status().isOk());
+
+    // 7. Assert pipe no longer exists
+    Optional<Pipe> deleted = pipeRepository.findByUid("pipe-delete-uid");
+    assertTrue(deleted.isEmpty());
+    assertEquals(0, pipeRepository.findAll().size());
+  }
+
+  @Test
+  void testBatchDelete_withInvalidAttributeUid_returnsFailureResponse() throws Exception {
+    // 1. Create and save a real user
+    User user = new User();
+    user.setUsername("testAttrUser");
+    user.setPassword("testPass");
+    user = userRepository.save(user);
+
+    // 2. Set up authenticated context
+    CustomUserDetails userDetails = new CustomUserDetails(user.getId(), user.getUsername(), user.getPassword(), List.of());
+    SecurityContext context = SecurityContextHolder.createEmptyContext();
+    context.setAuthentication(new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities()));
+    SecurityContextHolder.setContext(context);
+
+    // 3. JSON with an attributeUid that doesn't exist in the DB
+    String invalidUid = "nonexistent-attribute-uid";
+    String requestJson = """
+        {
+          "created": {},
+          "updated": {},
+          "deleted": {
+            "attributeUids": ["%s"]
+          }
+        }
+        """.formatted(invalidUid);
+
+    // 4. Perform the batch delete request
+    MvcResult result = mockMvc.perform(post("/batch")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(requestJson))
+        .andExpect(status().isBadRequest()) // Expect 400 for failure
+        .andReturn();
+
+    // 5. Parse response and verify
+    String responseJson = result.getResponse().getContentAsString();
+
+    assertTrue(responseJson.contains("\"success\":false"));
+    assertTrue(responseJson.contains("\"message\":\"Some entities failed to delete\""));
+    assertTrue(responseJson.contains("\"attributeUids\":[\"" + invalidUid + "\"]"));
+  }
+
+  @Test
+  @Transactional
+  void testApplyBatchChanges_deletesAllEntityTypesSuccessfully() throws Exception {
+    // 1. Create and save user
+    User user = new User();
+    user.setUsername("deleteAllUser");
+    user.setPassword("pass");
+    user = userRepository.save(user);
+
+    // 2. Create and save nodes (needed for relationships)
+    Node nodeA = new Node();
+    nodeA.setUid("node-a-delete");
+    nodeA.setName("Node A");
+    nodeA.setUser(user);
+    nodeA = nodeRepository.save(nodeA);
+
+    Node nodeB = new Node();
+    nodeB.setUid("node-b-delete");
+    nodeB.setName("Node B");
+    nodeB.setUser(user);
+    nodeB = nodeRepository.save(nodeB);
+
+    // 3. Create and save pipe
+    Pipe pipe = new Pipe();
+    pipe.setUid("pipe-delete-all");
+    pipe.setName("DeletePipe");
+    pipe.setColor('B');
+    pipe.setMute(false);
+    pipe.setSourceNode(nodeA);
+    pipe.setTargetNode(nodeB);
+    pipe = pipeRepository.save(pipe);
+
+    // 4. Create and save attribute
+    Attribute attribute = new Attribute();
+    attribute.setUid("attr-delete-all");
+    attribute.setName("DeleteAttribute");
+    attribute.setMute(false);
+    attribute.setTotalNumber(2);
+    attribute.setNode(nodeA);
+    attribute = attributeRepository.save(attribute);
+
+    // 5. Create and save attribute content
+    AttributeContent ac = new AttributeContent();
+    ac.setUid("ac-delete-all");
+    ac.setName("DeleteAC");
+    ac.setBelongingNode(nodeA);
+    ac.setAttribute(attribute);
+    ac = attributeContentRepository.save(ac);
+
+    // Verify all entities exist before deletion
+    assertTrue(nodeRepository.findByUid("node-a-delete").isPresent());
+    assertTrue(nodeRepository.findByUid("node-b-delete").isPresent());
+    assertTrue(pipeRepository.findByUid("pipe-delete-all").isPresent());
+    assertTrue(attributeRepository.findByUid("attr-delete-all").isPresent());
+    assertTrue(attributeContentRepository.findByUid("ac-delete-all").isPresent());
+
+    // 6. Authenticate as that user
+    CustomUserDetails userDetails = new CustomUserDetails(user.getId(), user.getUsername(), user.getPassword(), List.of());
+    SecurityContext context = SecurityContextHolder.createEmptyContext();
+    context.setAuthentication(new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities()));
+    SecurityContextHolder.setContext(context);
+
+    // 7. JSON payload to delete all entities
+    String payload = """
+        {
+          "created": {},
+          "updated": {},
+          "deleted": {
+            "nodeUids": ["node-a-delete", "node-b-delete"],
+            "pipeUids": ["pipe-delete-all"],
+            "attributeUids": ["attr-delete-all"],
+            "attributeContentUids": ["ac-delete-all"]
+          }
+        }
+        """;
+
+    // 8. Perform batch delete request
+    mockMvc.perform(post("/batch")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(payload))
+        .andExpect(status().isOk());
+
+    // 9. Verify all entities are deleted
+    assertTrue(nodeRepository.findByUid("node-a-delete").isEmpty());
+    assertTrue(nodeRepository.findByUid("node-b-delete").isEmpty());
+    assertTrue(pipeRepository.findByUid("pipe-delete-all").isEmpty());
+    assertTrue(attributeRepository.findByUid("attr-delete-all").isEmpty());
+    assertTrue(attributeContentRepository.findByUid("ac-delete-all").isEmpty());
+
+    // Verify repository counts
+    assertEquals(0, nodeRepository.findAll().size());
+    assertEquals(0, pipeRepository.findAll().size());
+    assertEquals(0, attributeRepository.findAll().size());
+    assertEquals(0, attributeContentRepository.findAll().size());
+  }
+
+  @Test
+  void testBatchDelete_withInvalidAttributeContentUid_returnsFailureResponse() throws Exception {
+    // 1. Create and save a real user
+    User user = new User();
+    user.setUsername("testACUser");
+    user.setPassword("testPass");
+    user = userRepository.save(user);
+
+    // 2. Set up authenticated context
+    CustomUserDetails userDetails = new CustomUserDetails(user.getId(), user.getUsername(), user.getPassword(), List.of());
+    SecurityContext context = SecurityContextHolder.createEmptyContext();
+    context.setAuthentication(new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities()));
+    SecurityContextHolder.setContext(context);
+
+    // 3. JSON with an attributeContentUid that doesn't exist in the DB
+    String invalidUid = "nonexistent-ac-uid";
+    String requestJson = """
+        {
+          "created": {},
+          "updated": {},
+          "deleted": {
+            "attributeContentUids": ["%s"]
+          }
+        }
+        """.formatted(invalidUid);
+
+    // 4. Perform the batch delete request
+    MvcResult result = mockMvc.perform(post("/batch")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(requestJson))
+        .andExpect(status().isBadRequest()) // Expect 400 for failure
+        .andReturn();
+
+    // 5. Parse response and verify
+    String responseJson = result.getResponse().getContentAsString();
+
+    assertTrue(responseJson.contains("\"success\":false"));
+    assertTrue(responseJson.contains("\"message\":\"Some entities failed to delete\""));
+    assertTrue(responseJson.contains("\"attributeContentUids\":[\"" + invalidUid + "\"]"));
+
+    // 6. Verify no changes to repository
+    assertEquals(0, attributeContentRepository.findAll().size());
+  }
 }

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Objects;
+import java.util.Optional;
 
 @Service
 public class AttributeService {
@@ -80,14 +81,15 @@ public class AttributeService {
 
     //  Delete Attribute
     @Transactional
-    public void deleteAttribute(String uid) {
-        if (uid == null ) {
-            throw new IllegalArgumentException("UID cannot be null");
+    public boolean deleteAttribute(String uid) {
+        if (uid == null || uid.isBlank()) return false;
+        
+        Optional<Attribute> attributeOpt = attributeRepository.findByUid(uid);
+        if (attributeOpt.isPresent()) {
+            attributeRepository.delete(attributeOpt.get());
+            return true;
         }
-
-        Attribute attribute = attributeRepository.findByUid(uid)
-                .orElseThrow(() -> new EntityNotFoundException("Attribute not found with UID: " + uid));
-        attributeRepository.delete(attribute);
+        return false;
     }
 
     public Attribute getAttribute(String uid) {

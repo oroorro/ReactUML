@@ -104,10 +104,14 @@ public class PipeService {
     }
 
     @Transactional
-    public void deletePipeByUid(String uid) {
-        Pipe pipe = pipeRepository.findByUid(uid)
-                .orElseThrow(() -> new EntityNotFoundException("Pipe not found with UID: " + uid));
-
-        pipeRepository.delete(pipe);
+    public boolean deletePipeByUid(String uid) {
+        if (uid == null || uid.isBlank()) return false;
+        
+        Optional<Pipe> pipeOpt = pipeRepository.findByUid(uid);
+        if (pipeOpt.isPresent()) {
+            pipeRepository.delete(pipeOpt.get());
+            return true;
+        }
+        return false;
     }
 }

@@ -43,17 +43,35 @@ public class BatchService {
         if (changes.deleted != null) {
             if (changes.deleted.attributeContentUids != null) {
                 for (String uid : changes.deleted.attributeContentUids) {
-                    attributeContentService.deleteByUid(uid);
+                    boolean success = attributeContentService.deleteByUid(uid);
+                    if (!success) {
+                        response.addError("attributeContentUids", uid);
+                        response.success = false;
+                        response.message = "Some entities failed to delete";
+                        System.out.println("Warning: AttributeContent with UID " + uid + " not found.");
+                    }
                 }
             }
             if (changes.deleted.pipeUids != null) {
                 for (String uid : changes.deleted.pipeUids) {
-                    pipeService.deletePipeByUid(uid);
+                    boolean success = pipeService.deletePipeByUid(uid);
+                    if (!success) {
+                        response.addError("pipeUids", uid);
+                        response.success = false;
+                        response.message = "Some entities failed to delete";
+                        System.out.println("Warning: Pipe with UID " + uid + " not found.");
+                    }
                 }
             }
             if (changes.deleted.attributeUids != null) {
                 for (String uid : changes.deleted.attributeUids) {
-                    attributeService.deleteAttribute(uid);
+                    boolean success = attributeService.deleteAttribute(uid);
+                    if (!success) {
+                        response.addError("attributeUids", uid);
+                        response.success = false;
+                        response.message = "Some entities failed to delete";
+                        System.out.println("Warning: Attribute with UID " + uid + " not found.");
+                    }
                 }
             }
             if (changes.deleted.nodeUids != null) {

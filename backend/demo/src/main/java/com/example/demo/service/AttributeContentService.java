@@ -2,6 +2,7 @@ package com.example.demo.service;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -91,10 +92,15 @@ public class AttributeContentService {
 
     // Delete by UID
     @Transactional
-    public void deleteByUid(String uid) {
-        AttributeContent content = attributeContentRepository.findByUid(uid)
-                .orElseThrow(() -> new IllegalArgumentException("AttributeContent not found with UID: " + uid));
-        attributeContentRepository.delete(content);
+    public boolean deleteByUid(String uid) {
+        if (uid == null || uid.isBlank()) return false;
+        
+        Optional<AttributeContent> contentOpt = attributeContentRepository.findByUid(uid);
+        if (contentOpt.isPresent()) {
+            attributeContentRepository.delete(contentOpt.get());
+            return true;
+        }
+        return false;
     }
 
     @Transactional
