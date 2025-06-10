@@ -3,6 +3,7 @@ package com.example.demo.model;
 import jakarta.persistence.*;
 
 @Entity
+@Table(name = "attribute_content")
 public class AttributeContent {
 
     @Id
@@ -33,6 +34,9 @@ public class AttributeContent {
     }
 
     private String name;
+    
+    @Column(nullable = true)
+    private String value;
 
     // Constructors
     public AttributeContent() {}
@@ -74,6 +78,14 @@ public class AttributeContent {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getValue() {
+        return value;
+    }
+    
+    public void setValue(String value) {
+        this.value = value;
     }
 
     public String getUid() {

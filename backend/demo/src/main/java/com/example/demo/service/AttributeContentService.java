@@ -104,19 +104,26 @@ public class AttributeContentService {
     }
 
     @Transactional
-    public AttributeContent editAttributeContent(AttributeContent updatedContent) {
+    public boolean editAttributeContent(AttributeContent updatedContent) {
         if (updatedContent == null || updatedContent.getUid() == null) {
-            throw new IllegalArgumentException("AttributeContent or its UID cannot be null");
+            return false;
         }
 
-        AttributeContent existing = attributeContentRepository.findByUid(updatedContent.getUid())
-                .orElseThrow(() -> new EntityNotFoundException(
-                        "AttributeContent not found with UID: " + updatedContent.getUid()));
+        Optional<AttributeContent> existingOpt = attributeContentRepository.findByUid(updatedContent.getUid());
+        if (!existingOpt.isPresent()) {
+            return false;
+        }
 
+        AttributeContent existing = existingOpt.get();
         boolean modified = false;
 
         if (!Objects.equals(existing.getName(), updatedContent.getName())) {
             existing.setName(updatedContent.getName());
+            modified = true;
+        }
+
+        if (!Objects.equals(existing.getValue(), updatedContent.getValue())) {
+            existing.setValue(updatedContent.getValue());
             modified = true;
         }
 
@@ -142,7 +149,15 @@ public class AttributeContentService {
             modified = true;
         }
 
-        return modified ? attributeContentRepository.save(existing) : existing;
+        if (modified) {
+            try {
+                attributeContentRepository.save(existing);
+                return true;
+            } catch (Exception e) {
+                return false;
+            }
+        }
+        return true; // No changes needed, consider it a success
     }
 
 }

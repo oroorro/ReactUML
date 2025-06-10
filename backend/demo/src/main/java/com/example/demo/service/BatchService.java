@@ -94,7 +94,13 @@ public class BatchService {
         if (changes.updated != null) {
             if (changes.updated.attributeContents != null) {
                 for (AttributeContent ac : changes.updated.attributeContents) {
-                    attributeContentService.editAttributeContent(ac);
+                    boolean success = attributeContentService.editAttributeContent(ac);
+                    if (!success) {
+                        response.addError("attributeContents", ac.getUid());
+                        response.success = false;
+                        response.message = "Some entities failed to update";
+                        System.out.println("Warning: AttributeContent with UID " + ac.getUid() + " not found or failed to update.");
+                    }
                 }
             }
             if (changes.updated.pipes != null) {
