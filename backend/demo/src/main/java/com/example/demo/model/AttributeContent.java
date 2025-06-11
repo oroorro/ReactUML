@@ -36,7 +36,7 @@ public class AttributeContent {
     private String name;
     
     @Column(nullable = true)
-    private String value;
+    private String holdingValue;
 
     // Constructors
     public AttributeContent() {}
@@ -80,12 +80,12 @@ public class AttributeContent {
         this.name = name;
     }
 
-    public String getValue() {
-        return value;
+    public String getHoldingValue() {
+        return holdingValue;
     }
     
-    public void setValue(String value) {
-        this.value = value;
+    public void setHoldingValue(String holdingValue) {
+        this.holdingValue = holdingValue;
     }
 
     public String getUid() {

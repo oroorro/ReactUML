@@ -740,7 +740,8 @@ class BatchControllerIntegrationTest {
     assertTrue(pipeRepository.findByUid("pipe-delete-uid").isPresent());
 
     // 4. Authenticate as that user
-    CustomUserDetails userDetails = new CustomUserDetails(user.getId(), user.getUsername(), user.getPassword(), List.of());
+    CustomUserDetails userDetails = new CustomUserDetails(user.getId(), user.getUsername(), user.getPassword(),
+        List.of());
     SecurityContext context = SecurityContextHolder.createEmptyContext();
     context.setAuthentication(new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities()));
     SecurityContextHolder.setContext(context);
@@ -777,7 +778,8 @@ class BatchControllerIntegrationTest {
     user = userRepository.save(user);
 
     // 2. Set up authenticated context
-    CustomUserDetails userDetails = new CustomUserDetails(user.getId(), user.getUsername(), user.getPassword(), List.of());
+    CustomUserDetails userDetails = new CustomUserDetails(user.getId(), user.getUsername(), user.getPassword(),
+        List.of());
     SecurityContext context = SecurityContextHolder.createEmptyContext();
     context.setAuthentication(new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities()));
     SecurityContextHolder.setContext(context);
@@ -866,7 +868,8 @@ class BatchControllerIntegrationTest {
     assertTrue(attributeContentRepository.findByUid("ac-delete-all").isPresent());
 
     // 6. Authenticate as that user
-    CustomUserDetails userDetails = new CustomUserDetails(user.getId(), user.getUsername(), user.getPassword(), List.of());
+    CustomUserDetails userDetails = new CustomUserDetails(user.getId(), user.getUsername(), user.getPassword(),
+        List.of());
     SecurityContext context = SecurityContextHolder.createEmptyContext();
     context.setAuthentication(new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities()));
     SecurityContextHolder.setContext(context);
@@ -905,11 +908,10 @@ class BatchControllerIntegrationTest {
     assertEquals(0, attributeContentRepository.findAll().size());
   }
 
-
   @Test
-void testTableExists() {
+  void testTableExists() {
     jdbcTemplate.execute("SELECT * FROM attribute_content");
-}
+  }
 
   @Test
   void testBatchDelete_withInvalidAttributeContentUid_returnsFailureResponse() throws Exception {
@@ -920,7 +922,8 @@ void testTableExists() {
     user = userRepository.save(user);
 
     // 2. Set up authenticated context
-    CustomUserDetails userDetails = new CustomUserDetails(user.getId(), user.getUsername(), user.getPassword(), List.of());
+    CustomUserDetails userDetails = new CustomUserDetails(user.getId(), user.getUsername(), user.getPassword(),
+        List.of());
     SecurityContext context = SecurityContextHolder.createEmptyContext();
     context.setAuthentication(new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities()));
     SecurityContextHolder.setContext(context);
@@ -955,7 +958,7 @@ void testTableExists() {
     assertEquals(0, attributeContentRepository.findAll().size());
   }
 
-  //test for updating attributecontent that changes Attribute's name  
+  // test for updating attributecontent that changes Attribute's name
   @Test
   void testApplyBatchChanges_updatesAttributeContentSuccessfully() throws Exception {
     // 1. Setup user and node
@@ -987,16 +990,16 @@ void testTableExists() {
     ac.setAttribute(attribute);
     attributeContentRepository.save(ac);
 
-    //check if the attribute content is saved
+    // check if the attribute content is saved
     Optional<AttributeContent> originalAC = attributeContentRepository.findByUid("ac-update-001");
     assertTrue(originalAC.isPresent());
     assertEquals("Original Name", originalAC.get().getName());
     assertEquals("node-update-ac", originalAC.get().getBelongingNode().getUid());
     assertEquals("attr-update-ac", originalAC.get().getAttribute().getUid());
 
-
     // 4. Set up security context
-    CustomUserDetails userDetails = new CustomUserDetails(user.getId(), user.getUsername(), user.getPassword(), List.of());
+    CustomUserDetails userDetails = new CustomUserDetails(user.getId(), user.getUsername(), user.getPassword(),
+        List.of());
     SecurityContext context = SecurityContextHolder.createEmptyContext();
     context.setAuthentication(new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities()));
     SecurityContextHolder.setContext(context);
@@ -1033,421 +1036,597 @@ void testTableExists() {
     assertEquals("attr-update-ac", updatedAC.get().getAttribute().getUid());
   }
 
+  @Test
+  void testApplyBatchChanges_updatesAttributeContentWithInvalidUid_returnsFailureResponse() throws Exception {
+    // 1. Setup user and node
+    User user = new User();
+    user.setUsername("updateACUser2");
+    user.setPassword("pass");
+    user = userRepository.save(user);
 
+    // 2. Set up security context
+    CustomUserDetails userDetails = new CustomUserDetails(user.getId(), user.getUsername(), user.getPassword(),
+        List.of());
+    SecurityContext context = SecurityContextHolder.createEmptyContext();
+    context.setAuthentication(new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities()));
+    SecurityContextHolder.setContext(context);
 
-  
+    // 3. JSON payload with non-existent attribute content UID
+    String payload = """
+        {
+          "created": {},
+          "updated": {
+            "attributeContents": [
+              {
+                "uid": "non-existent-ac",
+                "name": "Updated Name",
+                "belongingNode": { "uid": "some-node" },
+                "attribute": { "uid": "some-attr" }
+              }
+            ]
+          },
+          "deleted": {}
+        }
+        """;
 
-  // @Test
-  // void testApplyBatchChanges_updatesAttributeContentWithInvalidUid_returnsFailureResponse() throws Exception {
-  //   // 1. Setup user and node
-  //   User user = new User();
-  //   user.setUsername("updateACUser2");
-  //   user.setPassword("pass");
-  //   user = userRepository.save(user);
+    // 4. Perform batch update request
+    MvcResult result = mockMvc.perform(post("/batch")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(payload))
+        .andExpect(status().isBadRequest())
+        .andReturn();
 
-  //   // 2. Set up security context
-  //   CustomUserDetails userDetails = new CustomUserDetails(user.getId(), user.getUsername(), user.getPassword(), List.of());
-  //   SecurityContext context = SecurityContextHolder.createEmptyContext();
-  //   context.setAuthentication(new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities()));
-  //   SecurityContextHolder.setContext(context);
+    // 5. Verify response
+    String responseJson = result.getResponse().getContentAsString();
+    assertTrue(responseJson.contains("\"success\":false"));
+    assertTrue(responseJson.contains("\"message\":\"Some entities failed to update\""));
+    assertTrue(responseJson.contains("\"attributeContents\":[\"non-existent-ac\"]"));
+  }
 
-  //   // 3. JSON payload with non-existent attribute content UID
-  //   String payload = """
-  //       {
-  //         "created": {},
-  //         "updated": {
-  //           "attributeContents": [
-  //             {
-  //               "uid": "non-existent-ac",
-  //               "name": "Updated Name",
-  //               "belongingNode": { "uid": "some-node" },
-  //               "attribute": { "uid": "some-attr" }
-  //             }
-  //           ]
-  //         },
-  //         "deleted": {}
-  //       }
-  //       """;
+  @Test
+  void testApplyBatchChanges_updatesAttributeContentIndividualFields() throws Exception {
+    // 1. Setup user and nodes
+    User user = new User();
+    user.setUsername("fieldUpdateUser");
+    user.setPassword("pass");
+    user = userRepository.save(user);
 
-  //   // 4. Perform batch update request
-  //   MvcResult result = mockMvc.perform(post("/batch")
-  //       .contentType(MediaType.APPLICATION_JSON)
-  //       .content(payload))
-  //       .andExpect(status().isBadRequest())
-  //       .andReturn();
+    Node node1 = new Node();
+    node1.setUid("node-field-1");
+    node1.setName("Node 1");
+    node1.setUser(user);
+    nodeRepository.save(node1);
 
-  //   // 5. Verify response
-  //   String responseJson = result.getResponse().getContentAsString();
-  //   assertTrue(responseJson.contains("\"success\":false"));
-  //   assertTrue(responseJson.contains("\"message\":\"Some entities failed to update\""));
-  //   assertTrue(responseJson.contains("\"attributeContents\":[\"non-existent-ac\"]"));
-  // }
+    Node node2 = new Node();
+    node2.setUid("node-field-2");
+    node2.setName("Node 2");
+    node2.setUser(user);
+    nodeRepository.save(node2);
 
-  // @Test
-  // void testApplyBatchChanges_updatesAttributeContentIndividualFields() throws Exception {
-  //   // 1. Setup user and nodes
-  //   User user = new User();
-  //   user.setUsername("fieldUpdateUser");
-  //   user.setPassword("pass");
-  //   user = userRepository.save(user);
+    // 2. Create and save attributes
+    Attribute attr1 = new Attribute();
+    attr1.setUid("attr-field-1");
+    attr1.setName("Size");
+    attr1.setNode(node1);
+    attr1.setMute(false);
+    attr1.setTotalNumber(1);
+    attributeRepository.save(attr1);
 
-  //   Node node1 = new Node();
-  //   node1.setUid("node-field-1");
-  //   node1.setName("Node 1");
-  //   node1.setUser(user);
-  //   nodeRepository.save(node1);
+    Attribute attr2 = new Attribute();
+    attr2.setUid("attr-field-2");
+    attr2.setName("Color");
+    attr2.setNode(node2);
+    attr2.setMute(false);
+    attr2.setTotalNumber(1);
+    attributeRepository.save(attr2);
 
-  //   Node node2 = new Node();
-  //   node2.setUid("node-field-2");
-  //   node2.setName("Node 2");
-  //   node2.setUser(user);
-  //   nodeRepository.save(node2);
+    // 3. Create and save pipe
+    Pipe pipe = new Pipe();
+    pipe.setUid("pipe-field-1");
+    pipe.setName("Test Pipe");
+    pipe.setColor('B');
+    pipe.setMute(false);
+    pipe.setSourceNode(node1);
+    pipe.setTargetNode(node2);
+    pipeRepository.save(pipe);
 
-  //   // 2. Create and save attributes
-  //   Attribute attr1 = new Attribute();
-  //   attr1.setUid("attr-field-1");
-  //   attr1.setName("Size");
-  //   attr1.setNode(node1);
-  //   attr1.setMute(false);
-  //   attr1.setTotalNumber(1);
-  //   attributeRepository.save(attr1);
+    // 4. Create and save initial attribute content
+    AttributeContent ac = new AttributeContent();
+    ac.setUid("ac-field-001");
+    ac.setName("Original Name");
+    ac.setHoldingValue("Original Value");
+    ac.setBelongingNode(node1);
+    ac.setAttribute(attr1);
+    attributeContentRepository.save(ac);
 
-  //   Attribute attr2 = new Attribute();
-  //   attr2.setUid("attr-field-2");
-  //   attr2.setName("Color");
-  //   attr2.setNode(node2);
-  //   attr2.setMute(false);
-  //   attr2.setTotalNumber(1);
-  //   attributeRepository.save(attr2);
+    // 5. Set up security context
+    CustomUserDetails userDetails = new CustomUserDetails(user.getId(), user.getUsername(), user.getPassword(),
+        List.of());
+    SecurityContext context = SecurityContextHolder.createEmptyContext();
+    context.setAuthentication(new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities()));
+    SecurityContextHolder.setContext(context);
 
-  //   // 3. Create and save pipe
-  //   Pipe pipe = new Pipe();
-  //   pipe.setUid("pipe-field-1");
-  //   pipe.setName("Test Pipe");
-  //   pipe.setColor('B');
-  //   pipe.setMute(false);
-  //   pipe.setSourceNode(node1);
-  //   pipe.setTargetNode(node2);
-  //   pipeRepository.save(pipe);
+    // 6. Test updating name
+    String nameUpdatePayload = """
+        {
+          "created": {},
+          "updated": {
+            "attributeContents": [
+              {
+                "uid": "ac-field-001",
+                "name": "Updated Name",
+                "belongingNode": { "uid": "node-field-1" },
+                "attribute": { "uid": "attr-field-1" }
+              }
+            ]
+          },
+          "deleted": {}
+        }
+        """;
 
-  //   // 4. Create and save initial attribute content
-  //   AttributeContent ac = new AttributeContent();
-  //   ac.setUid("ac-field-001");
-  //   ac.setName("Original Name");
-  //   ac.setValue("Original Value");
-  //   ac.setBelongingNode(node1);
-  //   ac.setAttribute(attr1);
-  //   attributeContentRepository.save(ac);
+    mockMvc.perform(post("/batch")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(nameUpdatePayload))
+        .andExpect(status().isOk());
 
-  //   // 5. Set up security context
-  //   CustomUserDetails userDetails = new CustomUserDetails(user.getId(), user.getUsername(), user.getPassword(), List.of());
-  //   SecurityContext context = SecurityContextHolder.createEmptyContext();
-  //   context.setAuthentication(new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities()));
-  //   SecurityContextHolder.setContext(context);
+    Optional<AttributeContent> updatedAC = attributeContentRepository.findByUid("ac-field-001");
+    assertTrue(updatedAC.isPresent());
+    assertEquals("Updated Name", updatedAC.get().getName());
 
-  //   // 6. Test updating name
-  //   String nameUpdatePayload = """
-  //       {
-  //         "created": {},
-  //         "updated": {
-  //           "attributeContents": [
-  //             {
-  //               "uid": "ac-field-001",
-  //               "name": "Updated Name",
-  //               "belongingNode": { "uid": "node-field-1" },
-  //               "attribute": { "uid": "attr-field-1" }
-  //             }
-  //           ]
-  //         },
-  //         "deleted": {}
-  //       }
-  //       """;
+    // 7. Test updating value
+    String valueUpdatePayload = """
+        {
+          "created": {},
+          "updated": {
+            "attributeContents": [
+              {
+                "uid": "ac-field-001",
+                "name": "Updated Name",
+                "holdingValue": "New Value",
+                "belongingNode": { "uid": "node-field-1" },
+                "attribute": { "uid": "attr-field-1" }
+              }
+            ]
+          },
+          "deleted": {}
+        }
+        """;
 
-  //   mockMvc.perform(post("/batch")
-  //       .contentType(MediaType.APPLICATION_JSON)
-  //       .content(nameUpdatePayload))
-  //       .andExpect(status().isOk());
+    mockMvc.perform(post("/batch")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(valueUpdatePayload))
+        .andExpect(status().isOk());
 
-  //   Optional<AttributeContent> updatedAC = attributeContentRepository.findByUid("ac-field-001");
-  //   assertTrue(updatedAC.isPresent());
-  //   assertEquals("Updated Name", updatedAC.get().getName());
+    updatedAC = attributeContentRepository.findByUid("ac-field-001");
+    assertTrue(updatedAC.isPresent());
+    assertEquals("New Value", updatedAC.get().getHoldingValue());
 
-  //   // 7. Test updating value
-  //   String valueUpdatePayload = """
-  //       {
-  //         "created": {},
-  //         "updated": {
-  //           "attributeContents": [
-  //             {
-  //               "uid": "ac-field-001",
-  //               "name": "Updated Name",
-  //               "value": "New Value",
-  //               "belongingNode": { "uid": "node-field-1" },
-  //               "attribute": { "uid": "attr-field-1" }
-  //             }
-  //           ]
-  //         },
-  //         "deleted": {}
-  //       }
-  //       """;
+    // 8. Test updating node
+    String nodeUpdatePayload = """
+        {
+          "created": {},
+          "updated": {
+            "attributeContents": [
+              {
+                "uid": "ac-field-001",
+                "name": "Updated Name",
+                "holdingValue": "New Value",
+                "belongingNode": { "uid": "node-field-2" },
+                "attribute": { "uid": "attr-field-1" }
+              }
+            ]
+          },
+          "deleted": {}
+        }
+        """;
 
-  //   mockMvc.perform(post("/batch")
-  //       .contentType(MediaType.APPLICATION_JSON)
-  //       .content(valueUpdatePayload))
-  //       .andExpect(status().isOk());
+    mockMvc.perform(post("/batch")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(nodeUpdatePayload))
+        .andExpect(status().isOk());
 
-  //   updatedAC = attributeContentRepository.findByUid("ac-field-001");
-  //   assertTrue(updatedAC.isPresent());
-  //   assertEquals("New Value", updatedAC.get().getValue());
+    updatedAC = attributeContentRepository.findByUid("ac-field-001");
+    assertTrue(updatedAC.isPresent());
+    assertEquals("node-field-2", updatedAC.get().getBelongingNode().getUid());
 
-  //   // 8. Test updating node
-  //   String nodeUpdatePayload = """
-  //       {
-  //         "created": {},
-  //         "updated": {
-  //           "attributeContents": [
-  //             {
-  //               "uid": "ac-field-001",
-  //               "name": "Updated Name",
-  //               "value": "New Value",
-  //               "belongingNode": { "uid": "node-field-2" },
-  //               "attribute": { "uid": "attr-field-1" }
-  //             }
-  //           ]
-  //         },
-  //         "deleted": {}
-  //       }
-  //       """;
+    // 9. Test updating attribute
+    String attrUpdatePayload = """
+        {
+          "created": {},
+          "updated": {
+            "attributeContents": [
+              {
+                "uid": "ac-field-001",
+                "name": "Updated Name",
+                "holdingValue": "New Value",
+                "belongingNode": { "uid": "node-field-2" },
+                "attribute": { "uid": "attr-field-2" }
+              }
+            ]
+          },
+          "deleted": {}
+        }
+        """;
 
-  //   mockMvc.perform(post("/batch")
-  //       .contentType(MediaType.APPLICATION_JSON)
-  //       .content(nodeUpdatePayload))
-  //       .andExpect(status().isOk());
+    mockMvc.perform(post("/batch")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(attrUpdatePayload))
+        .andExpect(status().isOk());
 
-  //   updatedAC = attributeContentRepository.findByUid("ac-field-001");
-  //   assertTrue(updatedAC.isPresent());
-  //   assertEquals("node-field-2", updatedAC.get().getBelongingNode().getUid());
+    updatedAC = attributeContentRepository.findByUid("ac-field-001");
+    assertTrue(updatedAC.isPresent());
+    assertEquals("attr-field-2", updatedAC.get().getAttribute().getUid());
 
-  //   // 9. Test updating attribute
-  //   String attrUpdatePayload = """
-  //       {
-  //         "created": {},
-  //         "updated": {
-  //           "attributeContents": [
-  //             {
-  //               "uid": "ac-field-001",
-  //               "name": "Updated Name",
-  //               "value": "New Value",
-  //               "belongingNode": { "uid": "node-field-2" },
-  //               "attribute": { "uid": "attr-field-2" }
-  //             }
-  //           ]
-  //         },
-  //         "deleted": {}
-  //       }
-  //       """;
+    // 10. Test updating pipe
+    String pipeUpdatePayload = """
+        {
+          "created": {},
+          "updated": {
+            "attributeContents": [
+              {
+                "uid": "ac-field-001",
+                "name": "Updated Name",
+                "holdingValue": "New Value",
+                "belongingNode": { "uid": "node-field-2" },
+                "attribute": { "uid": "attr-field-2" },
+                "pipe": { "uid": "pipe-field-1" }
+              }
+            ]
+          },
+          "deleted": {}
+        }
+        """;
 
-  //   mockMvc.perform(post("/batch")
-  //       .contentType(MediaType.APPLICATION_JSON)
-  //       .content(attrUpdatePayload))
-  //       .andExpect(status().isOk());
+    mockMvc.perform(post("/batch")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(pipeUpdatePayload))
+        .andExpect(status().isOk());
 
-  //   updatedAC = attributeContentRepository.findByUid("ac-field-001");
-  //   assertTrue(updatedAC.isPresent());
-  //   assertEquals("attr-field-2", updatedAC.get().getAttribute().getUid());
+    updatedAC = attributeContentRepository.findByUid("ac-field-001");
+    assertTrue(updatedAC.isPresent());
+    assertEquals("pipe-field-1", updatedAC.get().getPipe().getUid());
+  }
 
-  //   // 10. Test updating pipe
-  //   String pipeUpdatePayload = """
-  //       {
-  //         "created": {},
-  //         "updated": {
-  //           "attributeContents": [
-  //             {
-  //               "uid": "ac-field-001",
-  //               "name": "Updated Name",
-  //               "value": "New Value",
-  //               "belongingNode": { "uid": "node-field-2" },
-  //               "attribute": { "uid": "attr-field-2" },
-  //               "pipe": { "uid": "pipe-field-1" }
-  //             }
-  //           ]
-  //         },
-  //         "deleted": {}
-  //       }
-  //       """;
+  @Test
+  void testApplyBatchChanges_updatesAttributeContentMinimalFields() throws Exception {
+    // 1. Setup user and node
+    User user = new User();
+    user.setUsername("minimalUpdateUser");
+    user.setPassword("pass");
+    user = userRepository.save(user);
 
-  //   mockMvc.perform(post("/batch")
-  //       .contentType(MediaType.APPLICATION_JSON)
-  //       .content(pipeUpdatePayload))
-  //       .andExpect(status().isOk());
+    Node node = new Node();
+    node.setUid("node-minimal");
+    node.setName("Minimal Node");
+    node.setUser(user);
+    nodeRepository.save(node);
 
-  //   updatedAC = attributeContentRepository.findByUid("ac-field-001");
-  //   assertTrue(updatedAC.isPresent());
-  //   assertEquals("pipe-field-1", updatedAC.get().getPipe().getUid());
-  // }
+    // 2. Create and save attribute
+    Attribute attribute = new Attribute();
+    attribute.setUid("attr-minimal");
+    attribute.setName("Size");
+    attribute.setNode(node);
+    attribute.setMute(false);
+    attribute.setTotalNumber(1);
+    attributeRepository.save(attribute);
 
-  // @Test
-  // void testApplyBatchChanges_updatesAttributeContentMinimalFields() throws Exception {
-  //   // 1. Setup user and node
-  //   User user = new User();
-  //   user.setUsername("minimalUpdateUser");
-  //   user.setPassword("pass");
-  //   user = userRepository.save(user);
+    // 3. Create and save initial attribute content
+    AttributeContent ac = new AttributeContent();
+    ac.setUid("ac-minimal-001");
+    ac.setName("Original Name");
+    ac.setHoldingValue("Original Value");
+    ac.setBelongingNode(node);
+    ac.setAttribute(attribute);
+    attributeContentRepository.save(ac);
 
-  //   Node node = new Node();
-  //   node.setUid("node-minimal");
-  //   node.setName("Minimal Node");
-  //   node.setUser(user);
-  //   nodeRepository.save(node);
+    // 4. Set up security context
+    CustomUserDetails userDetails = new CustomUserDetails(user.getId(), user.getUsername(), user.getPassword(),
+        List.of());
+    SecurityContext context = SecurityContextHolder.createEmptyContext();
+    context.setAuthentication(new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities()));
+    SecurityContextHolder.setContext(context);
 
-  //   // 2. Create and save attribute
-  //   Attribute attribute = new Attribute();
-  //   attribute.setUid("attr-minimal");
-  //   attribute.setName("Size");
-  //   attribute.setNode(node);
-  //   attribute.setMute(false);
-  //   attribute.setTotalNumber(1);
-  //   attributeRepository.save(attribute);
+    // 5. Test updating only the value field
+    String minimalUpdatePayload = """
+        {
+          "created": {},
+          "updated": {
+            "attributeContents": [
+              {
+                "uid": "ac-minimal-001",
+                "holdingValue": "Updated Value"
+              }
+            ]
+          },
+          "deleted": {}
+        }
+        """;
 
-  //   // 3. Create and save initial attribute content
-  //   AttributeContent ac = new AttributeContent();
-  //   ac.setUid("ac-minimal-001");
-  //   ac.setName("Original Name");
-  //   ac.setValue("Original Value");
-  //   ac.setBelongingNode(node);
-  //   ac.setAttribute(attribute);
-  //   attributeContentRepository.save(ac);
+    mockMvc.perform(post("/batch")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(minimalUpdatePayload))
+        .andExpect(status().isOk());
 
-  //   // 4. Set up security context
-  //   CustomUserDetails userDetails = new CustomUserDetails(user.getId(), user.getUsername(), user.getPassword(), List.of());
-  //   SecurityContext context = SecurityContextHolder.createEmptyContext();
-  //   context.setAuthentication(new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities()));
-  //   SecurityContextHolder.setContext(context);
+    // 6. Verify only value was updated, other fields remain unchanged
+    Optional<AttributeContent> updatedAC = attributeContentRepository.findByUid("ac-minimal-001");
+    assertTrue(updatedAC.isPresent());
+    assertEquals("Updated Value", updatedAC.get().getHoldingValue());
+    assertEquals("Original Name", updatedAC.get().getName());
+    assertEquals("node-minimal", updatedAC.get().getBelongingNode().getUid());
+    assertEquals("attr-minimal", updatedAC.get().getAttribute().getUid());
+  }
 
-  //   // 5. Test updating only the value field
-  //   String minimalUpdatePayload = """
-  //       {
-  //         "created": {},
-  //         "updated": {
-  //           "attributeContents": [
-  //             {
-  //               "uid": "ac-minimal-001",
-  //               "value": "Updated Value"
-  //             }
-  //           ]
-  //         },
-  //         "deleted": {}
-  //       }
-  //       """;
+  @Test
+  void testApplyBatchChanges_updatesAttributeContentAllFields() throws Exception {
+    // 1. Setup user and nodes
+    User user = new User();
+    user.setUsername("fullUpdateUser");
+    user.setPassword("pass");
+    user = userRepository.save(user);
 
-  //   mockMvc.perform(post("/batch")
-  //       .contentType(MediaType.APPLICATION_JSON)
-  //       .content(minimalUpdatePayload))
-  //       .andExpect(status().isOk());
+    Node node1 = new Node();
+    node1.setUid("node-full-1");
+    node1.setName("Node 1");
+    node1.setUser(user);
+    nodeRepository.save(node1);
 
-  //   // 6. Verify only value was updated, other fields remain unchanged
-  //   Optional<AttributeContent> updatedAC = attributeContentRepository.findByUid("ac-minimal-001");
-  //   assertTrue(updatedAC.isPresent());
-  //   assertEquals("Updated Value", updatedAC.get().getValue());
-  //   assertEquals("Original Name", updatedAC.get().getName());
-  //   assertEquals("node-minimal", updatedAC.get().getBelongingNode().getUid());
-  //   assertEquals("attr-minimal", updatedAC.get().getAttribute().getUid());
-  // }
+    Node node2 = new Node();
+    node2.setUid("node-full-2");
+    node2.setName("Node 2");
+    node2.setUser(user);
+    nodeRepository.save(node2);
 
-  // @Test
-  // void testApplyBatchChanges_updatesAttributeContentAllFields() throws Exception {
-  //   // 1. Setup user and nodes
-  //   User user = new User();
-  //   user.setUsername("fullUpdateUser");
-  //   user.setPassword("pass");
-  //   user = userRepository.save(user);
+    // 2. Create and save attributes
+    Attribute attr1 = new Attribute();
+    attr1.setUid("attr-full-1");
+    attr1.setName("Size");
+    attr1.setNode(node1);
+    attr1.setMute(false);
+    attr1.setTotalNumber(1);
+    attributeRepository.save(attr1);
 
-  //   Node node1 = new Node();
-  //   node1.setUid("node-full-1");
-  //   node1.setName("Node 1");
-  //   node1.setUser(user);
-  //   nodeRepository.save(node1);
+    Attribute attr2 = new Attribute();
+    attr2.setUid("attr-full-2");
+    attr2.setName("Color");
+    attr2.setNode(node2);
+    attr2.setMute(false);
+    attr2.setTotalNumber(1);
+    attributeRepository.save(attr2);
 
-  //   Node node2 = new Node();
-  //   node2.setUid("node-full-2");
-  //   node2.setName("Node 2");
-  //   node2.setUser(user);
-  //   nodeRepository.save(node2);
+    // 3. Create and save pipe
+    Pipe pipe = new Pipe();
+    pipe.setUid("pipe-full-1");
+    pipe.setName("Test Pipe");
+    pipe.setColor('B');
+    pipe.setMute(false);
+    pipe.setSourceNode(node1);
+    pipe.setTargetNode(node2);
+    pipeRepository.save(pipe);
 
-  //   // 2. Create and save attributes
-  //   Attribute attr1 = new Attribute();
-  //   attr1.setUid("attr-full-1");
-  //   attr1.setName("Size");
-  //   attr1.setNode(node1);
-  //   attr1.setMute(false);
-  //   attr1.setTotalNumber(1);
-  //   attributeRepository.save(attr1);
+    // 4. Create and save initial attribute content
+    AttributeContent ac = new AttributeContent();
+    ac.setUid("ac-full-001");
+    ac.setName("Original Name");
+    ac.setHoldingValue("Original Value");
+    ac.setBelongingNode(node1);
+    ac.setAttribute(attr1);
+    attributeContentRepository.save(ac);
 
-  //   Attribute attr2 = new Attribute();
-  //   attr2.setUid("attr-full-2");
-  //   attr2.setName("Color");
-  //   attr2.setNode(node2);
-  //   attr2.setMute(false);
-  //   attr2.setTotalNumber(1);
-  //   attributeRepository.save(attr2);
+    // 5. Set up security context
+    CustomUserDetails userDetails = new CustomUserDetails(user.getId(), user.getUsername(), user.getPassword(),
+        List.of());
+    SecurityContext context = SecurityContextHolder.createEmptyContext();
+    context.setAuthentication(new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities()));
+    SecurityContextHolder.setContext(context);
 
-  //   // 3. Create and save pipe
-  //   Pipe pipe = new Pipe();
-  //   pipe.setUid("pipe-full-1");
-  //   pipe.setName("Test Pipe");
-  //   pipe.setColor('B');
-  //   pipe.setMute(false);
-  //   pipe.setSourceNode(node1);
-  //   pipe.setTargetNode(node2);
-  //   pipeRepository.save(pipe);
+    // 6. Test updating all fields at once
+    String fullUpdatePayload = """
+        {
+          "created": {},
+          "updated": {
+            "attributeContents": [
+              {
+                "uid": "ac-full-001",
+                "name": "New Name",
+                "holdingValue": "New Value",
+                "belongingNode": { "uid": "node-full-2" },
+                "attribute": { "uid": "attr-full-2" },
+                "pipe": { "uid": "pipe-full-1" }
+              }
+            ]
+          },
+          "deleted": {}
+        }
+        """;
 
-  //   // 4. Create and save initial attribute content
-  //   AttributeContent ac = new AttributeContent();
-  //   ac.setUid("ac-full-001");
-  //   ac.setName("Original Name");
-  //   ac.setValue("Original Value");
-  //   ac.setBelongingNode(node1);
-  //   ac.setAttribute(attr1);
-  //   attributeContentRepository.save(ac);
+    mockMvc.perform(post("/batch")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(fullUpdatePayload))
+        .andExpect(status().isOk());
 
-  //   // 5. Set up security context
-  //   CustomUserDetails userDetails = new CustomUserDetails(user.getId(), user.getUsername(), user.getPassword(), List.of());
-  //   SecurityContext context = SecurityContextHolder.createEmptyContext();
-  //   context.setAuthentication(new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities()));
-  //   SecurityContextHolder.setContext(context);
+    // 7. Verify all fields were updated correctly
+    Optional<AttributeContent> updatedAC = attributeContentRepository.findByUid("ac-full-001");
+    assertTrue(updatedAC.isPresent());
+    assertEquals("New Name", updatedAC.get().getName());
+    assertEquals("New Value", updatedAC.get().getHoldingValue());
+    assertEquals("node-full-2", updatedAC.get().getBelongingNode().getUid());
+    assertEquals("attr-full-2", updatedAC.get().getAttribute().getUid());
+    assertEquals("pipe-full-1", updatedAC.get().getPipe().getUid());
+  }
 
-  //   // 6. Test updating all fields at once
-  //   String fullUpdatePayload = """
-  //       {
-  //         "created": {},
-  //         "updated": {
-  //           "attributeContents": [
-  //             {
-  //               "uid": "ac-full-001",
-  //               "name": "New Name",
-  //               "value": "New Value",
-  //               "belongingNode": { "uid": "node-full-2" },
-  //               "attribute": { "uid": "attr-full-2" },
-  //               "pipe": { "uid": "pipe-full-1" }
-  //             }
-  //           ]
-  //         },
-  //         "deleted": {}
-  //       }
-  //       """;
+  @Test
+  void testApplyBatchChanges_updatesOnlyValueField() throws Exception {
+    User user = userRepository.save(new User("minimalUser", "pass"));
 
-  //   mockMvc.perform(post("/batch")
-  //       .contentType(MediaType.APPLICATION_JSON)
-  //       .content(fullUpdatePayload))
-  //       .andExpect(status().isOk());
+    Node node = new Node();
+    node.setUid("node-min");
+    node.setName("Minimal");
+    node.setUser(user);
+    nodeRepository.save(node);
 
-  //   // 7. Verify all fields were updated correctly
-  //   Optional<AttributeContent> updatedAC = attributeContentRepository.findByUid("ac-full-001");
-  //   assertTrue(updatedAC.isPresent());
-  //   assertEquals("New Name", updatedAC.get().getName());
-  //   assertEquals("New Value", updatedAC.get().getValue());
-  //   assertEquals("node-full-2", updatedAC.get().getBelongingNode().getUid());
-  //   assertEquals("attr-full-2", updatedAC.get().getAttribute().getUid());
-  //   assertEquals("pipe-full-1", updatedAC.get().getPipe().getUid());
-  // }
+    Attribute attribute = new Attribute();
+    attribute.setUid("attr-min");
+    attribute.setName("MinimalAttr");
+    attribute.setNode(node);
+    attributeRepository.save(attribute);
+
+    AttributeContent ac = new AttributeContent();
+    ac.setUid("ac-minimal");
+    ac.setName("Name");
+    ac.setHoldingValue("OldVal");
+    ac.setBelongingNode(node);
+    ac.setAttribute(attribute);
+    attributeContentRepository.save(ac);
+
+    // check if the attribute content is saved
+    Optional<AttributeContent> savedAC = attributeContentRepository.findByUid("ac-minimal");
+    assertTrue(savedAC.isPresent());
+    assertEquals("OldVal", savedAC.get().getHoldingValue());
+    assertEquals("Name", savedAC.get().getName());
+    assertEquals("node-min", savedAC.get().getBelongingNode().getUid());
+    assertEquals("attr-min", savedAC.get().getAttribute().getUid());
+
+    // 4. Set up security context
+    CustomUserDetails userDetails = new CustomUserDetails(user.getId(), user.getUsername(), user.getPassword(),
+        List.of());
+    SecurityContext context = SecurityContextHolder.createEmptyContext();
+    context.setAuthentication(new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities()));
+    SecurityContextHolder.setContext(context);
+
+    String payload = """
+        {
+          "created": {},
+          "updated": {
+            "attributeContents": [
+              {
+                "uid": "ac-minimal",
+                "holdingValue": "OnlyUpdated"
+              }
+            ]
+          },
+          "deleted": {}
+        }
+        """;
+
+    mockMvc.perform(post("/batch")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(payload))
+        .andExpect(status().isOk());
+
+    AttributeContent updated = attributeContentRepository.findByUid("ac-minimal").orElseThrow();
+    assertEquals("OnlyUpdated", updated.getHoldingValue());
+    assertEquals("node-min", updated.getBelongingNode().getUid());
+    assertEquals("attr-min", updated.getAttribute().getUid());
+    assertEquals("Name", updated.getName()); // unchanged
+
+  }
+
+  @Test
+  void testApplyBatchChanges_updatesAllFieldsWithNewEntities() throws Exception {
+    User user = userRepository.save(new User("fullUpdateUser", "pass"));
+
+    Node node = new Node();
+    node.setUid("node-full");
+    node.setName("FullNode");
+    node.setUser(user);
+    nodeRepository.save(node);
+
+    Attribute attribute = new Attribute();
+    attribute.setUid("attr-full");
+    attribute.setName("FullAttr");
+    attribute.setNode(node);
+    attributeRepository.save(attribute);
+
+    Pipe pipe = new Pipe();
+    pipe.setUid("pipe-full");
+    pipe.setName("FullPipe");
+    pipe.setSourceNode(node);
+    pipe.setTargetNode(node);
+    pipeRepository.save(pipe);
+
+    AttributeContent ac = new AttributeContent();
+    ac.setUid("ac-full");
+    ac.setName("BeforeFull");
+    ac.setHoldingValue("123");
+    ac.setBelongingNode(node);
+    ac.setAttribute(attribute);
+    ac.setPipe(pipe);
+    attributeContentRepository.save(ac);
+
+    // check if the attribute content is saved
+    Optional<AttributeContent> savedAC = attributeContentRepository.findByUid("ac-full");
+    assertTrue(savedAC.isPresent());
+    assertEquals("123", savedAC.get().getHoldingValue());
+    assertEquals("BeforeFull", savedAC.get().getName());
+    assertEquals("node-full", savedAC.get().getBelongingNode().getUid());
+    assertEquals("attr-full", savedAC.get().getAttribute().getUid());
+    assertEquals("pipe-full", savedAC.get().getPipe().getUid());
+
+    Node diffNode = new Node();
+    diffNode.setUid("node-diff");
+    diffNode.setName("Updated Node");
+    diffNode.setUser(user);
+    nodeRepository.save(diffNode);
+
+    Attribute diffAttr = new Attribute();
+    diffAttr.setUid("attr-diff");
+    diffAttr.setName("Updated Attr");
+    diffAttr.setNode(diffNode);
+    attributeRepository.save(diffAttr);
+
+    Pipe diffPipe = new Pipe();
+    diffPipe.setUid("pipe-diff");
+    diffPipe.setName("Updated Pipe");
+    diffPipe.setSourceNode(diffNode);
+    diffPipe.setTargetNode(diffNode);
+    pipeRepository.save(diffPipe);
+
+    // Set up security context
+    CustomUserDetails userDetails = new CustomUserDetails(user.getId(), user.getUsername(), user.getPassword(),
+        List.of());
+    SecurityContext context = SecurityContextHolder.createEmptyContext();
+    context.setAuthentication(new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities()));
+    SecurityContextHolder.setContext(context);
+
+    String payload = """
+        {
+          "created": {},
+          "updated": {
+            "attributeContents": [
+              {
+                "uid": "ac-full",
+                "name": "AfterFull",
+                "holdingValue": "456",
+                "belongingNode": { "uid": "node-diff" },
+                "attribute": { "uid": "attr-diff" },
+                "pipe": { "uid": "pipe-diff" }
+              }
+            ]
+          },
+          "deleted": {}
+        }
+        """;
+
+    mockMvc.perform(post("/batch")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(payload))
+        .andDo(result -> {
+          if (result.getResolvedException() != null) {
+            System.err.println("Exception: " + result.getResolvedException().getClass());
+            System.err.println("Message: " + result.getResolvedException().getMessage());
+          } else {
+            System.err.println("No resolved exception. Status: " + result.getResponse().getStatus());
+            System.err.println("Response body: " + result.getResponse().getContentAsString());
+          }
+        })
+        .andExpect(status().isOk());
+
+    AttributeContent updated = attributeContentRepository.findByUid("ac-full").orElseThrow();
+    assertEquals("AfterFull", updated.getName());
+    assertEquals("456", updated.getHoldingValue());
+    assertEquals("node-diff", updated.getBelongingNode().getUid());
+    assertEquals("attr-diff", updated.getAttribute().getUid());
+    assertEquals("pipe-diff", updated.getPipe().getUid());
+  }
+
 }

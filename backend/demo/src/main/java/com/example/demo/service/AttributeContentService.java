@@ -117,27 +117,33 @@ public class AttributeContentService {
         AttributeContent existing = existingOpt.get();
         boolean modified = false;
 
-        if (!Objects.equals(existing.getName(), updatedContent.getName())) {
+        if (updatedContent.getName() != null && !Objects.equals(existing.getName(), updatedContent.getName())) {
             existing.setName(updatedContent.getName());
             modified = true;
         }
 
-        if (!Objects.equals(existing.getValue(), updatedContent.getValue())) {
-            existing.setValue(updatedContent.getValue());
+        if (updatedContent.getHoldingValue() != null && !Objects.equals(existing.getHoldingValue(), updatedContent.getHoldingValue())) {
+            existing.setHoldingValue(updatedContent.getHoldingValue());
             modified = true;
         }
 
         if (updatedContent.getAttribute() != null &&
                 (existing.getAttribute() == null ||
                         !Objects.equals(existing.getAttribute().getUid(), updatedContent.getAttribute().getUid()))) {
-            existing.setAttribute(updatedContent.getAttribute());
+            Attribute resolvedAttribute = attributeRepository.findByUid(updatedContent.getAttribute().getUid())
+                    .orElseThrow(() -> new EntityNotFoundException("Attribute not found with UID: " + updatedContent.getAttribute().getUid()));
+            existing.setAttribute(resolvedAttribute);
+            //existing.setAttribute(updatedContent.getAttribute());
             modified = true;
         }
 
         if (updatedContent.getPipe() != null &&
                 (existing.getPipe() == null ||
                         !Objects.equals(existing.getPipe().getUid(), updatedContent.getPipe().getUid()))) {
-            existing.setPipe(updatedContent.getPipe());
+            Pipe resolvedPipe = pipeRepository.findByUid(updatedContent.getPipe().getUid())
+                    .orElseThrow(() -> new EntityNotFoundException("Pipe not found with UID: " + updatedContent.getPipe().getUid()));
+            existing.setPipe(resolvedPipe);
+            //existing.setPipe(updatedContent.getPipe());
             modified = true;
         }
 
@@ -145,7 +151,10 @@ public class AttributeContentService {
                 (existing.getBelongingNode() == null ||
                         !Objects.equals(existing.getBelongingNode().getUid(),
                                 updatedContent.getBelongingNode().getUid()))) {
-            existing.setBelongingNode(updatedContent.getBelongingNode());
+            Node resolvedNode = nodeRepository.findByUid(updatedContent.getBelongingNode().getUid())
+                    .orElseThrow(() -> new EntityNotFoundException("Node not found with UID: " + updatedContent.getBelongingNode().getUid()));
+            existing.setBelongingNode(resolvedNode);
+            //existing.setBelongingNode(updatedContent.getBelongingNode());
             modified = true;
         }
 
