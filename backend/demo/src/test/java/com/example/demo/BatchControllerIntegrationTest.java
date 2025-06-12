@@ -1,18 +1,14 @@
 package com.example.demo;
 
-import com.example.demo.model.Attribute;
-import com.example.demo.model.AttributeContent;
-import com.example.demo.model.Node;
-import com.example.demo.model.Pipe;
-import com.example.demo.model.User;
-import com.example.demo.repository.AttributeContentRepository;
-import com.example.demo.repository.AttributeRepository;
-import com.example.demo.repository.NodeRepository;
-import com.example.demo.repository.PipeRepository;
-import com.example.demo.repository.UserRepository;
-import com.example.demo.security.CustomUserDetails;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import jakarta.transaction.Transactional;
+import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,16 +22,19 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import com.example.demo.model.Attribute;
+import com.example.demo.model.AttributeContent;
+import com.example.demo.model.Node;
+import com.example.demo.model.Pipe;
+import com.example.demo.model.User;
+import com.example.demo.repository.AttributeContentRepository;
+import com.example.demo.repository.AttributeRepository;
+import com.example.demo.repository.NodeRepository;
+import com.example.demo.repository.PipeRepository;
+import com.example.demo.repository.UserRepository;
+import com.example.demo.security.CustomUserDetails;
 
-import java.util.List;
-import java.util.Optional;
+import jakarta.transaction.Transactional;
 
 @AutoConfigureMockMvc
 @SpringBootTest(properties = "spring.config.name=application-test")
@@ -1628,5 +1627,181 @@ class BatchControllerIntegrationTest {
     assertEquals("attr-diff", updated.getAttribute().getUid());
     assertEquals("pipe-diff", updated.getPipe().getUid());
   }
+
+  // 4. Edit with Complex Nested Entities
+  @Test
+  void testApplyBatchChanges_withComplexNestedEntities() throws Exception {
+    // 1. Create user
+    User user = userRepository.save(new User("nestedUser", "pass"));
+
+    // 2. Create source and target nodes
+    Node sourceNode = new Node();
+    sourceNode.setUid("source-node");
+    sourceNode.setName("Source");
+    sourceNode.setUser(user);
+    nodeRepository.save(sourceNode);
+
+    Node targetNode = new Node();
+    targetNode.setUid("target-node");
+    targetNode.setName("Target");
+    targetNode.setUser(user);
+    nodeRepository.save(targetNode);
+
+    // 3. Create pipe between source and target
+    Pipe pipe = new Pipe();
+    pipe.setUid("pipe-nested");
+    pipe.setName("NestedPipe");
+    pipe.setSourceNode(sourceNode);
+    pipe.setTargetNode(targetNode);
+    pipeRepository.save(pipe);
+
+    // 4. Create attribute linked to source node
+    Attribute attr = new Attribute();
+    attr.setUid("attr-nested");
+    attr.setName("Importance");
+    attr.setMute(false);
+    attr.setTotalNumber(5);
+    attr.setNode(sourceNode);
+    attributeRepository.save(attr);
+
+    // 5. Create AttributeContent linked to all of the above
+    AttributeContent ac = new AttributeContent();
+    ac.setUid("ac-nested");
+    ac.setName("InitialName");
+    ac.setHoldingValue("low");
+    ac.setBelongingNode(sourceNode);
+    ac.setAttribute(attr);
+    ac.setPipe(pipe);
+    attributeContentRepository.save(ac);
+
+    // 6. Confirm initial state
+    AttributeContent initial = attributeContentRepository.findByUid("ac-nested").orElseThrow();
+    assertEquals("low", initial.getHoldingValue());
+    assertEquals("InitialName", initial.getName());
+    assertEquals("source-node", initial.getBelongingNode().getUid());
+    assertEquals("attr-nested", initial.getAttribute().getUid());
+    assertEquals("pipe-nested", initial.getPipe().getUid());
+
+    Pipe initialPipe = pipeRepository.findByUid("pipe-nested").orElseThrow();
+    assertEquals("NestedPipe", initialPipe.getName());
+    assertEquals("source-node", initialPipe.getSourceNode().getUid());
+    assertEquals("target-node", initialPipe.getTargetNode().getUid());
+
+    // 7. Set up security
+    CustomUserDetails userDetails = new CustomUserDetails(user.getId(), user.getUsername(), user.getPassword(),
+        List.of());
+    SecurityContext context = SecurityContextHolder.createEmptyContext();
+    context.setAuthentication(new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities()));
+    SecurityContextHolder.setContext(context);
+
+    // 8. JSON payload to update holdingValue and name
+    String payload = """
+        {
+          "created": {},
+          "updated": {
+            "attributeContents": [
+              {
+                "uid": "ac-nested",
+                "name": "UpdatedName",
+                "holdingValue": "high",
+                "belongingNode": { "uid": "source-node" },
+                "attribute": { "uid": "attr-nested" },
+                "pipe": { "uid": "pipe-nested" }
+              }
+            ]
+          },
+          "deleted": {}
+        }
+        """;
+
+    // 9. Perform update
+    mockMvc.perform(post("/batch")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(payload))
+        .andExpect(status().isOk());
+
+    // 10. check if the attribute content is updated
+    // name and holdingValue are updated
+    // belongingNode, attribute, and pipe are not updated
+    // pipe's sourceNode and targetNode are not updated
+    AttributeContent updated = attributeContentRepository.findByUid("ac-nested").orElseThrow();
+    assertEquals("UpdatedName", updated.getName());
+    assertEquals("high", updated.getHoldingValue());
+    assertEquals("source-node", updated.getBelongingNode().getUid());
+    assertEquals("attr-nested", updated.getAttribute().getUid());
+    assertEquals("pipe-nested", updated.getPipe().getUid());
+    assertEquals("source-node", updated.getPipe().getSourceNode().getUid());
+    assertEquals("target-node", updated.getPipe().getTargetNode().getUid());
+
+    //test each Node, pipe and attribute's user is the same as the user
+    assertEquals(user.getId(), updated.getBelongingNode().getUser().getId());
+    assertEquals(user.getId(), updated.getPipe().getSourceNode().getUser().getId());
+    assertEquals(user.getId(), updated.getPipe().getTargetNode().getUser().getId());
+    assertEquals(user.getId(), updated.getAttribute().getNode().getUser().getId());
+    
+  }
+
+  @Test
+void testApplyBatchChanges_noChangeSubmitted_doesNotModifyAttributeContent() throws Exception {
+    User user = userRepository.save(new User("idempotentUser", "pass"));
+
+    Node node = new Node();
+    node.setUid("node-idem");
+    node.setName("IdemNode");
+    node.setUser(user);
+    nodeRepository.save(node);
+
+    Attribute attr = new Attribute();
+    attr.setUid("attr-idem");
+    attr.setName("StableAttr");
+    attr.setNode(node);
+    attributeRepository.save(attr);
+
+    AttributeContent ac = new AttributeContent();
+    ac.setUid("ac-idem");
+    ac.setName("UnchangedName");
+    ac.setHoldingValue("original");
+    ac.setBelongingNode(node);
+    ac.setAttribute(attr);
+    attributeContentRepository.save(ac);
+
+    // Setup auth
+    CustomUserDetails userDetails = new CustomUserDetails(user.getId(), user.getUsername(), user.getPassword(), List.of());
+    SecurityContext context = SecurityContextHolder.createEmptyContext();
+    context.setAuthentication(new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities()));
+    SecurityContextHolder.setContext(context);
+
+    String payload = """
+        {
+          "created": {},
+          "updated": {
+            "attributeContents": [
+              {
+                "uid": "ac-idem",
+                "name": "UnchangedName",
+                "holdingValue": "original",
+                "belongingNode": { "uid": "node-idem" },
+                "attribute": { "uid": "attr-idem" }
+              }
+            ]
+          },
+          "deleted": {}
+        }
+        """;
+
+    mockMvc.perform(post("/batch")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(payload))
+        .andExpect(status().isOk());
+
+    AttributeContent after = attributeContentRepository.findByUid("ac-idem").orElseThrow();
+    assertEquals("UnchangedName", after.getName());
+    assertEquals("original", after.getHoldingValue());
+    assertEquals("node-idem", after.getBelongingNode().getUid());
+    assertEquals("attr-idem", after.getAttribute().getUid());
+}
+
+
+
 
 }
