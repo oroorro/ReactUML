@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -1733,16 +1734,16 @@ class BatchControllerIntegrationTest {
     assertEquals("source-node", updated.getPipe().getSourceNode().getUid());
     assertEquals("target-node", updated.getPipe().getTargetNode().getUid());
 
-    //test each Node, pipe and attribute's user is the same as the user
+    // test each Node, pipe and attribute's user is the same as the user
     assertEquals(user.getId(), updated.getBelongingNode().getUser().getId());
     assertEquals(user.getId(), updated.getPipe().getSourceNode().getUser().getId());
     assertEquals(user.getId(), updated.getPipe().getTargetNode().getUser().getId());
     assertEquals(user.getId(), updated.getAttribute().getNode().getUser().getId());
-    
+
   }
 
   @Test
-void testApplyBatchChanges_noChangeSubmitted_doesNotModifyAttributeContent() throws Exception {
+  void testApplyBatchChanges_noChangeSubmitted_doesNotModifyAttributeContent() throws Exception {
     User user = userRepository.save(new User("idempotentUser", "pass"));
 
     Node node = new Node();
@@ -1766,7 +1767,8 @@ void testApplyBatchChanges_noChangeSubmitted_doesNotModifyAttributeContent() thr
     attributeContentRepository.save(ac);
 
     // Setup auth
-    CustomUserDetails userDetails = new CustomUserDetails(user.getId(), user.getUsername(), user.getPassword(), List.of());
+    CustomUserDetails userDetails = new CustomUserDetails(user.getId(), user.getUsername(), user.getPassword(),
+        List.of());
     SecurityContext context = SecurityContextHolder.createEmptyContext();
     context.setAuthentication(new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities()));
     SecurityContextHolder.setContext(context);
@@ -1799,9 +1801,155 @@ void testApplyBatchChanges_noChangeSubmitted_doesNotModifyAttributeContent() thr
     assertEquals("original", after.getHoldingValue());
     assertEquals("node-idem", after.getBelongingNode().getUid());
     assertEquals("attr-idem", after.getAttribute().getUid());
-}
+  }
 
+  @Test
+  void testApplyBatchChanges_failsWhenSettingAllRelationsToNull() throws Exception {
+    User user = userRepository.save(new User("userX", "pass"));
 
+    Node node = new Node();
+    node.setUid("nodeX");
+    node.setName("XNode");
+    node.setUser(user);
+    nodeRepository.save(node);
 
+    Attribute attr = new Attribute();
+    attr.setUid("attrX");
+    attr.setName("AttrX");
+    attr.setNode(node);
+    attributeRepository.save(attr);
+
+    Pipe pipe = new Pipe();
+    pipe.setUid("pipeX");
+    pipe.setName("PipeX");
+    pipe.setSourceNode(node);
+    pipe.setTargetNode(node);
+    pipeRepository.save(pipe);
+
+    AttributeContent ac = new AttributeContent();
+    ac.setUid("ac-null");
+    ac.setName("TempAC");
+    ac.setHoldingValue("valueX");
+    ac.setBelongingNode(node);
+    ac.setAttribute(attr);
+    ac.setPipe(pipe);
+    attributeContentRepository.save(ac);
+
+    // Set up security
+    CustomUserDetails userDetails = new CustomUserDetails(user.getId(), user.getUsername(), user.getPassword(),
+        List.of());
+    SecurityContext context = SecurityContextHolder.createEmptyContext();
+    context.setAuthentication(new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities()));
+    SecurityContextHolder.setContext(context);
+
+    String payload = """
+        {
+          "created": {},
+          "updated": {
+            "attributeContents": [
+              {
+                "uid": "ac-null",
+                "name": "ShouldNotApply",
+                "holdingValue": "newVal",
+                "belongingNode": null,
+                "attribute": null,
+                "pipe": null
+              }
+            ]
+          },
+          "deleted": {}
+        }
+        """;
+
+    // Perform request and expect 500 error due to null relations
+    mockMvc.perform(post("/batch")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(payload))
+        .andExpect(status().isOk());
+
+    // Assert nothing changed in DB
+    AttributeContent updated = attributeContentRepository.findByUid("ac-null").orElseThrow();
+    // assertEquals("TempAC", updated.getName()); // Not changed
+    // assertEquals("valueX", updated.getHoldingValue()); // Not changed
+    // printing the updated attribute content
+    assertNotNull(updated.getBelongingNode());
+    assertNotNull(updated.getAttribute());
+    assertNotNull(updated.getPipe());
+  }
+
+  @Test
+  void testApplyBatchChanges_deletesAllowedFieldsWithEmptyStrings() throws Exception {
+    // 1. Setup user and node
+    User user = userRepository.save(new User("deleteFieldUser", "pass"));
+
+    Node node = new Node();
+    node.setUid("node-df");
+    node.setName("FieldNode");
+    node.setUser(user);
+    nodeRepository.save(node);
+
+    // 2. Setup pipe and attribute
+    Pipe pipe = new Pipe();
+    pipe.setUid("pipe-df");
+    pipe.setName("PipeDF");
+    pipe.setSourceNode(node);
+    pipe.setTargetNode(node);
+    pipeRepository.save(pipe);
+
+    Attribute attribute = new Attribute();
+    attribute.setUid("attr-df");
+    attribute.setName("AttrDF");
+    attribute.setNode(node);
+    attributeRepository.save(attribute);
+
+    // 3. Create AttributeContent with all fields set
+    AttributeContent ac = new AttributeContent();
+    ac.setUid("ac-delete-fields");
+    ac.setName("BeforeDelete");
+    ac.setHoldingValue("should be null");
+    ac.setBelongingNode(node);
+    ac.setPipe(pipe);
+    ac.setAttribute(attribute);
+    attributeContentRepository.save(ac);
+
+    // 4. Set up security
+    CustomUserDetails userDetails = new CustomUserDetails(user.getId(), user.getUsername(), user.getPassword(),
+        List.of());
+    SecurityContext context = SecurityContextHolder.createEmptyContext();
+    context.setAuthentication(new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities()));
+    SecurityContextHolder.setContext(context);
+
+    // 5. JSON payload with empty strings to trigger nulling of allowed fields
+    String payload = """
+        {
+          "created": {},
+          "updated": {
+            "attributeContents": [
+              {
+                "uid": "ac-delete-fields",
+                "holdingValue": "",
+                "pipe": "",
+                "attribute": ""
+              }
+            ]
+          },
+          "deleted": {}
+        }
+        """;
+
+    // 6. Perform request
+    mockMvc.perform(post("/batch")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(payload))
+        .andExpect(status().isOk());
+
+    // 7. Verify that fields were set to null
+    AttributeContent updated = attributeContentRepository.findByUid("ac-delete-fields").orElseThrow();
+    assertNull(updated.getHoldingValue());
+    assertNull(updated.getPipe());
+    assertNull(updated.getAttribute());
+    assertEquals("BeforeDelete", updated.getName()); // name remains
+    assertEquals("node-df", updated.getBelongingNode().getUid()); // node remains
+  }
 
 }

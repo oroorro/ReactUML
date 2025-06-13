@@ -108,9 +108,18 @@ public class AttributeContentService {
         if (updatedContent == null || updatedContent.getUid() == null) {
             return false;
         }
-
+        // Disallowed deletions cases 
+        if (updatedContent.getUid() != null && updatedContent.getUid().isBlank()) {
+            return false;
+        }
+        if (updatedContent.getName() != null && updatedContent.getName().isBlank()) {
+            return false;
+        }
+    
+        // Check if the attribute content exists in the database
         Optional<AttributeContent> existingOpt = attributeContentRepository.findByUid(updatedContent.getUid());
         if (!existingOpt.isPresent()) {
+            // If the attribute content does not exist, return false
             return false;
         }
 
@@ -122,39 +131,89 @@ public class AttributeContentService {
             modified = true;
         }
 
-        if (updatedContent.getHoldingValue() != null && !Objects.equals(existing.getHoldingValue(), updatedContent.getHoldingValue())) {
-            existing.setHoldingValue(updatedContent.getHoldingValue());
+        // if (updatedContent.getHoldingValue() != null && !Objects.equals(existing.getHoldingValue(), updatedContent.getHoldingValue())) {
+        //     existing.setHoldingValue(updatedContent.getHoldingValue());
+        //     modified = true;
+        // }
+
+         // Allowed deletions
+        if (updatedContent.getHoldingValue() != null) {
+            if (updatedContent.getHoldingValue().isBlank()) {
+                existing.setHoldingValue(null);
+            } else if (!updatedContent.getHoldingValue().equals(existing.getHoldingValue())) {
+                existing.setHoldingValue(updatedContent.getHoldingValue());
+            }
             modified = true;
         }
 
-        if (updatedContent.getAttribute() != null &&
-                (existing.getAttribute() == null ||
-                        !Objects.equals(existing.getAttribute().getUid(), updatedContent.getAttribute().getUid()))) {
-            Attribute resolvedAttribute = attributeRepository.findByUid(updatedContent.getAttribute().getUid())
+        // if (updatedContent.getAttribute() != null &&
+        //         (existing.getAttribute() == null ||
+        //                 !Objects.equals(existing.getAttribute().getUid(), updatedContent.getAttribute().getUid()))) {
+
+        //     Attribute resolvedAttribute = attributeRepository.findByUid(updatedContent.getAttribute().getUid())
+        //             .orElseThrow(() -> new EntityNotFoundException("Attribute not found with UID: " + updatedContent.getAttribute().getUid()));
+        //     existing.setAttribute(resolvedAttribute);
+        //     modified = true;
+        // }
+
+        if (updatedContent.getAttribute() != null) { //updated AttributeContet's attribute object is not null
+            //given updated AttributeContet's Attribute uid is blank and not null
+            if (updatedContent.getAttribute().getUid() != null && updatedContent.getAttribute().getUid().isBlank()) {
+                //then set the attribute to null
+                System.err.println("setting attribute to null");
+                existing.setAttribute(null);
+            } 
+            //given updated AttributeContent's attribute object is not equal to the existing attribute object
+            else if (!updatedContent.getAttribute().equals(existing.getAttribute())) {
+                //check if the attribute exists in the database
+                Attribute resolvedAttribute = attributeRepository.findByUid(updatedContent.getAttribute().getUid())
                     .orElseThrow(() -> new EntityNotFoundException("Attribute not found with UID: " + updatedContent.getAttribute().getUid()));
-            existing.setAttribute(resolvedAttribute);
-            //existing.setAttribute(updatedContent.getAttribute());
+                //if the attribute exists in the database, then set the attribute to the resolved attribute
+                existing.setAttribute(resolvedAttribute);
+            }
             modified = true;
         }
 
-        if (updatedContent.getPipe() != null &&
-                (existing.getPipe() == null ||
-                        !Objects.equals(existing.getPipe().getUid(), updatedContent.getPipe().getUid()))) {
-            Pipe resolvedPipe = pipeRepository.findByUid(updatedContent.getPipe().getUid())
+        // if (updatedContent.getPipe() != null &&
+        //         (existing.getPipe() == null ||
+        //                 !Objects.equals(existing.getPipe().getUid(), updatedContent.getPipe().getUid()))) {
+        //     Pipe resolvedPipe = pipeRepository.findByUid(updatedContent.getPipe().getUid())
+        //             .orElseThrow(() -> new EntityNotFoundException("Pipe not found with UID: " + updatedContent.getPipe().getUid()));
+        //     existing.setPipe(resolvedPipe);
+        //     //existing.setPipe(updatedContent.getPipe());
+        //     modified = true;
+        // }
+
+        if (updatedContent.getPipe() != null) {
+            if (updatedContent.getPipe().getUid() != null && updatedContent.getPipe().getUid().isBlank()) {
+                existing.setPipe(null);
+            } else if (!updatedContent.getPipe().equals(existing.getPipe())) {
+                Pipe resolvedPipe = pipeRepository.findByUid(updatedContent.getPipe().getUid())
                     .orElseThrow(() -> new EntityNotFoundException("Pipe not found with UID: " + updatedContent.getPipe().getUid()));
-            existing.setPipe(resolvedPipe);
-            //existing.setPipe(updatedContent.getPipe());
+                existing.setPipe(resolvedPipe);
+            }
             modified = true;
         }
 
-        if (updatedContent.getBelongingNode() != null &&
-                (existing.getBelongingNode() == null ||
-                        !Objects.equals(existing.getBelongingNode().getUid(),
-                                updatedContent.getBelongingNode().getUid()))) {
-            Node resolvedNode = nodeRepository.findByUid(updatedContent.getBelongingNode().getUid())
+        // if (updatedContent.getBelongingNode() != null &&
+        //         (existing.getBelongingNode() == null ||
+        //                 !Objects.equals(existing.getBelongingNode().getUid(),
+        //                         updatedContent.getBelongingNode().getUid()))) {
+        //     Node resolvedNode = nodeRepository.findByUid(updatedContent.getBelongingNode().getUid())
+        //             .orElseThrow(() -> new EntityNotFoundException("Node not found with UID: " + updatedContent.getBelongingNode().getUid()));
+        //     existing.setBelongingNode(resolvedNode);
+        //     //existing.setBelongingNode(updatedContent.getBelongingNode());
+        //     modified = true;
+        // }
+
+        if (updatedContent.getBelongingNode() != null) {
+            if (updatedContent.getBelongingNode().getUid() != null && updatedContent.getBelongingNode().getUid().isBlank()) {
+                existing.setBelongingNode(null);
+            } else if (!updatedContent.getBelongingNode().equals(existing.getBelongingNode())) {
+                Node resolvedNode = nodeRepository.findByUid(updatedContent.getBelongingNode().getUid())
                     .orElseThrow(() -> new EntityNotFoundException("Node not found with UID: " + updatedContent.getBelongingNode().getUid()));
-            existing.setBelongingNode(resolvedNode);
-            //existing.setBelongingNode(updatedContent.getBelongingNode());
+                existing.setBelongingNode(resolvedNode);
+            }
             modified = true;
         }
 
@@ -166,7 +225,7 @@ public class AttributeContentService {
                 return false;
             }
         }
-        return true; // No changes needed, consider it a success
+        return true; // No changes needed, considering it as success
     }
 
 }

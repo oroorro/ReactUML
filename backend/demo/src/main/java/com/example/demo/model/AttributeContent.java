@@ -25,6 +25,12 @@ public class AttributeContent {
     @JoinColumn(name = "belonging_node_id")
     private Node belongingNode;
 
+    @Column(nullable = false)
+    private String name;
+    
+    @Column(nullable = true)
+    private String holdingValue;
+
     @PrePersist
     @PreUpdate
     private void validateExclusiveLink() {
@@ -32,11 +38,6 @@ public class AttributeContent {
             throw new IllegalStateException("AttributeContent must be linked to either an Attribute or a Pipe");
         }
     }
-
-    private String name;
-    
-    @Column(nullable = true)
-    private String holdingValue;
 
     // Constructors
     public AttributeContent() {}
