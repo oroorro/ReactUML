@@ -13,40 +13,58 @@ import com.example.demo.dto.BatchResponse;
 import com.example.demo.dto.ChangeSetDto;
 import com.example.demo.security.CustomUserDetails;
 import com.example.demo.service.BatchService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @RestController
 @RequestMapping("/batch")
 public class BatchController {
-    
-    private final BatchService batchService;
 
-    public BatchController(BatchService batchService) {
+    private final BatchService batchService;
+    private final ObjectMapper objectMapper;
+
+    public BatchController(BatchService batchService, ObjectMapper objectMapper) {
         this.batchService = batchService;
+        this.objectMapper = objectMapper;
     }
 
+    // @PostMapping
+    // public ResponseEntity<?> applyBatchChanges(@RequestBody ChangeSetDto changes,
+    // @AuthenticationPrincipal CustomUserDetails userDetails) {
+
+    // //batchService.applyChanges(changes, userDetails.getId());
+
+    // // try {
+    // // batchService.applyChanges(changes, userDetails.getId());
+    // // return ResponseEntity.ok().build();
+    // // } catch (Exception e) {
+    // // e.printStackTrace();
+    // // return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    // // }
+
+    // BatchResponse result = batchService.applyChanges(changes,
+    // userDetails.getId());
+
+    // if (result.hasErrors()) {
+    // return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
+    // }
+
+    // return ResponseEntity.ok(result);
+
+    // //return ResponseEntity.ok().build();
+    // }
+
     @PostMapping
-    public ResponseEntity<?> applyBatchChanges(@RequestBody ChangeSetDto changes,
-                                            @AuthenticationPrincipal CustomUserDetails userDetails) {
-        
-        //batchService.applyChanges(changes, userDetails.getId());
-
-        // try {
-        //     batchService.applyChanges(changes, userDetails.getId());
-        //     return ResponseEntity.ok().build();
-        // } catch (Exception e) {
-        //     e.printStackTrace();
-        //     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        // }
-
-        BatchResponse result = batchService.applyChanges(changes, userDetails.getId());
-
-        if (result.hasErrors()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
+    public ResponseEntity<BatchResponse> applyChanges(@RequestBody JsonNode dto,
+            @AuthenticationPrincipal CustomUserDetails user) {
+        try {
+            ChangeSetDto changes = objectMapper.treeToValue(dto, ChangeSetDto.class);
+            BatchResponse result = batchService.applyChanges(changes, dto, user.getId());
+            return ResponseEntity.ok(result);
+        } catch (JsonProcessingException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new BatchResponse(false, "Invalid JSON format: " + e.getMessage()));
         }
-    
-        return ResponseEntity.ok(result);
-
-
-        //return ResponseEntity.ok().build();
     }
 }

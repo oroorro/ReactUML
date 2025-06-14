@@ -5,6 +5,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -104,7 +105,7 @@ public class AttributeContentService {
     }
 
     @Transactional
-    public boolean editAttributeContent(AttributeContent updatedContent) {
+    public boolean editAttributeContent(AttributeContent updatedContent, JsonNode rawJsonNode){
         if (updatedContent == null || updatedContent.getUid() == null) {
             return false;
         }
@@ -137,11 +138,21 @@ public class AttributeContentService {
         // }
 
          // Allowed deletions
-        if (updatedContent.getHoldingValue() != null) {
-            if (updatedContent.getHoldingValue().isBlank()) {
+        // if (updatedContent.getHoldingValue() != null) {
+        //     if (updatedContent.getHoldingValue().isBlank()) {
+        //         existing.setHoldingValue(null);
+        //     } else if (!updatedContent.getHoldingValue().equals(existing.getHoldingValue())) {
+        //         existing.setHoldingValue(updatedContent.getHoldingValue());
+        //     }
+        //     modified = true;
+        // }
+
+        if (rawJsonNode.has("holdingValue")) {
+            String val = updatedContent.getHoldingValue();
+            if (val == null || val.isBlank()) {
                 existing.setHoldingValue(null);
-            } else if (!updatedContent.getHoldingValue().equals(existing.getHoldingValue())) {
-                existing.setHoldingValue(updatedContent.getHoldingValue());
+            } else {
+                existing.setHoldingValue(val);
             }
             modified = true;
         }
@@ -156,20 +167,38 @@ public class AttributeContentService {
         //     modified = true;
         // }
 
-        if (updatedContent.getAttribute() != null) { //updated AttributeContet's attribute object is not null
-            //given updated AttributeContet's Attribute uid is blank and not null
-            if (updatedContent.getAttribute().getUid() != null && updatedContent.getAttribute().getUid().isBlank()) {
-                //then set the attribute to null
+        // if (updatedContent.getAttribute() != null) { //updated AttributeContet's attribute object is not null
+        //     //given updated AttributeContet's Attribute uid is blank and not null
+        //     if (updatedContent.getAttribute().getUid() != null && updatedContent.getAttribute().getUid().isBlank()) {
+        //         //then set the attribute to null
+        //         System.err.println("setting attribute to null");
+        //         existing.setAttribute(null);
+        //     } 
+        //     //given updated AttributeContent's attribute object is not equal to the existing attribute object
+        //     else if (!updatedContent.getAttribute().equals(existing.getAttribute())) {
+        //         //check if the attribute exists in the database
+        //         Attribute resolvedAttribute = attributeRepository.findByUid(updatedContent.getAttribute().getUid())
+        //             .orElseThrow(() -> new EntityNotFoundException("Attribute not found with UID: " + updatedContent.getAttribute().getUid()));
+        //         //if the attribute exists in the database, then set the attribute to the resolved attribute
+        //         existing.setAttribute(resolvedAttribute);
+        //     }
+        //     modified = true;
+        // }
+
+        if (rawJsonNode.has("attribute")) {
+            System.err.println("attribute is present");
+            JsonNode attrNode = rawJsonNode.get("attribute");
+        
+            if (attrNode.isNull() || attrNode.get("uid") == null || attrNode.get("uid").asText().isBlank()) {
                 System.err.println("setting attribute to null");
                 existing.setAttribute(null);
-            } 
-            //given updated AttributeContent's attribute object is not equal to the existing attribute object
-            else if (!updatedContent.getAttribute().equals(existing.getAttribute())) {
-                //check if the attribute exists in the database
-                Attribute resolvedAttribute = attributeRepository.findByUid(updatedContent.getAttribute().getUid())
-                    .orElseThrow(() -> new EntityNotFoundException("Attribute not found with UID: " + updatedContent.getAttribute().getUid()));
-                //if the attribute exists in the database, then set the attribute to the resolved attribute
-                existing.setAttribute(resolvedAttribute);
+            } else {
+                String uid = attrNode.get("uid").asText();
+                if (existing.getAttribute() == null || !uid.equals(existing.getAttribute().getUid())) {
+                    Attribute resolvedAttribute = attributeRepository.findByUid(uid)
+                        .orElseThrow(() -> new EntityNotFoundException("Attribute not found with UID: " + uid));
+                    existing.setAttribute(resolvedAttribute);
+                }
             }
             modified = true;
         }
@@ -184,16 +213,35 @@ public class AttributeContentService {
         //     modified = true;
         // }
 
-        if (updatedContent.getPipe() != null) {
-            if (updatedContent.getPipe().getUid() != null && updatedContent.getPipe().getUid().isBlank()) {
+        // if (updatedContent.getPipe() != null) {
+        //     if (updatedContent.getPipe().getUid() != null && updatedContent.getPipe().getUid().isBlank()) {
+        //         existing.setPipe(null);
+        //     } else if (!updatedContent.getPipe().equals(existing.getPipe())) {
+        //         Pipe resolvedPipe = pipeRepository.findByUid(updatedContent.getPipe().getUid())
+        //             .orElseThrow(() -> new EntityNotFoundException("Pipe not found with UID: " + updatedContent.getPipe().getUid()));
+        //         existing.setPipe(resolvedPipe);
+        //     }
+        //     modified = true;
+        // }
+
+        if (rawJsonNode.has("pipe")) {
+            System.err.println("pipe is present");
+            JsonNode pipeNode = rawJsonNode.get("pipe");
+        
+            if (pipeNode.isNull() || pipeNode.get("uid") == null || pipeNode.get("uid").asText().isBlank()) {
                 existing.setPipe(null);
-            } else if (!updatedContent.getPipe().equals(existing.getPipe())) {
-                Pipe resolvedPipe = pipeRepository.findByUid(updatedContent.getPipe().getUid())
-                    .orElseThrow(() -> new EntityNotFoundException("Pipe not found with UID: " + updatedContent.getPipe().getUid()));
-                existing.setPipe(resolvedPipe);
+                System.err.println("pipe is set to null");
+            } else {
+                String uid = pipeNode.get("uid").asText();
+                if (existing.getPipe() == null || !uid.equals(existing.getPipe().getUid())) {
+                    Pipe resolvedPipe = pipeRepository.findByUid(uid)
+                        .orElseThrow(() -> new EntityNotFoundException("Pipe not found with UID: " + uid));
+                    existing.setPipe(resolvedPipe);
+                }
             }
             modified = true;
         }
+        
 
         // if (updatedContent.getBelongingNode() != null &&
         //         (existing.getBelongingNode() == null ||

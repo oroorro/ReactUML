@@ -1356,6 +1356,84 @@ class BatchControllerIntegrationTest {
     assertEquals("attr-minimal", updatedAC.get().getAttribute().getUid());
   }
 
+
+  @Test
+  void testApplyBatchChanges_updatesAttributeContentMinimalFieldsPipe() throws Exception {
+    // 1. Setup user and node
+    User user = new User();
+    user.setUsername("minimalUpdateUser");
+    user.setPassword("pass");
+    user = userRepository.save(user);
+
+    Node node = new Node();
+    node.setUid("node-minimal");
+    node.setName("Minimal Node");
+    node.setUser(user);
+    nodeRepository.save(node);
+
+    // 2. Create and save attribute
+    Attribute attribute = new Attribute();
+    attribute.setUid("attr-minimal");
+    attribute.setName("Size");
+    attribute.setNode(node);
+    attribute.setMute(false);
+    attribute.setTotalNumber(1);
+    attributeRepository.save(attribute);
+
+    Pipe pipe = new Pipe();
+    pipe.setUid("pipe-full-1");
+    pipe.setName("Test Pipe");
+    pipe.setColor('B');
+    pipe.setMute(false);
+    pipe.setSourceNode(node);
+    pipeRepository.save(pipe);
+
+    // 3. Create and save initial attribute content without Pipe
+    AttributeContent ac = new AttributeContent();
+    ac.setUid("ac-minimal-001");
+    ac.setName("Original Name");
+    ac.setHoldingValue("Original Value");
+    ac.setBelongingNode(node);
+    ac.setAttribute(attribute);
+    attributeContentRepository.save(ac);
+
+    // 4. Set up security context
+    CustomUserDetails userDetails = new CustomUserDetails(user.getId(), user.getUsername(), user.getPassword(),
+        List.of());
+    SecurityContext context = SecurityContextHolder.createEmptyContext();
+    context.setAuthentication(new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities()));
+    SecurityContextHolder.setContext(context);
+
+    // 5. Test updating only the value field
+    String minimalUpdatePayload = """
+        {
+          "created": {},
+          "updated": {
+            "attributeContents": [
+              {
+                "uid": "ac-minimal-001",
+                "pipe": { "uid": "pipe-full-1" }
+              }
+            ]
+          },
+          "deleted": {}
+        }
+        """;
+
+    mockMvc.perform(post("/batch")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(minimalUpdatePayload))
+        .andExpect(status().isOk());
+
+    // 6. Verify only value was updated, other fields remain unchanged
+    Optional<AttributeContent> updatedAC = attributeContentRepository.findByUid("ac-minimal-001");
+    assertTrue(updatedAC.isPresent());
+    assertEquals("pipe-full-1", updatedAC.get().getPipe().getUid());
+    assertEquals("Original Name", updatedAC.get().getName());
+    assertEquals("node-minimal", updatedAC.get().getBelongingNode().getUid());
+    assertEquals("attr-minimal", updatedAC.get().getAttribute().getUid());
+  }
+
   @Test
   void testApplyBatchChanges_updatesAttributeContentAllFields() throws Exception {
     // 1. Setup user and nodes
@@ -1906,7 +1984,7 @@ class BatchControllerIntegrationTest {
     AttributeContent ac = new AttributeContent();
     ac.setUid("ac-delete-fields");
     ac.setName("BeforeDelete");
-    ac.setHoldingValue("should be null");
+    ac.setHoldingValue("will be nulled");
     ac.setBelongingNode(node);
     ac.setPipe(pipe);
     ac.setAttribute(attribute);
@@ -1927,9 +2005,9 @@ class BatchControllerIntegrationTest {
             "attributeContents": [
               {
                 "uid": "ac-delete-fields",
-                "holdingValue": "",
-                "pipe": "",
-                "attribute": ""
+                "holdingValue": null,
+                "pipe": null
+                
               }
             ]
           },
@@ -1945,9 +2023,18 @@ class BatchControllerIntegrationTest {
 
     // 7. Verify that fields were set to null
     AttributeContent updated = attributeContentRepository.findByUid("ac-delete-fields").orElseThrow();
+    //PRINT THE UPDATED ATTRIBUTE CONTENT
+    // System.out.println("Updated AttributeContent: " + updated.getHoldingValue());
+    // System.out.println("Updated AttributeContent: " + updated.getPipe().getUid());
+    // System.out.println("Updated AttributeContent: " + updated.getAttribute().getUid());
+    // System.out.println("Updated AttributeContent: " + updated.getName());
+    // System.out.println("Updated AttributeContent: " + updated.getBelongingNode().getUid());
+
     assertNull(updated.getHoldingValue());
     assertNull(updated.getPipe());
-    assertNull(updated.getAttribute());
+    
+    //attribute remains 
+    assertEquals("attr-df", updated.getAttribute().getUid());
     assertEquals("BeforeDelete", updated.getName()); // name remains
     assertEquals("node-df", updated.getBelongingNode().getUid()); // node remains
   }

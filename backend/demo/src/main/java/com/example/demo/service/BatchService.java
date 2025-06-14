@@ -7,6 +7,9 @@ import com.example.demo.dto.BatchResponse;
 import com.example.demo.dto.ChangeSetDto;
 import com.example.demo.model.Attribute;
 import com.example.demo.model.AttributeContent;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 import com.example.demo.model.Node;
 import com.example.demo.model.Pipe;
@@ -20,24 +23,25 @@ public class BatchService {
     private final PipeService pipeService;
     private final AttributeService attributeService;
     private final AttributeContentService attributeContentService;
+    private final ObjectMapper objectMapper;
 
     public BatchService(NodeService nodeService,
                         PipeService pipeService,
                         AttributeService attributeService,
-                        AttributeContentService attributeContentService) {
+                        AttributeContentService attributeContentService,
+                        ObjectMapper objectMapper) {
         this.nodeService = nodeService;
         this.pipeService = pipeService;
         this.attributeService = attributeService;
         this.attributeContentService = attributeContentService;
+        this.objectMapper = objectMapper;
     }
 
 
     @Transactional
-    public BatchResponse applyChanges(ChangeSetDto changes, Integer userId) {
+    public BatchResponse applyChanges(ChangeSetDto changes, JsonNode dto, Integer userId) {
 
-        BatchResponse response = new BatchResponse();
-        response.success = true;
-        response.message = "Batch processed successfully";
+        BatchResponse response = new BatchResponse(true, "Batch processed successfully");
 
         // 1. DELETE first (avoid FK constraint issues)
         if (changes.deleted != null) {
@@ -91,26 +95,69 @@ public class BatchService {
         }
 
         // 2. UPDATE existing
-        if (changes.updated != null) {
-            if (changes.updated.attributeContents != null) {
-                for (AttributeContent ac : changes.updated.attributeContents) {
-                    boolean success = attributeContentService.editAttributeContent(ac);
-                    if (!success) {
-                        response.addError("attributeContents", ac.getUid());
-                        response.success = false;
-                        response.message = "Some entities failed to update";
-                        System.out.println("Warning: AttributeContent with UID " + ac.getUid() + " not found or failed to update.");
+        // if (changes.updated != null) {
+        //     if (changes.updated.attributeContents != null) {
+        //         for (AttributeContent ac : changes.updated.attributeContents) {
+        //             try {
+
+        //                 //JsonNode jsonNode = objectMapper.valueToTree(ac);
+        //                 for(JsonNode contentNode: dto.get("updated").get("attributeContents")){
+
+        //                     AttributeContent dto = objectMapper.treeToValue(contentNode, AttributeContent.class);
+        //                     boolean success = attributeContentService.editAttributeContent(dto, contentNode);
+        //                     if (!success) {
+        //                         response.addError("attributeContents", ac.getUid());
+        //                         response.success = false;
+        //                         response.message = "Some entities failed to update";
+        //                         System.out.println("Warning: AttributeContent with UID " + ac.getUid() + " not found or failed to update.");
+        //                     }
+        //                 }
+                        
+        //             } catch (JsonProcessingException e) {
+        //                 response.addError("attributeContents", ac.getUid());
+        //                 response.success = false;
+        //                 response.message = "Failed to process JSON for AttributeContent: " + e.getMessage();
+        //                 System.out.println("Error processing AttributeContent with UID " + ac.getUid() + ": " + e.getMessage());
+        //             }
+        //         }
+        //     }
+        //     if (changes.updated.pipes != null) {
+        //         for (Pipe pipe : changes.updated.pipes) {
+        //             pipeService.editPipe(pipe);
+        //         }
+        //     }
+        //     if (changes.updated.nodes != null) {
+        //         for (Node node : changes.updated.nodes) {
+        //             nodeService.editNode(node);
+        //         }
+        //     }
+        // }
+
+
+        // 2. UPDATED
+        if (changes.updated != null && changes.updated.attributeContents != null) {
+            JsonNode updatedNode = dto.get("updated");
+            if (updatedNode != null && updatedNode.has("attributeContents")) {
+                JsonNode contentsArray = updatedNode.get("attributeContents");
+                if (contentsArray.isArray()) {
+                    for (int i = 0; i < changes.updated.attributeContents.size(); i++) {
+                        AttributeContent ac = changes.updated.attributeContents.get(i);
+                        JsonNode rawNode = contentsArray.get(i); // Match by index
+                        try {
+                            boolean success = attributeContentService.editAttributeContent(ac, rawNode);
+                            if (!success) {
+                                response.addError("attributeContents", ac.getUid());
+                                response.success = false;
+                                response.message = "Some entities failed to update";
+                                System.out.println("Warning: AttributeContent with UID " + ac.getUid() + " not found or failed to update.");
+                            }
+                        } catch (Exception e) {
+                            response.addError("attributeContents", ac.getUid());
+                            response.success = false;
+                            response.message = "Failed to process JSON for AttributeContent: " + e.getMessage();
+                            System.out.println("Error processing AttributeContent with UID " + ac.getUid() + ": " + e.getMessage());
+                        }
                     }
-                }
-            }
-            if (changes.updated.pipes != null) {
-                for (Pipe pipe : changes.updated.pipes) {
-                    pipeService.editPipe(pipe);
-                }
-            }
-            if (changes.updated.nodes != null) {
-                for (Node node : changes.updated.nodes) {
-                    nodeService.editNode(node);
                 }
             }
         }

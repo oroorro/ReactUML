@@ -10,6 +10,11 @@ public class BatchResponse {
     public String message;
     public Map<String, List<String>> errors = new HashMap<>();
 
+    public BatchResponse(boolean success, String message) {
+        this.success = success;
+        this.message = message;
+    }
+    
     public void addError(String category, String uid) {
         errors.computeIfAbsent(category, k -> new ArrayList<>()).add(uid);
     }
