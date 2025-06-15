@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.List;
@@ -2416,22 +2417,13 @@ class BatchControllerIntegrationTest {
         }
         """;
 
-        MvcResult result = mockMvc.perform(post("/batch")
+    mockMvc.perform(post("/batch")
         .contentType(MediaType.APPLICATION_JSON)
         .content(payload))
-        .andExpect(status().isBadRequest())
-        .andReturn();
-
-     // Deserialize response body
-     String responseBody = result.getResponse().getContentAsString();
-     ObjectMapper mapper = new ObjectMapper();
-     BatchResponse response = mapper.readValue(responseBody, BatchResponse.class);
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.success").value(false))
+        .andExpect(jsonPath("$.message").value("Some entities failed to update"));
  
-     // Verify BatchResponse fields
-     assertFalse(response.success);
-     assertEquals("Some entities failed to update", response.message);
-
-
     // 5. Assert nothing changed
     AttributeContent after = attributeContentRepository.findByUid("ac-node-null").orElseThrow();
     assertEquals("BeforeNodeNull", after.getName());
@@ -2491,7 +2483,9 @@ class BatchControllerIntegrationTest {
     mockMvc.perform(post("/batch")
         .contentType(MediaType.APPLICATION_JSON)
         .content(payload))
-        .andExpect(status().isBadRequest());
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.success").value(false))
+        .andExpect(jsonPath("$.message").value("Some entities failed to update"));
 
     // 5. Assert nothing changed
     AttributeContent after = attributeContentRepository.findByUid("ac-uid-null").orElseThrow();
