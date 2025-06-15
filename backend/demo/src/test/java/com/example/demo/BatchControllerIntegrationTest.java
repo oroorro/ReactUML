@@ -2423,7 +2423,7 @@ class BatchControllerIntegrationTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.success").value(false))
         .andExpect(jsonPath("$.message").value("Some entities failed to update"));
- 
+
     // 5. Assert nothing changed
     AttributeContent after = attributeContentRepository.findByUid("ac-node-null").orElseThrow();
     assertEquals("BeforeNodeNull", after.getName());
@@ -2492,6 +2492,373 @@ class BatchControllerIntegrationTest {
     assertEquals("BeforeUidNull", after.getName());
     assertEquals("safe", after.getHoldingValue());
     assertEquals("node-uid-null", after.getBelongingNode().getUid());
+  }
+
+  @Test
+  void testSequentialAttributeFieldEdits() throws Exception {
+    // 1. Setup user and node
+    User user = userRepository.save(new User("attrEditUser", "pass"));
+
+    Node node = new Node();
+    node.setUid("attr-node");
+    node.setName("AttrNode");
+    node.setUser(user);
+    nodeRepository.save(node);
+
+    // 2. Create the Attribute
+    Attribute attr = new Attribute();
+    attr.setUid("attr-basic-edit");
+    attr.setName("OriginalName");
+    attr.setMute(false);
+    attr.setTotalNumber(5);
+    attr.setNode(node);
+    attributeRepository.save(attr);
+
+    // 3. Set up security context
+    CustomUserDetails userDetails = new CustomUserDetails(user.getId(), user.getUsername(), user.getPassword(),
+        List.of());
+    SecurityContext context = SecurityContextHolder.createEmptyContext();
+    context.setAuthentication(new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities()));
+    SecurityContextHolder.setContext(context);
+
+    // 4. Edit name
+    mockMvc.perform(post("/batch")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content("""
+            {
+              "created": {},
+              "updated": {
+                "attributes": [
+                  { "uid": "attr-basic-edit", "name": "UpdatedName" }
+                ]
+              },
+              "deleted": {}
+            }
+            """))
+        .andExpect(status().isOk());
+
+    Attribute updated = attributeRepository.findByUid("attr-basic-edit").orElseThrow();
+    assertEquals("attr-basic-edit", updated.getUid());
+    assertEquals("UpdatedName", updated.getName());
+    assertEquals(5, updated.getTotalNumber());
+    assertEquals(false, updated.getMute());
+    assertEquals("attr-node", updated.getNode().getUid());
+
+    // 5. Edit mute
+    mockMvc.perform(post("/batch")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content("""
+            {
+              "created": {},
+              "updated": {
+                "attributes": [
+                  { "uid": "attr-basic-edit", "mute": true }
+                ]
+              },
+              "deleted": {}
+            }
+            """))
+        .andExpect(status().isOk());
+
+    updated = attributeRepository.findByUid("attr-basic-edit").orElseThrow();
+    assertTrue(updated.getMute());
+    assertEquals("attr-basic-edit", updated.getUid());
+    assertEquals("UpdatedName", updated.getName());
+    assertEquals(5, updated.getTotalNumber());
+    assertEquals("attr-node", updated.getNode().getUid());
+
+    // 6. Edit totalNumber
+    mockMvc.perform(post("/batch")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content("""
+            {
+              "created": {},
+              "updated": {
+                "attributes": [
+                  { "uid": "attr-basic-edit", "totalNumber": 99 }
+                ]
+              },
+              "deleted": {}
+            }
+            """))
+        .andExpect(status().isOk());
+
+    updated = attributeRepository.findByUid("attr-basic-edit").orElseThrow();
+    assertEquals(99, updated.getTotalNumber());
+    assertEquals("attr-basic-edit", updated.getUid());
+    assertEquals("UpdatedName", updated.getName());
+    assertEquals(true, updated.getMute());
+    assertEquals("attr-node", updated.getNode().getUid());
+
+    // 7. Edit node
+    Node newNode = new Node();
+    newNode.setUid("new-attr-node");
+    newNode.setName("NewNode");
+    newNode.setUser(user);
+    nodeRepository.save(newNode);
+
+    mockMvc.perform(post("/batch")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content("""
+            {
+              "created": {},
+              "updated": {
+                "attributes": [
+                  { "uid": "attr-basic-edit", "node": { "uid": "new-attr-node" } }
+                ]
+              },
+              "deleted": {}
+            }
+            """))
+        .andExpect(status().isOk());
+
+    updated = attributeRepository.findByUid("attr-basic-edit").orElseThrow();
+    assertEquals("new-attr-node", updated.getNode().getUid());
+    assertEquals("UpdatedName", updated.getName());
+    assertEquals(99, updated.getTotalNumber());
+    assertEquals(true, updated.getMute());
+  }
+
+  @Test
+  void testEditAttribute_withMinimalRequiredFields() throws Exception {
+    // 1. Setup user and node
+    User user = userRepository.save(new User("minUser", "pass"));
+    Node node = new Node();
+    node.setUid("node-min");
+    node.setName("MinimalNode");
+    node.setUser(user);
+    nodeRepository.save(node);
+
+    // 2. Setup attribute
+    Attribute attribute = new Attribute();
+    attribute.setUid("attr-minimal");
+    attribute.setName("OriginalName");
+    attribute.setMute(false);
+    attribute.setTotalNumber(10);
+    attribute.setNode(node);
+    attributeRepository.save(attribute);
+
+    // 3. Setup security context
+    CustomUserDetails userDetails = new CustomUserDetails(user.getId(), user.getUsername(), user.getPassword(),
+        List.of());
+    SecurityContext context = SecurityContextHolder.createEmptyContext();
+    context.setAuthentication(new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities()));
+    SecurityContextHolder.setContext(context);
+
+    // 4. JSON payload only updating the `name`
+    String payload = """
+        {
+          "created": {},
+          "updated": {
+            "attributes": [
+              {
+                "uid": "attr-minimal",
+                "name": "UpdatedName"
+              }
+            ]
+          },
+          "deleted": {}
+        }
+        """;
+
+    // 5. Perform batch update
+    mockMvc.perform(post("/batch")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(payload))
+        .andExpect(status().isOk());
+
+    // 6. Fetch updated Attribute and assert changes
+    Attribute updated = attributeRepository.findByUid("attr-minimal").orElseThrow();
+    assertEquals("UpdatedName", updated.getName()); // Only this should change
+    assertEquals("attr-minimal", updated.getUid()); // UID remains unchanged
+    assertEquals(false, updated.getMute()); // Mute unchanged
+    assertEquals(10, updated.getTotalNumber()); // totalNumber unchanged
+    assertEquals("node-min", updated.getNode().getUid()); // Node relation unchanged
+  }
+
+  @Test
+  void testEditAttribute_withAllFieldsPresent() throws Exception {
+    // 1. Setup user and node
+    User user = userRepository.save(new User("fullEditUser", "pass"));
+
+    Node oldNode = new Node();
+    oldNode.setUid("node-old");
+    oldNode.setName("OldNode");
+    oldNode.setUser(user);
+    nodeRepository.save(oldNode);
+
+    Node newNode = new Node();
+    newNode.setUid("node-new");
+    newNode.setName("NewNode");
+    newNode.setUser(user);
+    nodeRepository.save(newNode);
+
+    // 2. Setup original attribute linked to old node
+    Attribute attribute = new Attribute();
+    attribute.setUid("attr-full");
+    attribute.setName("OriginalAttr");
+    attribute.setMute(false);
+    attribute.setTotalNumber(5);
+    attribute.setNode(oldNode);
+    attributeRepository.save(attribute);
+
+    // 3. Setup security context
+    CustomUserDetails userDetails = new CustomUserDetails(user.getId(), user.getUsername(), user.getPassword(),
+        List.of());
+    SecurityContext context = SecurityContextHolder.createEmptyContext();
+    context.setAuthentication(new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities()));
+    SecurityContextHolder.setContext(context);
+
+    // 4. JSON payload updating all fields
+    String payload = """
+        {
+          "created": {},
+          "updated": {
+            "attributes": [
+              {
+                "uid": "attr-full",
+                "name": "UpdatedAttr",
+                "mute": true,
+                "totalNumber": 99,
+                "node": { "uid": "node-new" }
+              }
+            ]
+          },
+          "deleted": {}
+        }
+        """;
+
+    // 5. Perform update
+    mockMvc.perform(post("/batch")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(payload))
+        .andExpect(status().isOk());
+
+    // 6. Fetch and verify updated attribute
+    Attribute updated = attributeRepository.findByUid("attr-full").orElseThrow();
+    assertEquals("UpdatedAttr", updated.getName());
+    assertTrue(updated.getMute());
+    assertEquals(99, updated.getTotalNumber());
+    assertEquals("node-new", updated.getNode().getUid());
+  }
+
+  @Test
+  void testEditAttribute_idempotentNoChangeSubmitted() throws Exception {
+    // 1. Setup user and node
+    User user = userRepository.save(new User("idempotentUser", "pass"));
+
+    Node node = new Node();
+    node.setUid("node-idem");
+    node.setName("IdemNode");
+    node.setUser(user);
+    nodeRepository.save(node);
+
+    // 2. Create an Attribute with fixed values
+    Attribute attr = new Attribute();
+    attr.setUid("attr-idem");
+    attr.setName("StaticAttr");
+    attr.setMute(false);
+    attr.setTotalNumber(7);
+    attr.setNode(node);
+    attributeRepository.save(attr);
+
+    // 3. Set up security
+    CustomUserDetails userDetails = new CustomUserDetails(user.getId(), user.getUsername(), user.getPassword(),
+        List.of());
+    SecurityContext context = SecurityContextHolder.createEmptyContext();
+    context.setAuthentication(new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities()));
+    SecurityContextHolder.setContext(context);
+
+    // 4. JSON payload with the same values as existing Attribute
+    String payload = """
+        {
+          "created": {},
+          "updated": {
+            "attributes": [
+              {
+                "uid": "attr-idem",
+                "name": "StaticAttr",
+                "mute": false,
+                "totalNumber": 7,
+                "node": { "uid": "node-idem" }
+              }
+            ]
+          },
+          "deleted": {}
+        }
+        """;
+
+    // 5. Perform update (should do nothing effectively)
+    mockMvc.perform(post("/batch")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(payload))
+        .andExpect(status().isOk());
+
+    // 6. Verify that nothing changed
+    Attribute unchanged = attributeRepository.findByUid("attr-idem").orElseThrow();
+    assertEquals("StaticAttr", unchanged.getName());
+    assertFalse(unchanged.getMute());
+    assertEquals(7, unchanged.getTotalNumber());
+    assertEquals("node-idem", unchanged.getNode().getUid());
+  }
+
+  @Test
+  void testEditAttribute_deletesAllowedFieldsWithNullValues() throws Exception {
+    // 1. Setup user and node
+    User user = userRepository.save(new User("fieldDeleteUser", "pass"));
+
+    Node node = new Node();
+    node.setUid("node-del");
+    node.setName("FieldNode");
+    node.setUser(user);
+    nodeRepository.save(node);
+
+    // 2. Create Attribute with all fields set
+    Attribute attr = new Attribute();
+    attr.setUid("attr-del");
+    attr.setName("DeletableAttr");
+    attr.setMute(true);
+    attr.setTotalNumber(42);
+    attr.setNode(node);
+    attributeRepository.save(attr);
+
+    // 3. Set up security
+    CustomUserDetails userDetails = new CustomUserDetails(user.getId(), user.getUsername(), user.getPassword(),
+        List.of());
+    SecurityContext context = SecurityContextHolder.createEmptyContext();
+    context.setAuthentication(new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities()));
+    SecurityContextHolder.setContext(context);
+
+    // 4. JSON payload that sets name, totalNumber, mute to null
+    String payload = """
+        {
+          "created": {},
+          "updated": {
+            "attributes": [
+              {
+                "uid": "attr-del",
+                "name": null,
+                "totalNumber": null,
+                "mute": null
+              }
+            ]
+          },
+          "deleted": {}
+        }
+        """;
+
+    // 5. Perform update
+    mockMvc.perform(post("/batch")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(payload))
+        .andExpect(status().isOk());
+
+    // 6. Verify the updated attribute
+    Attribute updated = attributeRepository.findByUid("attr-del").orElseThrow();
+    assertNull(updated.getName(), "Name should be null");
+    assertNull(updated.getTotalNumber(), "Total number should be null");
+    assertNull(updated.getMute(), "Mute should be null");
+    assertEquals("node-del", updated.getNode().getUid(), "Node should remain unchanged");
   }
 
 }

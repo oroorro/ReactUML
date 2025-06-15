@@ -4,6 +4,7 @@ import com.example.demo.model.Attribute;
 import com.example.demo.model.Node;
 import com.example.demo.repository.AttributeRepository;
 import com.example.demo.repository.NodeRepository;
+import com.fasterxml.jackson.databind.JsonNode;
 
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
@@ -45,7 +46,7 @@ public class AttributeService {
 
     // Edit Attribute
     @Transactional
-    public Attribute editAttribute(Attribute updatedAttribute) {
+    public boolean editAttribute(Attribute updatedAttribute, JsonNode rawNode) {
         if (updatedAttribute == null || updatedAttribute.getUid() == null) {
             throw new IllegalArgumentException("Updated attribute or UID cannot be null.");
         }
@@ -55,28 +56,42 @@ public class AttributeService {
 
         boolean modified = false;
 
-        if (!Objects.equals(existing.getName(), updatedAttribute.getName())) {
+        // Only update name if it's present in the JSON
+        if (rawNode.has("name") && !Objects.equals(existing.getName(), updatedAttribute.getName())) {
             existing.setName(updatedAttribute.getName());
             modified = true;
         }
 
-        if (!Objects.equals(existing.getMute(), updatedAttribute.getMute())) {
+        // Only update mute if it's present in the JSON
+        if (rawNode.has("mute") && !Objects.equals(existing.getMute(), updatedAttribute.getMute())) {
             existing.setMute(updatedAttribute.getMute());
             modified = true;
         }
 
-        if (!Objects.equals(existing.getTotalNumber(), updatedAttribute.getTotalNumber())) {
+        // Only update totalNumber if it's present in the JSON
+        if (rawNode.has("totalNumber") && !Objects.equals(existing.getTotalNumber(), updatedAttribute.getTotalNumber())) {
             existing.setTotalNumber(updatedAttribute.getTotalNumber());
             modified = true;
         }
 
-        if (updatedAttribute.getNode() != null &&
-            !Objects.equals(existing.getNode().getUid(), updatedAttribute.getNode().getUid())) {
-            existing.setNode(updatedAttribute.getNode());
-            modified = true;
+        // Handle node relationship
+        if (rawNode.has("node")) {
+            JsonNode nodeNode = rawNode.get("node");
+            if (nodeNode.has("uid")) {
+                String nodeUid = nodeNode.get("uid").asText();
+                if (!Objects.equals(existing.getNode().getUid(), nodeUid)) {
+                    Node newNode = nodeRepository.findByUid(nodeUid)
+                        .orElseThrow(() -> new EntityNotFoundException("Node not found with UID: " + nodeUid));
+                    existing.setNode(newNode);
+                    modified = true;
+                }
+            }
         }
 
-        return modified ? attributeRepository.save(existing) : existing;
+        if (modified) {
+            attributeRepository.save(existing);
+        }
+        return modified;
     }
 
     //  Delete Attribute

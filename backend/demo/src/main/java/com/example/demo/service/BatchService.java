@@ -136,6 +136,7 @@ public class BatchService {
 
         // 2. UPDATED
         if (changes.updated != null && changes.updated.attributeContents != null) {
+            
             JsonNode updatedNode = dto.get("updated");
             if (updatedNode != null && updatedNode.has("attributeContents")) {
                 JsonNode contentsArray = updatedNode.get("attributeContents");
@@ -156,6 +157,33 @@ public class BatchService {
                             response.success = false;
                             response.message = "Failed to process JSON for AttributeContent: " + e.getMessage();
                             System.out.println("Error processing AttributeContent with UID " + ac.getUid() + ": " + e.getMessage());
+                        }
+                    }
+                }
+            }
+
+        }
+        else if (changes.updated != null && changes.updated.attributes != null) {
+            JsonNode updatedNode = dto.get("updated");
+            if (updatedNode != null && updatedNode.has("attributes")) {
+                JsonNode attributesArray = updatedNode.get("attributes");
+                if (attributesArray.isArray()) {
+                    for (int i = 0; i < changes.updated.attributes.size(); i++) {
+                        Attribute attr = changes.updated.attributes.get(i);
+                        JsonNode rawNode = attributesArray.get(i); // Match by index
+                        try {
+                            boolean success = attributeService.editAttribute(attr, rawNode);
+                            if (!success) {
+                                response.addError("attributes", attr.getUid());
+                                response.success = false;
+                                response.message = "Some entities failed to update";
+                                System.out.println("Warning: Attribute with UID " + attr.getUid() + " not found or failed to update.");
+                            }
+                        } catch (Exception e) {
+                            response.addError("attributes", attr.getUid());
+                            response.success = false;
+                            response.message = "Failed to process JSON for Attribute: " + e.getMessage();
+                            System.out.println("Error processing Attribute with UID " + attr.getUid() + ": " + e.getMessage());
                         }
                     }
                 }
