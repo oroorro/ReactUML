@@ -254,16 +254,42 @@ public class AttributeContentService {
         //     modified = true;
         // }
 
-        if (updatedContent.getBelongingNode() != null) {
-            if (updatedContent.getBelongingNode().getUid() != null && updatedContent.getBelongingNode().getUid().isBlank()) {
-                existing.setBelongingNode(null);
-            } else if (!updatedContent.getBelongingNode().equals(existing.getBelongingNode())) {
-                Node resolvedNode = nodeRepository.findByUid(updatedContent.getBelongingNode().getUid())
-                    .orElseThrow(() -> new EntityNotFoundException("Node not found with UID: " + updatedContent.getBelongingNode().getUid()));
-                existing.setBelongingNode(resolvedNode);
+        // if (updatedContent.getBelongingNode() != null) {
+        //     if (updatedContent.getBelongingNode().getUid() != null && updatedContent.getBelongingNode().getUid().isBlank()) {
+        //         existing.setBelongingNode(null);
+        //     } else if (!updatedContent.getBelongingNode().equals(existing.getBelongingNode())) {
+        //         Node resolvedNode = nodeRepository.findByUid(updatedContent.getBelongingNode().getUid())
+        //             .orElseThrow(() -> new EntityNotFoundException("Node not found with UID: " + updatedContent.getBelongingNode().getUid()));
+        //         existing.setBelongingNode(resolvedNode);
+        //     }
+        //     modified = true;
+        // }
+        
+        if (rawJsonNode.has("belongingNode")) {
+            JsonNode nodeField = rawJsonNode.get("belongingNode");
+        
+            // Case: belongingNode: null (explicitly null → reject update)
+            if (nodeField.isNull()) {
+                System.out.println("belongingNode is explicitly set to null, which is not allowed.");
+                return false; // Return false to indicate failure (optional=false field)
             }
-            modified = true;
+        
+            // Case: belongingNode exists but uid is blank
+            if (nodeField.get("uid") != null && nodeField.get("uid").asText().isBlank()) {
+                System.out.println("belongingNode uid is blank → invalid input.");
+                return false;
+            }
+        
+            // Case: valid uid → resolve and update
+            String newUid = nodeField.get("uid").asText();
+            if (!newUid.equals(existing.getBelongingNode().getUid())) {
+                Node resolvedNode = nodeRepository.findByUid(newUid)
+                    .orElseThrow(() -> new EntityNotFoundException("Node not found with UID: " + newUid));
+                existing.setBelongingNode(resolvedNode);
+                modified = true;
+            }
         }
+        
 
         if (modified) {
             try {
