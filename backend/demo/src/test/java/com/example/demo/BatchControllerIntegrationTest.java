@@ -516,7 +516,7 @@ class BatchControllerIntegrationTest {
     Pipe pipe = new Pipe();
     pipe.setUid("pipe-01");
     pipe.setName("Line A");
-    pipe.setColor('B');
+    pipe.setColor("B");
     pipe.setMute(false);
     pipe.setSourceNode(nodeA);
     pipe.setTargetNode(nodeB);
@@ -734,7 +734,7 @@ class BatchControllerIntegrationTest {
     Pipe pipe = new Pipe();
     pipe.setUid("pipe-delete-uid");
     pipe.setName("DeletePipe");
-    pipe.setColor('B');
+    pipe.setColor("B");
     pipe.setMute(false);
     pipe.setSourceNode(node);
     pipe.setTargetNode(node);
@@ -840,7 +840,7 @@ class BatchControllerIntegrationTest {
     Pipe pipe = new Pipe();
     pipe.setUid("pipe-delete-all");
     pipe.setName("DeletePipe");
-    pipe.setColor('B');
+    pipe.setColor("B");
     pipe.setMute(false);
     pipe.setSourceNode(nodeA);
     pipe.setTargetNode(nodeB);
@@ -1127,7 +1127,7 @@ class BatchControllerIntegrationTest {
     Pipe pipe = new Pipe();
     pipe.setUid("pipe-field-1");
     pipe.setName("Test Pipe");
-    pipe.setColor('B');
+    pipe.setColor("B");
     pipe.setMute(false);
     pipe.setSourceNode(node1);
     pipe.setTargetNode(node2);
@@ -1385,7 +1385,7 @@ class BatchControllerIntegrationTest {
     Pipe pipe = new Pipe();
     pipe.setUid("pipe-full-1");
     pipe.setName("Test Pipe");
-    pipe.setColor('B');
+    pipe.setColor("B");
     pipe.setMute(false);
     pipe.setSourceNode(node);
     pipeRepository.save(pipe);
@@ -1477,7 +1477,7 @@ class BatchControllerIntegrationTest {
     Pipe pipe = new Pipe();
     pipe.setUid("pipe-full-1");
     pipe.setName("Test Pipe");
-    pipe.setColor('B');
+    pipe.setColor("B");
     pipe.setMute(false);
     pipe.setSourceNode(node1);
     pipe.setTargetNode(node2);
@@ -3034,6 +3034,149 @@ class BatchControllerIntegrationTest {
     assertEquals(77, fetched.getTotalNumber());
     assertEquals(false, fetched.getMute());
     assertEquals("node-null-uid", fetched.getNode().getUid());
+  }
+
+  @Test
+  void testEditEachPipeFieldSequentially() throws Exception {
+    // 1. Setup user and nodes
+    User user = userRepository.save(new User("pipeEditUser", "pass"));
+
+    Node nodeA = new Node();
+    nodeA.setUid("node-A");
+    nodeA.setName("NodeA");
+    nodeA.setUser(user);
+    nodeRepository.save(nodeA);
+
+    Node nodeB = new Node();
+    nodeB.setUid("node-B");
+    nodeB.setName("NodeB");
+    nodeB.setUser(user);
+    nodeRepository.save(nodeB);
+
+    Node nodeC = new Node();
+    nodeC.setUid("node-C");
+    nodeC.setName("NodeC");
+    nodeC.setUser(user);
+    nodeRepository.save(nodeC);
+
+    // 2. Create initial Pipe
+    Pipe pipe = new Pipe();
+    pipe.setUid("pipe-123");
+    pipe.setName("OriginalPipe");
+    pipe.setColor("red");
+    pipe.setSourceNode(nodeA);
+    pipe.setTargetNode(nodeB);
+    pipeRepository.save(pipe);
+
+    // 3. Set up security
+    CustomUserDetails userDetails = new CustomUserDetails(user.getId(), user.getUsername(), user.getPassword(),
+        List.of());
+    SecurityContext context = SecurityContextHolder.createEmptyContext();
+    context.setAuthentication(new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities()));
+    SecurityContextHolder.setContext(context);
+
+    // ----------- EDIT name ------------
+    String updateNamePayload = """
+        {
+          "created": {},
+          "updated": {
+            "pipes": [
+              {
+                "uid": "pipe-123",
+                "name": "UpdatedPipe"
+              }
+            ]
+          },
+          "deleted": {}
+        }
+        """;
+    mockMvc.perform(post("/batch")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(updateNamePayload))
+        .andExpect(status().isOk());
+
+    Pipe updatedPipe = pipeRepository.findByUid("pipe-123").orElseThrow();
+    assertEquals("UpdatedPipe", updatedPipe.getName());
+    assertEquals("red", updatedPipe.getColor());
+    assertEquals("node-A", updatedPipe.getSourceNode().getUid());
+    assertEquals("node-B", updatedPipe.getTargetNode().getUid());
+
+    // ----------- EDIT color ------------
+    String updateColorPayload = """
+        {
+          "created": {},
+          "updated": {
+            "pipes": [
+              {
+                "uid": "pipe-123",
+                "color": "blue"
+              }
+            ]
+          },
+          "deleted": {}
+        }
+        """;
+    mockMvc.perform(post("/batch")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(updateColorPayload))
+        .andExpect(status().isOk());
+
+    updatedPipe = pipeRepository.findByUid("pipe-123").orElseThrow();
+    assertEquals("blue", updatedPipe.getColor());
+
+    // ----------- EDIT targetNode ------------
+    String updateTargetNodePayload = """
+        {
+          "created": {},
+          "updated": {
+            "pipes": [
+              {
+                "uid": "pipe-123",
+                "targetNode": {
+                  "uid": "node-C"
+                }
+              }
+            ]
+          },
+          "deleted": {}
+        }
+        """;
+    mockMvc.perform(post("/batch")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(updateTargetNodePayload))
+        .andExpect(status().isOk());
+
+    updatedPipe = pipeRepository.findByUid("pipe-123").orElseThrow();
+    assertEquals("node-C", updatedPipe.getTargetNode().getUid());
+
+    // ----------- EDIT sourceNode ------------
+    String updateSourceNodePayload = """
+        {
+          "created": {},
+          "updated": {
+            "pipes": [
+              {
+                "uid": "pipe-123",
+                "sourceNode": {
+                  "uid": "node-C"
+                }
+              }
+            ]
+          },
+          "deleted": {}
+        }
+        """;
+    mockMvc.perform(post("/batch")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(updateSourceNodePayload))
+        .andExpect(status().isOk());
+
+    updatedPipe = pipeRepository.findByUid("pipe-123").orElseThrow();
+    assertEquals("node-C", updatedPipe.getSourceNode().getUid());
+
+    // All other fields should remain unchanged through each edit
+    assertEquals("UpdatedPipe", updatedPipe.getName());
+    assertEquals("blue", updatedPipe.getColor());
   }
 
 }

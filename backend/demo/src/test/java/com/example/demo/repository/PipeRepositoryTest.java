@@ -43,7 +43,7 @@ public class PipeRepositoryTest {
         pipe.setUid(null);
         pipe.setSourceNode(source);
         pipe.setName("NullUidPipe");
-        pipe.setColor('G');
+        pipe.setColor("G");
         pipe.setMute(false);
 
         assertThrows(DataIntegrityViolationException.class, () -> {
@@ -61,7 +61,7 @@ public class PipeRepositoryTest {
         pipe.setSourceNode(source);
         pipe.setTargetNode(null); // allowed
         pipe.setName("NoTarget");
-        pipe.setColor('B');
+        pipe.setColor("B");
         pipe.setMute(false);
 
         pipe = pipeRepository.saveAndFlush(pipe);
@@ -82,7 +82,7 @@ public class PipeRepositoryTest {
         pipe.setSourceNode(source);
         pipe.setTargetNode(target);
         pipe.setName("Targeted");
-        pipe.setColor('T');
+        pipe.setColor("T");
         pipe.setMute(true);
 
         Pipe saved = pipeRepository.saveAndFlush(pipe);
@@ -96,7 +96,7 @@ public class PipeRepositoryTest {
         pipe.setUid(IdUtil.generateUniqueId());
         pipe.setSourceNode(null); // required
         pipe.setName("NoSource");
-        pipe.setColor('R');
+        pipe.setColor("R");
         pipe.setMute(false);
 
         assertThrows(DataIntegrityViolationException.class, () -> {
@@ -113,7 +113,7 @@ public class PipeRepositoryTest {
         pipe.setUid(IdUtil.generateUniqueId());
         pipe.setSourceNode(source);
         pipe.setName("SourceValid");
-        pipe.setColor('S');
+        pipe.setColor("S");
         pipe.setMute(false);
 
         Pipe saved = pipeRepository.saveAndFlush(pipe);
@@ -128,7 +128,7 @@ public class PipeRepositoryTest {
         pipe.setUid("to-delete");
         pipe.setSourceNode(source);
         pipe.setName("DeleteMe");
-        pipe.setColor('D');
+        pipe.setColor("D");
         pipe.setMute(false);
         pipe = pipeRepository.saveAndFlush(pipe);
 
@@ -157,7 +157,7 @@ public class PipeRepositoryTest {
             pipe.setUid("pipe-" + i);
             pipe.setSourceNode(source);
             pipe.setName("Pipe" + i);
-            pipe.setColor((char) ('A' + i));
+            pipe.setColor("A" + i);
             pipe.setMute(i % 2 == 0);
             pipeRepository.save(pipe);
         }
@@ -175,7 +175,7 @@ public class PipeRepositoryTest {
         pipe.setUid("unique-uid-001");
         pipe.setSourceNode(source);
         pipe.setName("MyPipe");
-        pipe.setColor('X');
+        pipe.setColor("X");
         pipe.setMute(true);
         pipeRepository.saveAndFlush(pipe);
 
@@ -200,14 +200,14 @@ public class PipeRepositoryTest {
         pipe1.setUid("pipe-src-1");
         pipe1.setSourceNode(source1);
         pipe1.setName("PipeFromS1");
-        pipe1.setColor('A');
+        pipe1.setColor("A");
         pipe1.setMute(false);
 
         Pipe pipe2 = new Pipe();
         pipe2.setUid("pipe-src-2");
         pipe2.setSourceNode(source1);
         pipe2.setName("PipeFromS1-B");
-        pipe2.setColor('B');
+        pipe2.setColor("B");
         pipe2.setMute(true);
 
         pipeRepository.saveAll(List.of(pipe1, pipe2));
@@ -231,7 +231,7 @@ public class PipeRepositoryTest {
         pipe.setSourceNode(source);
         pipe.setName("LongUID");
         pipe.setMute(false);
-        pipe.setColor('X');
+        pipe.setColor("X");
 
         assertThrows(DataIntegrityViolationException.class, () -> {
             pipeRepository.saveAndFlush(pipe);
@@ -248,14 +248,14 @@ public class PipeRepositoryTest {
         p1.setName("P1");
         p1.setSourceNode(source);
         p1.setMute(false);
-        p1.setColor('A');
+        p1.setColor("A");
 
         Pipe p2 = new Pipe();
         p2.setUid("dup-uid"); // same UID
         p2.setName("P2");
         p2.setSourceNode(source);
         p2.setMute(true);
-        p2.setColor('B');
+        p2.setColor("B");
 
         pipeRepository.saveAndFlush(p1);
 

@@ -189,6 +189,32 @@ public class BatchService {
                 }
             }
         }
+        else if (changes.updated != null && changes.updated.pipes != null) {
+            JsonNode updatedNode = dto.get("updated");
+            if (updatedNode != null && updatedNode.has("pipes")) {
+                JsonNode pipesArray = updatedNode.get("pipes");
+                if (pipesArray.isArray()) {
+                    for (int i = 0; i < changes.updated.pipes.size(); i++) {
+                        Pipe pipe = changes.updated.pipes.get(i);
+                        JsonNode rawNode = pipesArray.get(i); // Match by index
+                        try {
+                            boolean success = pipeService.editPipe(pipe, rawNode);
+                            if (!success) {
+                                response.addError("pipes", pipe.getUid());
+                                response.success = false;
+                                response.message = "Some entities failed to update";
+                                System.out.println("Warning: Pipe with UID " + pipe.getUid() + " not found or failed to update.");
+                            }
+                        } catch (Exception e) {
+                            response.addError("pipes", pipe.getUid());
+                            response.success = false;
+                            response.message = "Failed to process JSON for Pipe: " + e.getMessage();
+                            System.out.println("Error processing Pipe with UID " + pipe.getUid() + ": " + e.getMessage());
+                        }
+                    }
+                }
+            }
+        }
 
         // 3. CREATE new
         if (changes.created != null) {

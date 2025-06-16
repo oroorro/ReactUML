@@ -29,13 +29,13 @@ public class Pipe {
 
     private String name;
 
-    private Character color; 
+    private String color; 
 
     private Boolean mute;
 
     public Pipe() {}  
 
-    public Pipe(Node sourceNode, String name, Character color, Boolean mute) {
+    public Pipe(Node sourceNode, String name, String color, Boolean mute) {
         this.sourceNode = sourceNode;
         this.name = name;
         this.color = color;
@@ -100,11 +100,11 @@ public class Pipe {
         this.name = name;
     }
 
-    public Character getColor() {
+    public String getColor() {
         return color;
     }
 
-    public void setColor(Character color) {
+    public void setColor(String color) {
         this.color = color;
     }
 
