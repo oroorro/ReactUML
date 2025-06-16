@@ -2743,6 +2743,65 @@ class BatchControllerIntegrationTest {
   }
 
   @Test
+  void testEditAttribute_withComplexNestedNode_shouldUpdateSuccessfully() throws Exception {
+    // 1. Setup user and nodes
+    User user = userRepository.save(new User("nestedUser", "pass"));
+
+    Node originalNode = new Node();
+    originalNode.setUid("node-complex");
+    originalNode.setName("OriginalNode");
+    originalNode.setUser(user);
+    nodeRepository.save(originalNode);
+
+    // 2. Create Attribute linked to node
+    Attribute attr = new Attribute();
+    attr.setUid("attr-complex");
+    attr.setName("ComplexAttr");
+    attr.setMute(false);
+    attr.setTotalNumber(10);
+    attr.setNode(originalNode);
+    attributeRepository.save(attr);
+
+    // 3. Setup security context
+    CustomUserDetails userDetails = new CustomUserDetails(user.getId(), user.getUsername(), user.getPassword(),
+        List.of());
+    SecurityContext context = SecurityContextHolder.createEmptyContext();
+    context.setAuthentication(new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities()));
+    SecurityContextHolder.setContext(context);
+
+    // 4. Prepare update JSON (only change name + mute)
+    String payload = """
+        {
+          "created": {},
+          "updated": {
+            "attributes": [
+              {
+                "uid": "attr-complex",
+                "name": "UpdatedAttrName",
+                "mute": true
+              }
+            ]
+          },
+          "deleted": {}
+        }
+        """;
+
+    // 5. Perform update
+    mockMvc.perform(post("/batch")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(payload))
+        .andExpect(status().isOk());
+
+    // 6. Verify update and relationship still intact
+    Attribute updated = attributeRepository.findByUid("attr-complex").orElseThrow();
+    assertEquals("UpdatedAttrName", updated.getName());
+    assertEquals(true, updated.getMute());
+    assertEquals(10, updated.getTotalNumber()); // unchanged
+    assertNotNull(updated.getNode());
+    assertEquals("node-complex", updated.getNode().getUid()); // relationship preserved
+  }
+
+  @Test
   void testEditAttribute_idempotentNoChangeSubmitted() throws Exception {
     // 1. Setup user and node
     User user = userRepository.save(new User("idempotentUser", "pass"));
@@ -2859,6 +2918,122 @@ class BatchControllerIntegrationTest {
     assertNull(updated.getTotalNumber(), "Total number should be null");
     assertNull(updated.getMute(), "Mute should be null");
     assertEquals("node-del", updated.getNode().getUid(), "Node should remain unchanged");
+  }
+
+  @Test
+  void testEditAttribute_setsNonPersistedNode_shouldFailAndRemainUnchanged() throws Exception {
+    // 1. Setup user and existing node
+    User user = userRepository.save(new User("invalidNodeUser", "pass"));
+
+    Node existingNode = new Node();
+    existingNode.setUid("existing-node");
+    existingNode.setName("ValidNode");
+    existingNode.setUser(user);
+    nodeRepository.save(existingNode);
+
+    // 2. Create valid Attribute
+    Attribute attr = new Attribute();
+    attr.setUid("attr-invalid-node");
+    attr.setName("OriginalAttr");
+    attr.setMute(false);
+    attr.setTotalNumber(50);
+    attr.setNode(existingNode);
+    attributeRepository.save(attr);
+
+    // 3. Set up security
+    CustomUserDetails userDetails = new CustomUserDetails(user.getId(), user.getUsername(), user.getPassword(),
+        List.of());
+    SecurityContext context = SecurityContextHolder.createEmptyContext();
+    context.setAuthentication(new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities()));
+    SecurityContextHolder.setContext(context);
+
+    // 4. JSON payload with a Node that is NOT persisted
+    String payload = """
+        {
+          "created": {},
+          "updated": {
+            "attributes": [
+              {
+                "uid": "attr-invalid-node",
+                "node": {
+                  "uid": "non-existent-node"
+                }
+              }
+            ]
+          },
+          "deleted": {}
+        }
+        """;
+
+    // 5. Perform update and expect 500 error
+    mockMvc.perform(post("/batch")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(payload))
+        .andExpect(status().isInternalServerError());
+
+    // 6. Verify attribute remains unchanged
+    Attribute fetched = attributeRepository.findByUid("attr-invalid-node").orElseThrow();
+    assertEquals("OriginalAttr", fetched.getName());
+    assertEquals(50, fetched.getTotalNumber());
+    assertEquals(false, fetched.getMute());
+    assertEquals("existing-node", fetched.getNode().getUid());
+  }
+
+  @Test
+  void testEditAttribute_withNullUid_shouldFailAndRemainUnchanged() throws Exception {
+    // 1. Create user and node
+    User user = userRepository.save(new User("nullUidUser", "pass"));
+
+    Node node = new Node();
+    node.setUid("node-null-uid");
+    node.setName("NodeForNullUid");
+    node.setUser(user);
+    nodeRepository.save(node);
+
+    // 2. Create valid Attribute
+    Attribute attr = new Attribute();
+    attr.setUid("attr-null-uid");
+    attr.setName("OriginalAttr");
+    attr.setMute(false);
+    attr.setTotalNumber(77);
+    attr.setNode(node);
+    attributeRepository.save(attr);
+
+    // 3. Set up security
+    CustomUserDetails userDetails = new CustomUserDetails(user.getId(), user.getUsername(), user.getPassword(),
+        List.of());
+    SecurityContext context = SecurityContextHolder.createEmptyContext();
+    context.setAuthentication(new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities()));
+    SecurityContextHolder.setContext(context);
+
+    // 4. JSON payload with "uid": null
+    String payload = """
+        {
+          "created": {},
+          "updated": {
+            "attributes": [
+              {
+                "uid": null,
+                "name": "AttemptedChange"
+              }
+            ]
+          },
+          "deleted": {}
+        }
+        """;
+
+    // 5. Perform update and expect failure (500)
+    mockMvc.perform(post("/batch")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(payload))
+        .andExpect(status().isInternalServerError());
+
+    // 6. Verify nothing has changed
+    Attribute fetched = attributeRepository.findByUid("attr-null-uid").orElseThrow();
+    assertEquals("OriginalAttr", fetched.getName());
+    assertEquals(77, fetched.getTotalNumber());
+    assertEquals(false, fetched.getMute());
+    assertEquals("node-null-uid", fetched.getNode().getUid());
   }
 
 }
