@@ -100,18 +100,38 @@ public class PipeService {
             }
         }
 
-        // Handle target node relationship
+        // Handle targetNode
+        // targetNode is allowed to be null and allowed to be updated to other Node 
+        // if (rawNode.has("targetNode")) {
+        //     JsonNode targetNode = rawNode.get("targetNode");
+        //     if (targetNode.has("uid")) {
+        //         String targetUid = targetNode.get("uid").asText();
+        //         //if exsiting targetnode is not null, check if the uid is the same as the targetUid
+        //         //if the targetnode is null, set the targetnode to the new target node
+        //         if (!Objects.equals(existing.getTargetNode() != null ? existing.getTargetNode().getUid() : null, targetUid)) {
+        //             Node newTarget = nodeRepository.findByUid(targetUid)
+        //                 .orElseThrow(() -> new EntityNotFoundException("Target node not found with UID: " + targetUid));
+        //             existing.setTargetNode(newTarget);
+        //             modified = true;
+        //         }
+        //     }
+        // }
+
+
+
         if (rawNode.has("targetNode")) {
-            JsonNode targetNode = rawNode.get("targetNode");
-            if (targetNode.has("uid")) {
-                String targetUid = targetNode.get("uid").asText();
-                if (!Objects.equals(existing.getTargetNode() != null ? existing.getTargetNode().getUid() : null, targetUid)) {
-                    Node newTarget = nodeRepository.findByUid(targetUid)
-                        .orElseThrow(() -> new EntityNotFoundException("Target node not found with UID: " + targetUid));
-                    existing.setTargetNode(newTarget);
-                    modified = true;
+            JsonNode targetNode = rawNode.get("targetNode"); 
+            if (targetNode.isNull() || targetNode.get("uid") == null || targetNode.get("uid").asText().isBlank()) {
+                existing.setTargetNode(null);
+            } else {
+                String uid = targetNode.get("uid").asText();
+                if (existing.getTargetNode() == null || !uid.equals(existing.getTargetNode().getUid())) {
+                    Node foundTargetNode = nodeRepository.findByUid(uid)
+                        .orElseThrow(() -> new EntityNotFoundException("targetNode not found with UID: " + uid));
+                    existing.setTargetNode(foundTargetNode);
                 }
             }
+            modified = true;
         }
 
         if (modified) {

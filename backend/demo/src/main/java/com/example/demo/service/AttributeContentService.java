@@ -127,8 +127,13 @@ public class AttributeContentService {
         AttributeContent existing = existingOpt.get();
         boolean modified = false;
 
-        if (updatedContent.getName() != null && !Objects.equals(existing.getName(), updatedContent.getName())) {
-            existing.setName(updatedContent.getName());
+        if (rawJsonNode.has("name")) {
+            String val = updatedContent.getName();
+            if (val == null || val.isBlank()) {
+                return false;
+            } else {
+                existing.setName(val);
+            }
             modified = true;
         }
 
@@ -186,11 +191,10 @@ public class AttributeContentService {
         // }
 
         if (rawJsonNode.has("attribute")) {
-            System.err.println("attribute is present");
             JsonNode attrNode = rawJsonNode.get("attribute");
         
             if (attrNode.isNull() || attrNode.get("uid") == null || attrNode.get("uid").asText().isBlank()) {
-                System.err.println("setting attribute to null");
+                
                 existing.setAttribute(null);
             } else {
                 String uid = attrNode.get("uid").asText();

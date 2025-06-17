@@ -29,11 +29,12 @@ public class Pipe {
 
     private String name;
 
-    private String color; 
+    private String color;
 
     private Boolean mute;
 
-    public Pipe() {}  
+    public Pipe() {
+    }
 
     public Pipe(Node sourceNode, String name, String color, Boolean mute) {
         this.sourceNode = sourceNode;
@@ -42,11 +43,25 @@ public class Pipe {
         this.mute = mute;
     }
 
+    @PrePersist
+    @PreUpdate
+    public void validateNodesNotSame() {
+        if (sourceNode != null && targetNode != null) {
+            String sourceUid = sourceNode.getUid();
+            String targetUid = targetNode.getUid();
+
+            if (sourceUid != null && sourceUid.equals(targetUid)) {
+                throw new IllegalArgumentException("SourceNode and TargetNode must not be the same (UID matched)");
+            }
+        }
+    }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
         Node node = (Node) o;
         return Objects.equals(uid, node.getUid());
     }
@@ -58,7 +73,7 @@ public class Pipe {
     public String getUid() {
         return uid;
     }
-    
+
     public void setUid(String uid) {
         this.uid = uid;
     }
@@ -86,11 +101,10 @@ public class Pipe {
     public void setAttributeContents(Set<AttributeContent> attributeContents) {
         this.attributeContents = attributeContents;
     }
-    
+
     public Set<AttributeContent> getAttributeContents() {
         return attributeContents;
     }
-    
 
     public String getName() {
         return name;
@@ -116,4 +130,3 @@ public class Pipe {
         this.mute = mute;
     }
 }
-

@@ -258,49 +258,75 @@ public class PipeServiceTest {
     }
 
     //2d: edit succeeds even when targetNode is null, then updated later
-    // @Test
-    // void testEditPipe_targetNodeNullThenChanged() {
-    //     existing.setTargetNode(nodeA); // Initially set
+    @Test
+    void testEditPipe_targetNodeNullThenChanged() {
+        // Setup initial pipe with target node
+        Pipe existing = new Pipe();
+        existing.setId(1);
+        existing.setUid("pipe-001");
+        existing.setSourceNode(nodeA);
+        existing.setTargetNode(nodeA);
+        existing.setName("OriginalName");
 
-    //     Pipe updated = new Pipe();
-    //     updated.setId(1);
-    //     updated.setUid("pipe-001");
-    //     updated.setSourceNode(nodeA);
-    //     updated.setName("NewName");
-    //     updated.setTargetNode(null); // allowed
+        // Create update data with null target node
+        Pipe updated = new Pipe();
+        updated.setId(1);
+        updated.setUid("pipe-001");
+        updated.setSourceNode(nodeA);
+        updated.setName("NewName");
+        updated.setTargetNode(null);
 
-    //     when(pipeRepository.findById(1)).thenReturn(Optional.of(existing));
-    //     // when(pipeRepository.findById(1)).thenReturn(Optional.of(updated));
-    //     when(pipeRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+        // Create JsonNode for editPipe
+        ObjectMapper mapper = new ObjectMapper();
+        ObjectNode updateData = mapper.createObjectNode();
+        updateData.put("name", "NewName");
+        updateData.putNull("targetNode");
+        //updateData.set("targetNode", targetNodeData);
 
-    //     Pipe result1 = pipeService.editPipe(updated);
-    //     assertNull(result1.getTargetNode());
-    //     assertEquals("NewName", result1.getName());
+        // Setup mocks
+        when(pipeRepository.findByUid("pipe-001")).thenReturn(Optional.of(existing));
+        when(pipeRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
-    //     // Now set to a different node
-    //     updated.setTargetNode(nodeC);
-    //     Pipe result2 = pipeService.editPipe(updated);
-    //     assertNotNull(result2.getTargetNode());
-    //     assertEquals("node-C", result2.getTargetNode().getUid());
-    // }
+        // Call service and verify
+        boolean modified = pipeService.editPipe(updated, updateData);
+        assertTrue(modified);
+        assertNull(existing.getTargetNode());
+        assertEquals("NewName", existing.getName());
+
+        //Now set to a different node
+        updated.setTargetNode(nodeC);
+        ObjectNode targetNodeData = mapper.createObjectNode();
+        targetNodeData.put("uid", "node-C");
+        updateData.set("targetNode", targetNodeData);
+        when(nodeRepository.findByUid("node-C")).thenReturn(Optional.of(nodeC));
+        boolean modified2 = pipeService.editPipe(updated, updateData);
+        assertTrue(modified2);
+        assertNotNull(existing.getTargetNode());
+        assertEquals("node-C", existing.getTargetNode().getUid());
+    }
 
     
 
     // // 2e: edit name
-    // @Test
-    // void testEditPipe_nameUpdated() {
-    //     Pipe updated = new Pipe();
-    //     updated.setId(1);
-    //     updated.setUid("pipe-001");
-    //     updated.setSourceNode(nodeA);
-    //     updated.setName("UpdatedName");
+    @Test
+    void testEditPipe_nameUpdated() {
+        Pipe updated = new Pipe();
+        updated.setId(1);
+        updated.setUid("pipe-001");
+        updated.setSourceNode(nodeA);
+        updated.setName("UpdatedName");
 
-    //     when(pipeRepository.findById(1)).thenReturn(Optional.of(existing));
-    //     when(pipeRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+        when(pipeRepository.findByUid("pipe-001")).thenReturn(Optional.of(existing));
+        when(pipeRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
-    //     Pipe result = pipeService.editPipe(updated);
-    //     assertEquals("UpdatedName", result.getName());
-    // }
+        ObjectMapper mapper = new ObjectMapper();
+        ObjectNode updateData = mapper.createObjectNode();
+        updateData.put("name", "UpdatedName");
+
+        boolean result = pipeService.editPipe(updated, updateData);
+        assertTrue(result);
+        assertEquals("UpdatedName", updated.getName());
+    }
 
     // // 2f: edit color
     // @Test

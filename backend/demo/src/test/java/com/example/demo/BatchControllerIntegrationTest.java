@@ -2494,6 +2494,74 @@ class BatchControllerIntegrationTest {
     assertEquals("node-uid-null", after.getBelongingNode().getUid());
   }
 
+
+  @Test
+void testApplyBatchChanges_failsWhenNameIsNull() throws Exception {
+    // 1. Setup user and node
+    User user = userRepository.save(new User("nullNameUser", "pass"));
+
+    Node node = new Node();
+    node.setUid("node-test");
+    node.setName("NodeTest");
+    node.setUser(user);
+    nodeRepository.save(node);
+
+    //create a pipe
+    Pipe pipe = new Pipe();
+    pipe.setUid("pipe-test");
+    pipe.setName("PipeTest");
+    pipe.setSourceNode(node);
+    pipe.setTargetNode(node);
+    pipeRepository.save(pipe);
+
+    // 2. Setup attributeContent with a valid name
+    AttributeContent ac = new AttributeContent();
+    ac.setUid("ac-null-name");
+    ac.setName("ValidName");
+    ac.setHoldingValue("keep");
+    ac.setBelongingNode(node);
+    ac.setPipe(pipe);
+    attributeContentRepository.save(ac);
+
+    // 3. Setup security
+    CustomUserDetails userDetails = new CustomUserDetails(user.getId(), user.getUsername(), user.getPassword(), List.of());
+    SecurityContext context = SecurityContextHolder.createEmptyContext();
+    context.setAuthentication(new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities()));
+    SecurityContextHolder.setContext(context);
+
+    // 4. JSON payload with null name (violates @Column(nullable = false))
+    String payload = """
+        {
+          "created": {},
+          "updated": {
+            "attributeContents": [
+              {
+                "uid": "ac-null-name",
+                "name": null
+              }
+            ]
+          },
+          "deleted": {}
+        }
+        """;
+
+    // 5. Perform the request and expect 500 due to constraint violation
+    mockMvc.perform(post("/batch")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(payload))
+        .andExpect(status().isOk()) 
+        .andExpect(jsonPath("$.success").value(false))
+        .andExpect(jsonPath("$.message").value("Some entities failed to update"));
+
+    // 7. Ensure original data is untouched
+    AttributeContent fetched = attributeContentRepository.findByUid("ac-null-name").orElseThrow();
+    assertEquals("ValidName", fetched.getName()); // still the same
+    assertEquals("keep", fetched.getHoldingValue());
+}
+ 
+//------ Attribute Tests------
+
+
   @Test
   void testSequentialAttributeFieldEdits() throws Exception {
     // 1. Setup user and node
@@ -3123,6 +3191,9 @@ class BatchControllerIntegrationTest {
 
     updatedPipe = pipeRepository.findByUid("pipe-123").orElseThrow();
     assertEquals("blue", updatedPipe.getColor());
+    assertEquals("UpdatedPipe", updatedPipe.getName());
+    assertEquals("node-A", updatedPipe.getSourceNode().getUid());
+    assertEquals("node-B", updatedPipe.getTargetNode().getUid());
 
     // ----------- EDIT targetNode ------------
     String updateTargetNodePayload = """
@@ -3148,6 +3219,9 @@ class BatchControllerIntegrationTest {
 
     updatedPipe = pipeRepository.findByUid("pipe-123").orElseThrow();
     assertEquals("node-C", updatedPipe.getTargetNode().getUid());
+    assertEquals("UpdatedPipe", updatedPipe.getName());
+    assertEquals("blue", updatedPipe.getColor());
+    assertEquals("node-A", updatedPipe.getSourceNode().getUid());
 
     // ----------- EDIT sourceNode ------------
     String updateSourceNodePayload = """
@@ -3158,7 +3232,7 @@ class BatchControllerIntegrationTest {
               {
                 "uid": "pipe-123",
                 "sourceNode": {
-                  "uid": "node-C"
+                  "uid": "node-B"
                 }
               }
             ]
@@ -3172,11 +3246,16 @@ class BatchControllerIntegrationTest {
         .andExpect(status().isOk());
 
     updatedPipe = pipeRepository.findByUid("pipe-123").orElseThrow();
-    assertEquals("node-C", updatedPipe.getSourceNode().getUid());
+    assertEquals("node-B", updatedPipe.getSourceNode().getUid());
+    assertEquals("node-C", updatedPipe.getTargetNode().getUid());
 
     // All other fields should remain unchanged through each edit
     assertEquals("UpdatedPipe", updatedPipe.getName());
     assertEquals("blue", updatedPipe.getColor());
   }
+
+  
+
+  
 
 }
