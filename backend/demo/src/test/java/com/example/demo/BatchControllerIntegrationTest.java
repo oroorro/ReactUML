@@ -2494,9 +2494,8 @@ class BatchControllerIntegrationTest {
     assertEquals("node-uid-null", after.getBelongingNode().getUid());
   }
 
-
   @Test
-void testApplyBatchChanges_failsWhenNameIsNull() throws Exception {
+  void testApplyBatchChanges_failsWhenNameIsNull() throws Exception {
     // 1. Setup user and node
     User user = userRepository.save(new User("nullNameUser", "pass"));
 
@@ -2506,7 +2505,7 @@ void testApplyBatchChanges_failsWhenNameIsNull() throws Exception {
     node.setUser(user);
     nodeRepository.save(node);
 
-    //create a pipe
+    // create a pipe
     Pipe pipe = new Pipe();
     pipe.setUid("pipe-test");
     pipe.setName("PipeTest");
@@ -2524,7 +2523,8 @@ void testApplyBatchChanges_failsWhenNameIsNull() throws Exception {
     attributeContentRepository.save(ac);
 
     // 3. Setup security
-    CustomUserDetails userDetails = new CustomUserDetails(user.getId(), user.getUsername(), user.getPassword(), List.of());
+    CustomUserDetails userDetails = new CustomUserDetails(user.getId(), user.getUsername(), user.getPassword(),
+        List.of());
     SecurityContext context = SecurityContextHolder.createEmptyContext();
     context.setAuthentication(new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities()));
     SecurityContextHolder.setContext(context);
@@ -2549,7 +2549,7 @@ void testApplyBatchChanges_failsWhenNameIsNull() throws Exception {
     mockMvc.perform(post("/batch")
         .contentType(MediaType.APPLICATION_JSON)
         .content(payload))
-        .andExpect(status().isOk()) 
+        .andExpect(status().isOk())
         .andExpect(jsonPath("$.success").value(false))
         .andExpect(jsonPath("$.message").value("Some entities failed to update"));
 
@@ -2557,10 +2557,9 @@ void testApplyBatchChanges_failsWhenNameIsNull() throws Exception {
     AttributeContent fetched = attributeContentRepository.findByUid("ac-null-name").orElseThrow();
     assertEquals("ValidName", fetched.getName()); // still the same
     assertEquals("keep", fetched.getHoldingValue());
-}
- 
-//------ Attribute Tests------
+  }
 
+  // ------ Attribute Tests------
 
   @Test
   void testSequentialAttributeFieldEdits() throws Exception {
@@ -3254,8 +3253,527 @@ void testApplyBatchChanges_failsWhenNameIsNull() throws Exception {
     assertEquals("blue", updatedPipe.getColor());
   }
 
-  
+  @Test
+  void testEditPipe_withMinimalRequiredFields_onlyNameUpdated() throws Exception {
+    // 1. Create and save a user and nodes
+    User user = userRepository.save(new User("pipeMinimalFieldUser", "pass"));
 
-  
+    Node sourceNode = new Node();
+    sourceNode.setUid("source-node-1");
+    sourceNode.setName("SourceNode");
+    sourceNode.setUser(user);
+    nodeRepository.save(sourceNode);
+
+    Node targetNode = new Node();
+    targetNode.setUid("target-node-1");
+    targetNode.setName("TargetNode");
+    targetNode.setUser(user);
+    nodeRepository.save(targetNode);
+
+    // 2. Create and save a Pipe
+    Pipe pipe = new Pipe();
+    pipe.setUid("pipe-minimal");
+    pipe.setName("OriginalName");
+    pipe.setSourceNode(sourceNode);
+    pipe.setTargetNode(targetNode);
+    pipe.setMute(false);
+    pipeRepository.save(pipe);
+
+    // 3. Setup security
+    CustomUserDetails userDetails = new CustomUserDetails(user.getId(), user.getUsername(), user.getPassword(),
+        List.of());
+    SecurityContext context = SecurityContextHolder.createEmptyContext();
+    context.setAuthentication(new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities()));
+    SecurityContextHolder.setContext(context);
+
+    // 4. Prepare minimal update payload (only name)
+    String payload = """
+        {
+          "created": {},
+          "updated": {
+            "pipes": [
+              {
+                "uid": "pipe-minimal",
+                "name": "UpdatedPipeName"
+              }
+            ]
+          },
+          "deleted": {}
+        }
+        """;
+
+    // 5. Call batch update
+    mockMvc.perform(post("/batch")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(payload))
+        .andExpect(status().isOk());
+
+    // 6. Verify name was updated, and other fields are untouched
+    Pipe updated = pipeRepository.findByUid("pipe-minimal").orElseThrow();
+    assertEquals("UpdatedPipeName", updated.getName());
+    assertEquals("source-node-1", updated.getSourceNode().getUid());
+    assertEquals("target-node-1", updated.getTargetNode().getUid());
+    assertEquals(false, updated.getMute());
+  }
+
+  @Test
+  void testEditPipe_withAllFieldsPresent_returnsUpdatedPipe() throws Exception {
+    // 1. Create and save initial Nodes
+    User user = userRepository.save(new User("pipeEditor", "pass"));
+
+    Node source = new Node();
+    source.setUid("source-node");
+    source.setName("Source");
+    source.setUser(user);
+    nodeRepository.save(source);
+
+    Node target = new Node();
+    target.setUid("target-node");
+    target.setName("Target");
+    target.setUser(user);
+    nodeRepository.save(target);
+
+    Node newSource = new Node();
+    newSource.setUid("new-source-node");
+    newSource.setName("NewSource");
+    newSource.setUser(user);
+    nodeRepository.save(newSource);
+
+    Node newTarget = new Node();
+    newTarget.setUid("new-target-node");
+    newTarget.setName("NewTarget");
+    newTarget.setUser(user);
+    nodeRepository.save(newTarget);
+
+    // 2. Create and save initial Pipe
+    Pipe pipe = new Pipe();
+    pipe.setUid("pipe-full-edit");
+    pipe.setName("OldName");
+    pipe.setColor("Blue");
+    pipe.setMute(false);
+    pipe.setSourceNode(source);
+    pipe.setTargetNode(target);
+    pipeRepository.save(pipe);
+
+    // test saved pipe
+    Pipe savedPipe = pipeRepository.findByUid("pipe-full-edit").orElseThrow();
+    assertEquals("OldName", savedPipe.getName());
+    assertEquals("Blue", savedPipe.getColor());
+    assertEquals(false, savedPipe.getMute());
+    assertEquals("source-node", savedPipe.getSourceNode().getUid());
+    assertEquals("target-node", savedPipe.getTargetNode().getUid());
+
+    // 3. Setup security context
+    CustomUserDetails userDetails = new CustomUserDetails(user.getId(), user.getUsername(), user.getPassword(),
+        List.of());
+    SecurityContext context = SecurityContextHolder.createEmptyContext();
+    context.setAuthentication(new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities()));
+    SecurityContextHolder.setContext(context);
+
+    // 4. JSON payload with all updated fields
+    String payload = """
+        {
+          "created": {},
+          "updated": {
+            "pipes": [
+              {
+                "uid": "pipe-full-edit",
+                "name": "UpdatedName",
+                "color": "Green",
+                "mute": true,
+                "sourceNode": { "uid": "new-source-node" },
+                "targetNode": { "uid": "new-target-node" }
+              }
+            ]
+          },
+          "deleted": {}
+        }
+        """;
+
+    // 5. Perform the update
+    mockMvc.perform(post("/batch")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(payload))
+        .andExpect(status().isOk());
+
+    // 6. Verify updates
+    Pipe updated = pipeRepository.findByUid("pipe-full-edit").orElseThrow();
+    assertEquals("UpdatedName", updated.getName());
+    assertEquals("Green", updated.getColor());
+    assertTrue(updated.getMute());
+    assertEquals("new-source-node", updated.getSourceNode().getUid());
+    assertEquals("new-target-node", updated.getTargetNode().getUid());
+  }
+
+  @Test
+  void testEditPipe_noChangeSubmitted_idempotent() throws Exception {
+    // 1. Create and persist user and nodes
+    User user = userRepository.save(new User("idempotentUser", "pass"));
+
+    Node source = new Node();
+    source.setUid("source-node");
+    source.setName("SourceNode");
+    source.setUser(user);
+    nodeRepository.save(source);
+
+    Node target = new Node();
+    target.setUid("target-node");
+    target.setName("TargetNode");
+    target.setUser(user);
+    nodeRepository.save(target);
+
+    // 2. Create and persist a Pipe with initial values
+    Pipe pipe = new Pipe();
+    pipe.setUid("pipe-idem");
+    pipe.setName("SameName");
+    pipe.setColor("Orange");
+    pipe.setMute(false);
+    pipe.setSourceNode(source);
+    pipe.setTargetNode(target);
+    pipeRepository.save(pipe);
+
+    // test saved pipe
+    Pipe savedPipe = pipeRepository.findByUid("pipe-idem").orElseThrow();
+    assertEquals("SameName", savedPipe.getName());
+    assertEquals("Orange", savedPipe.getColor());
+    assertEquals(false, savedPipe.getMute());
+    assertEquals("source-node", savedPipe.getSourceNode().getUid());
+    assertEquals("target-node", savedPipe.getTargetNode().getUid());
+
+    // 3. Setup security
+    CustomUserDetails userDetails = new CustomUserDetails(user.getId(), user.getUsername(), user.getPassword(),
+        List.of());
+    SecurityContext context = SecurityContextHolder.createEmptyContext();
+    context.setAuthentication(new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities()));
+    SecurityContextHolder.setContext(context);
+
+    // 4. JSON payload matches current values
+    String payload = """
+        {
+          "created": {},
+          "updated": {
+            "pipes": [
+              {
+                "uid": "pipe-idem",
+                "name": "SameName",
+                "color": "Orange",
+                "mute": false,
+                "sourceNode": { "uid": "source-node" },
+                "targetNode": { "uid": "target-node" }
+              }
+            ]
+          },
+          "deleted": {}
+        }
+        """;
+
+    // 5. Perform POST /batch
+    mockMvc.perform(post("/batch")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(payload))
+        .andExpect(status().isOk());
+
+    // 6. Fetch pipe again and assert unchanged
+    Pipe result = pipeRepository.findByUid("pipe-idem").orElseThrow();
+    assertEquals("SameName", result.getName());
+    assertEquals("Orange", result.getColor());
+    assertFalse(result.getMute());
+    assertEquals("source-node", result.getSourceNode().getUid());
+    assertEquals("target-node", result.getTargetNode().getUid());
+  }
+
+  @Test
+  void testEditPipe_deletesAllowedFieldsWithNullValue() throws Exception {
+    // 1. Create user and nodes
+    User user = userRepository.save(new User("pipeNullTestUser", "pass"));
+
+    Node source = new Node();
+    source.setUid("src-node");
+    source.setName("SourceNode");
+    source.setUser(user);
+    nodeRepository.save(source);
+
+    Node target = new Node();
+    target.setUid("tgt-node");
+    target.setName("TargetNode");
+    target.setUser(user);
+    nodeRepository.save(target);
+
+    // 2. Create and persist a Pipe with initial values
+    Pipe pipe = new Pipe();
+    pipe.setUid("pipe-del");
+    pipe.setName("PipeToDeleteFields");
+    pipe.setColor("Green");
+    pipe.setMute(true);
+    pipe.setSourceNode(source);
+    pipe.setTargetNode(target);
+    pipeRepository.save(pipe);
+
+    // test saved pipe
+    Pipe savedPipe = pipeRepository.findByUid("pipe-del").orElseThrow();
+    assertEquals("PipeToDeleteFields", savedPipe.getName());
+    assertEquals("Green", savedPipe.getColor());
+    assertEquals(true, savedPipe.getMute());
+    assertEquals("src-node", savedPipe.getSourceNode().getUid());
+    assertEquals("tgt-node", savedPipe.getTargetNode().getUid());
+
+    // 3. Setup security
+    CustomUserDetails userDetails = new CustomUserDetails(user.getId(), user.getUsername(), user.getPassword(),
+        List.of());
+    SecurityContext context = SecurityContextHolder.createEmptyContext();
+    context.setAuthentication(new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities()));
+    SecurityContextHolder.setContext(context);
+
+    // 4. JSON payload sets some fields to null
+    String payload = """
+        {
+          "created": {},
+          "updated": {
+            "pipes": [
+              {
+                "uid": "pipe-del",
+                "targetNode": null,
+                "name": null,
+                "color": null,
+                "mute": null
+              }
+            ]
+          },
+          "deleted": {}
+        }
+        """;
+
+    // 5. Perform update request
+    mockMvc.perform(post("/batch")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(payload))
+        .andExpect(status().isOk());
+
+    // 6. Assert changes persisted as null
+    Pipe result = pipeRepository.findByUid("pipe-del").orElseThrow();
+    assertNull(result.getTargetNode());
+    assertNull(result.getName());
+    assertNull(result.getColor());
+    assertNull(result.getMute()); // make sure your model allows mute to be nullable
+    assertEquals("src-node", result.getSourceNode().getUid()); // sourceNode should remain
+  }
+
+  @Test
+  void testEditPipe_withNonPersistedSourceAndTargetNode_shouldFail() throws Exception {
+    // 1. Setup user and valid nodes
+    User user = userRepository.save(new User("nonPersistPipeUser", "pass"));
+
+    Node existingNode = new Node();
+    existingNode.setUid("existing-node");
+    existingNode.setName("NodeValid");
+    existingNode.setUser(user);
+    nodeRepository.save(existingNode);
+
+    // make a node for source node
+    Node sourceNode = new Node();
+    sourceNode.setUid("source-node");
+    sourceNode.setName("SourceNode");
+    sourceNode.setUser(user);
+    nodeRepository.save(sourceNode);
+
+    Pipe pipe = new Pipe();
+    pipe.setUid("pipe-nonpersist");
+    pipe.setName("StablePipe");
+    pipe.setColor("Blue");
+    pipe.setMute(false);
+    pipe.setSourceNode(sourceNode);
+    pipe.setTargetNode(existingNode);
+    pipeRepository.save(pipe);
+
+    // 2. Setup security context
+    CustomUserDetails userDetails = new CustomUserDetails(user.getId(), user.getUsername(), user.getPassword(),
+        List.of());
+    SecurityContext context = SecurityContextHolder.createEmptyContext();
+    context.setAuthentication(new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities()));
+    SecurityContextHolder.setContext(context);
+
+    ObjectMapper mapper = new ObjectMapper();
+
+    // ========== First attempt: Set non-existent sourceNode ==========
+    String payloadWithFakeSource = """
+        {
+          "created": {},
+          "updated": {
+            "pipes": [
+              {
+                "uid": "pipe-nonpersist",
+                "sourceNode": { "uid": "nonexistent-src" }
+              }
+            ]
+          },
+          "deleted": {}
+        }
+        """;
+
+    mockMvc.perform(post("/batch")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(payloadWithFakeSource))
+        .andExpect(status().isInternalServerError());
+
+    // Confirm no change
+    Pipe pipeAfterFirstFail = pipeRepository.findByUid("pipe-nonpersist").orElseThrow();
+    assertEquals("source-node", pipeAfterFirstFail.getSourceNode().getUid());
+
+    // ========== Second attempt: Set non-existent targetNode ==========
+    String payloadWithFakeTarget = """
+        {
+          "created": {},
+          "updated": {
+            "pipes": [
+              {
+                "uid": "pipe-nonpersist",
+                "targetNode": { "uid": "nonexistent-tgt" }
+              }
+            ]
+          },
+          "deleted": {}
+        }
+        """;
+
+    mockMvc.perform(post("/batch")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(payloadWithFakeTarget))
+        .andExpect(status().isInternalServerError());
+
+    // Confirm no change
+    Pipe pipeAfterSecondFail = pipeRepository.findByUid("pipe-nonpersist").orElseThrow();
+    assertEquals("existing-node", pipeAfterSecondFail.getTargetNode().getUid());
+    assertEquals("source-node", pipeAfterSecondFail.getSourceNode().getUid());
+  }
+
+  @Test
+  void testEditPipe_withNullSourceNode_shouldFailGracefully() throws Exception {
+    // 1. Setup user and valid node
+    User user = userRepository.save(new User("nullSrcUser", "pass"));
+
+    Node node = new Node();
+    node.setUid("valid-node");
+    node.setName("ValidNode");
+    node.setUser(user);
+    nodeRepository.save(node);
+
+    // make a node for source node
+    Node sourceNode = new Node();
+    sourceNode.setUid("source-node");
+    sourceNode.setName("SourceNode");
+    sourceNode.setUser(user);
+    nodeRepository.save(sourceNode);
+
+    // 2. Save a valid pipe with sourceNode and targetNode
+    Pipe pipe = new Pipe();
+    pipe.setUid("pipe-nullsrc");
+    pipe.setName("PipeBeforeNull");
+    pipe.setColor("Red");
+    pipe.setMute(false);
+    pipe.setSourceNode(sourceNode);
+    pipe.setTargetNode(node);
+    pipeRepository.save(pipe);
+
+    // 3. Setup security context
+    CustomUserDetails userDetails = new CustomUserDetails(user.getId(), user.getUsername(), user.getPassword(),
+        List.of());
+    SecurityContext context = SecurityContextHolder.createEmptyContext();
+    context.setAuthentication(new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities()));
+    SecurityContextHolder.setContext(context);
+
+    // 4. Prepare payload to set sourceNode to null
+    String payload = """
+        {
+          "created": {},
+          "updated": {
+            "pipes": [
+              {
+                "uid": "pipe-nullsrc",
+                "sourceNode": null
+              }
+            ]
+          },
+          "deleted": {}
+        }
+        """;
+
+    // 5. Perform request and expect success=false in response
+    mockMvc.perform(post("/batch")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(payload))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.success").value(false))
+        .andExpect(jsonPath("$.message").value("Some entities failed to update"))
+        .andExpect(jsonPath("$.errors.pipes[0]").value("pipe-nullsrc"));
+
+    // 6. Confirm DB value did not change
+    Pipe pipeAfter = pipeRepository.findByUid("pipe-nullsrc").orElseThrow();
+    assertNotNull(pipeAfter.getSourceNode());
+    assertEquals("source-node", pipeAfter.getSourceNode().getUid());
+  }
+
+  @Test
+  void testEditPipe_withSameSourceAndTargetNode_shouldFail() throws Exception {
+    // 1. Setup user and node
+    User user = userRepository.save(new User("sameNodeUser", "pass"));
+
+    Node node = new Node();
+    node.setUid("shared-node");
+    node.setName("SharedNode");
+    node.setUser(user);
+    nodeRepository.save(node);
+
+    // 2. Save initial Pipe with sourceNode and different targetNode
+    Node anotherNode = new Node();
+    anotherNode.setUid("another-node");
+    anotherNode.setName("AnotherNode");
+    anotherNode.setUser(user);
+    nodeRepository.save(anotherNode);
+
+    Pipe pipe = new Pipe();
+    pipe.setUid("pipe-same-nodes");
+    pipe.setName("OriginalPipe");
+    pipe.setColor("Blue");
+    pipe.setMute(false);
+    pipe.setSourceNode(node);
+    pipe.setTargetNode(anotherNode);
+    pipeRepository.save(pipe);
+
+    // 3. Set security
+    CustomUserDetails userDetails = new CustomUserDetails(user.getId(), user.getUsername(), user.getPassword(),
+        List.of());
+    SecurityContext context = SecurityContextHolder.createEmptyContext();
+    context.setAuthentication(new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities()));
+    SecurityContextHolder.setContext(context);
+
+    // 4. Payload that sets targetNode = sourceNode (both to "shared-node")
+    String payload = """
+        {
+          "created": {},
+          "updated": {
+            "pipes": [
+              {
+                "uid": "pipe-same-nodes",
+                "sourceNode": { "uid": "shared-node" },
+                "targetNode": { "uid": "shared-node" }
+              }
+            ]
+          },
+          "deleted": {}
+        }
+        """;
+
+    // 5. Perform request and check error in response
+    mockMvc.perform(post("/batch")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(payload))
+        .andExpect(status().isInternalServerError());
+        
+
+    // 6. Ensure database was not updated
+    Pipe after = pipeRepository.findByUid("pipe-same-nodes").orElseThrow();
+    assertEquals("shared-node", after.getSourceNode().getUid());
+    assertEquals("another-node", after.getTargetNode().getUid()); // remains unchanged
+  }
 
 }
