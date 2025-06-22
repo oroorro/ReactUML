@@ -50,15 +50,15 @@ public class NodeController {
 
     // + EditNode
     // PUT /node/edit/{nodeId}
-    @PutMapping("/edit/{nodeId}")
-    public ResponseEntity<Node> editNode(@PathVariable Integer nodeId, @RequestBody Node updatedNode) {
-        Node updated = nodeService.editNode(updatedNode);
-        if (updated != null) {
-            return ResponseEntity.ok(updated);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
-    }
+    // @PutMapping("/edit/{nodeId}")
+    // public ResponseEntity<Node> editNode(@PathVariable Integer nodeId, @RequestBody Node updatedNode) {
+    //     Node updated = nodeService.editNode(updatedNode);
+    //     if (updated != null) {
+    //         return ResponseEntity.ok(updated);
+    //     } else {
+    //         return ResponseEntity.notFound().build();
+    //     }
+    // }
 
     @GetMapping("/test-return")
     public ResponseEntity<Node> testReturn() {

@@ -3768,12 +3768,392 @@ class BatchControllerIntegrationTest {
         .contentType(MediaType.APPLICATION_JSON)
         .content(payload))
         .andExpect(status().isInternalServerError());
-        
 
     // 6. Ensure database was not updated
     Pipe after = pipeRepository.findByUid("pipe-same-nodes").orElseThrow();
     assertEquals("shared-node", after.getSourceNode().getUid());
     assertEquals("another-node", after.getTargetNode().getUid()); // remains unchanged
+  }
+
+  @Test
+  void testEditNode_eachFieldSequentially() throws Exception {
+    // 1. Create user and original node
+    User user = userRepository.save(new User("fieldEditUser", "pass"));
+
+    Node node = new Node();
+    node.setUid("node-edit-1");
+    node.setUser(user);
+    node.setName("Original");
+    node.setChildDirection("vertical");
+    node.setColor("black");
+    node.setState("active");
+    node.setPositionX(100);
+    node.setPositionY(200);
+    node.setIsStartingNode(false);
+    node.setParentId(12);
+    node.setNumberOfPropsIn(1);
+    nodeRepository.save(node);
+
+    // 2. Authenticate
+    CustomUserDetails userDetails = new CustomUserDetails(user.getId(), user.getUsername(), user.getPassword(),
+        List.of());
+    SecurityContext context = SecurityContextHolder.createEmptyContext();
+    context.setAuthentication(new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities()));
+    SecurityContextHolder.setContext(context);
+
+    // 3. Create update payloads and test each field
+    List<String> fieldPayloads = List.of(
+        """
+            {"uid": "node-edit-1", "name": "UpdatedName"}
+            """,
+        """
+            {"uid": "node-edit-1", "childDirection": "horizontal"}
+            """,
+        """
+            {"uid": "node-edit-1", "color": "blue"}
+            """,
+        """
+            {"uid": "node-edit-1", "state": "inactive"}
+            """,
+        """
+            {"uid": "node-edit-1", "positionX": 300}
+            """,
+        """
+            {"uid": "node-edit-1", "positionY": 400}
+            """,
+        """
+            {"uid": "node-edit-1", "isStartingNode": true}
+            """,
+        """
+            {"uid": "node-edit-1", "parentId": 13}
+            """,
+        """
+            {"uid": "node-edit-1", "numberOfPropsIn": 7}
+            """);
+
+    for (String json : fieldPayloads) {
+      String payload = String.format("""
+              {
+                "created": {},
+                "updated": {
+                  "nodes": [%s]
+                },
+                "deleted": {}
+              }
+          """, json);
+
+      mockMvc.perform(post("/batch")
+          .contentType(MediaType.APPLICATION_JSON)
+          .content(payload))
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.success").value(true));
+    }
+
+    // 4. Confirm final state
+    Node updated = nodeRepository.findByUid("node-edit-1").orElseThrow();
+    assertEquals("UpdatedName", updated.getName());
+    assertEquals("horizontal", updated.getChildDirection());
+    assertEquals("blue", updated.getColor());
+    assertEquals("inactive", updated.getState());
+    assertEquals(300, updated.getPositionX());
+    assertEquals(400, updated.getPositionY());
+    assertTrue(updated.getIsStartingNode());
+    assertEquals(13, updated.getParentId());
+    assertEquals(7, updated.getNumberOfPropsIn());
+  }
+
+  @Test
+  @Transactional
+  void testApplyBatchChanges_editNodeWithMinimalRequiredFields_shouldUpdateParentIdOnly() throws Exception {
+    // Create and save a real user
+    User realUser = new User();
+    realUser.setUsername("testuser");
+    realUser.setPassword("password");
+    userRepository.save(realUser);
+
+    // Set up custom user context
+    CustomUserDetails userDetails = new CustomUserDetails(realUser);
+    SecurityContext context = SecurityContextHolder.createEmptyContext();
+    context.setAuthentication(new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities()));
+    SecurityContextHolder.setContext(context);
+
+    // Save an original node
+    Node originalNode = new Node();
+    originalNode.setUid("node-001");
+    originalNode.setUser(realUser);
+    originalNode.setParentId(null);
+    originalNode.setName("Original Name");
+    originalNode.setPositionX(10);
+    originalNode.setPositionY(20);
+    nodeRepository.save(originalNode);
+
+    // Prepare payload for minimal update (only updating parentId)
+    String payload = """
+        {
+          "created": {},
+          "updated": {
+            "nodes": [
+              {
+                "uid": "node-001",
+                "userId": %d,
+                "parentId": 12345
+              }
+            ]
+          },
+          "deleted": {}
+        }
+        """.formatted(realUser.getId());
+
+    MvcResult result = mockMvc.perform(post("/batch")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(payload))
+        .andExpect(status().isOk())
+        .andReturn();
+
+    // Fetch updated node
+    Node updatedNode = nodeRepository.findByUid("node-001").orElseThrow();
+
+    // Assert updated parentId
+    assertEquals(12345, updatedNode.getParentId());
+
+    // Assert other fields are unchanged
+    assertEquals("Original Name", updatedNode.getName());
+    assertEquals(10, updatedNode.getPositionX());
+    assertEquals(20, updatedNode.getPositionY());
+    assertEquals(realUser.getId(), updatedNode.getUser().getId());
+  }
+
+  @Test
+  @Transactional
+  void testApplyBatchChanges_editNodeWithAllFields_shouldUpdateAllCorrectly() throws Exception {
+    // 1. Create and persist a user
+    User user = new User();
+    user.setUsername("fullUpdateUser");
+    user.setPassword("pass123");
+    userRepository.save(user);
+
+    // 3. Create and persist original node
+    Node node = new Node();
+    node.setUid("node-full-update");
+    node.setUser(user);
+    node.setParentId(1);
+    node.setName("Old Name");
+    node.setColor("blue");
+    node.setPositionX(5);
+    node.setPositionY(10);
+    node.setIsStartingNode(false);
+    node.setChildDirection("DOWNWARD");
+    node.setNumberOfPropsIn(2);
+    node.setState("INACTIVE");
+    nodeRepository.save(node);
+
+    // 2. Set up authenticated user context
+    CustomUserDetails userDetails = new CustomUserDetails(user);
+    SecurityContext context = SecurityContextHolder.createEmptyContext();
+    context.setAuthentication(new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities()));
+    SecurityContextHolder.setContext(context);
+
+    // 4. Payload for full update
+    String payload = """
+        {
+          "created": {},
+          "updated": {
+            "nodes": [
+              {
+                "uid": "node-full-update",
+                "parentId": 99,
+                "name": "Updated Node",
+                "color": "red",
+                "positionX": 200,
+                "positionY": 300,
+                "isStartingNode": true,
+                "childDirection": "UPWARD",
+                "numberOfPropsIn": 5,
+                "state": "ACTIVE"
+              }
+            ]
+          },
+          "deleted": {}
+        }
+        """;
+
+    // 5. Perform the update
+    mockMvc.perform(post("/batch")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(payload))
+        .andExpect(status().isOk());
+
+    // 6. Verify via fetch
+    Node updated = nodeRepository.findByUid("node-full-update").orElseThrow();
+
+    assertEquals(99, updated.getParentId());
+    assertEquals("Updated Node", updated.getName());
+    assertEquals("red", updated.getColor());
+    assertEquals(200, updated.getPositionX());
+    assertEquals(300, updated.getPositionY());
+    assertTrue(updated.getIsStartingNode());
+    assertEquals("UPWARD", updated.getChildDirection());
+    assertEquals(5, updated.getNumberOfPropsIn());
+    assertEquals("ACTIVE", updated.getState());
+    assertEquals(user.getId(), updated.getUser().getId());
+  }
+
+  @Test
+  @Transactional
+  void testApplyBatchChanges_idempotentRequest_shouldSucceedAndChangeNothing() throws Exception {
+    // 1. Create and save user
+    User user = new User();
+    user.setUsername("idempotentUser");
+    user.setPassword("secure");
+    userRepository.save(user);
+
+    // 2. Setup authentication context
+    CustomUserDetails userDetails = new CustomUserDetails(user);
+    SecurityContext context = SecurityContextHolder.createEmptyContext();
+    context.setAuthentication(new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities()));
+    SecurityContextHolder.setContext(context);
+
+    // 3. Create and save node with known values
+    Node node = new Node();
+    node.setUid("node-idempotent");
+    node.setUser(user);
+    node.setParentId(42);
+    node.setName("Same Name");
+    node.setColor("gray");
+    node.setPositionX(100);
+    node.setPositionY(150);
+    node.setIsStartingNode(false);
+    node.setChildDirection("LEFT");
+    node.setNumberOfPropsIn(3);
+    node.setState("STABLE");
+    nodeRepository.save(node);
+
+    // 4. Build a payload with the exact same values
+    String payload = """
+        {
+          "created": {},
+          "updated": {
+            "nodes": [
+              {
+                "uid": "node-idempotent",
+                "parentId": 42,
+                "name": "Same Name",
+                "color": "gray",
+                "positionX": 100,
+                "positionY": 150,
+                "isStartingNode": false,
+                "childDirection": "LEFT",
+                "numberOfPropsIn": 3,
+                "state": "STABLE"
+              }
+            ]
+          },
+          "deleted": {}
+        }
+        """;
+
+    // 5. Perform the idempotent update
+    mockMvc.perform(post("/batch")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(payload))
+        .andExpect(status().isOk());
+
+    // 6. Fetch the node and verify it remains the same
+    Node updated = nodeRepository.findByUid("node-idempotent").orElseThrow();
+
+    assertEquals(42, updated.getParentId());
+    assertEquals("Same Name", updated.getName());
+    assertEquals("gray", updated.getColor());
+    assertEquals(100, updated.getPositionX());
+    assertEquals(150, updated.getPositionY());
+    assertFalse(updated.getIsStartingNode());
+    assertEquals("LEFT", updated.getChildDirection());
+    assertEquals(3, updated.getNumberOfPropsIn());
+    assertEquals("STABLE", updated.getState());
+    assertEquals(user.getId(), updated.getUser().getId());
+  }
+
+  @Test
+  @Transactional
+  void testApplyBatchChanges_setNullableFieldsToNull_shouldSucceedAndDefaultsApply() throws Exception {
+    // 1. Create a user
+    User user = new User();
+    user.setUsername("nullableFieldsUser");
+    user.setPassword("password");
+    userRepository.save(user);
+
+    // 2. Set up authentication context
+    CustomUserDetails userDetails = new CustomUserDetails(user);
+    SecurityContext context = SecurityContextHolder.createEmptyContext();
+    context.setAuthentication(new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities()));
+    SecurityContextHolder.setContext(context);
+
+    // 3. Create and save a node with all fields populated
+    Node node = new Node();
+    node.setUid("node-null-fields");
+    node.setUser(user);
+    node.setParentId(77);
+    node.setName("Node Full");
+    node.setColor("green");
+    node.setState("LOADED");
+    node.setPositionX(10);
+    node.setPositionY(20);
+    node.setIsStartingNode(true);
+    node.setChildDirection("LEFT"); // This should be reset to "VERTICAL" after null
+    node.setNumberOfPropsIn(2);
+    nodeRepository.save(node);
+
+    //check saved node
+    Node savedNode = nodeRepository.findByUid("node-null-fields").orElseThrow();
+    assertEquals(77, savedNode.getParentId());
+    assertEquals("Node Full", savedNode.getName());
+    assertEquals("green", savedNode.getColor());
+    assertEquals("LOADED", savedNode.getState());
+    assertEquals(10, savedNode.getPositionX());
+
+    // 4. Send update to nullify all editable fields
+    String payload = """
+        {
+          "created": {},
+          "updated": {
+            "nodes": [
+              {
+                "uid": "node-null-fields",
+                "parentId": null,
+                "name": null,
+                "color": null,
+                "state": null,
+                "positionX": null,
+                "positionY": null,
+                "childDirection": null,
+                "numberOfPropsIn": null
+              }
+            ]
+          },
+          "deleted": {}
+        }
+        """;
+
+    // 5. Perform the update
+    mockMvc.perform(post("/batch")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(payload))
+        .andExpect(status().isOk());
+
+    // 6. Fetch the node again and assert all fields are null or fallback
+    Node updated = nodeRepository.findByUid("node-null-fields").orElseThrow();
+
+    assertEquals(0, updated.getParentId());
+    assertNull(updated.getName(), "name should be null");
+    assertNull(updated.getColor(), "color should be null");
+    assertNull(updated.getState(), "state should be null");
+    assertNull(updated.getPositionX(), "positionX should be null");
+    assertNull(updated.getPositionY(), "positionY should be null");
+    assertNull(updated.getNumberOfPropsIn(), "numberOfPropsIn should be null");
+    //assertNull(updated.getIsStartingNode(), "isStartingNode should be null");
+  
+    // User still intact
+    assertEquals(user.getId(), updated.getUser().getId());
   }
 
 }

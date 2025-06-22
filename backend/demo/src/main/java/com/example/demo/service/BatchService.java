@@ -134,7 +134,9 @@ public class BatchService {
         // }
 
 
-        // 2. UPDATED
+        //UPDATING BATCH
+
+        //updating attributeContents 
         if (changes.updated != null && changes.updated.attributeContents != null) {
             
             JsonNode updatedNode = dto.get("updated");
@@ -163,6 +165,7 @@ public class BatchService {
             }
 
         }
+        //updating attributes 
         else if (changes.updated != null && changes.updated.attributes != null) {
             JsonNode updatedNode = dto.get("updated");
             if (updatedNode != null && updatedNode.has("attributes")) {
@@ -189,6 +192,7 @@ public class BatchService {
                 }
             }
         }
+        //updating pipes 
         else if (changes.updated != null && changes.updated.pipes != null) {
             JsonNode updatedNode = dto.get("updated");
             if (updatedNode != null && updatedNode.has("pipes")) {
@@ -210,6 +214,34 @@ public class BatchService {
                             response.success = false;
                             response.message = "Failed to process JSON for Pipe: " + e.getMessage();
                             System.out.println("Error processing Pipe with UID " + pipe.getUid() + ": " + e.getMessage());
+                        }
+                    }
+                }
+            }
+        }
+        //updating nodes 
+        //updating nodes
+        else if (changes.updated != null && changes.updated.nodes != null) {
+            JsonNode updatedNode = dto.get("updated");
+            if (updatedNode != null && updatedNode.has("nodes")) {
+                JsonNode nodesArray = updatedNode.get("nodes");
+                if (nodesArray.isArray()) {
+                    for (int i = 0; i < changes.updated.nodes.size(); i++) {
+                        Node node = changes.updated.nodes.get(i);
+                        JsonNode rawNode = nodesArray.get(i); // Match by index
+                        try {
+                            Node updated = nodeService.editNode(node, rawNode);
+                            if (updated == null) {
+                                response.addError("nodes", node.getUid());
+                                response.success = false;
+                                response.message = "Some entities failed to update";
+                                System.out.println("Warning: Node with UID " + node.getUid() + " not found or failed to update.");
+                            }
+                        } catch (Exception e) {
+                            response.addError("nodes", node.getUid());
+                            response.success = false;
+                            response.message = "Failed to process JSON for Node: " + e.getMessage();
+                            System.out.println("Error processing Node with UID " + node.getUid() + ": " + e.getMessage());
                         }
                     }
                 }

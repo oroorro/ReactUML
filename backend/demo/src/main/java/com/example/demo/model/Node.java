@@ -25,7 +25,7 @@ public class Node {
     private Set<Attribute> attributes = new HashSet<>();
 
     @JsonBackReference
-    @ManyToOne
+    @ManyToOne(optional = false)
     @JoinColumn(name = "user_id")
     private User user;
 
@@ -78,6 +78,13 @@ public class Node {
         this.positionX = positionX;
         this.positionY = positionY;
         this.isStartingNode = isStartingNode;
+    }
+
+    @PrePersist
+    public void prePersist() {
+        if (this.childDirection == null) {
+            this.childDirection = "vertical";
+        }
     }
 
     public Integer getId() {
