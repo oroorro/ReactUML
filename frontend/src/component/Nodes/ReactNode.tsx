@@ -100,7 +100,7 @@ const ReactNode = ({
 
     useEffect(() => {
 
-        if (data.stateManager.id) {
+        if (data.stateManager && data.stateManager.id) {
             //console.log("data stateManager", data.stateManager.id)
             const id = data.stateManager.id;
 
@@ -658,7 +658,7 @@ const ReactNode = ({
 
             <div style={{ display: 'flex', }}>
 
-                {attributes.map((attr: Attribute) => {
+                {attributes && attributes.map((attr: Attribute) => {
 
                     const isExpanded = expandedAttributes.includes(attr.id);
                     return (
@@ -672,7 +672,7 @@ const ReactNode = ({
 
             </div>
 
-            {renderChildren(children, 1, id, children.state, renderChildrenDirection)}
+            {children && renderChildren(children, 1, id, children.state, renderChildrenDirection)}
         </div>
     );
 };

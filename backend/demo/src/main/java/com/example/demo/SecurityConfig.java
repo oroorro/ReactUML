@@ -1,14 +1,18 @@
 package com.example.demo;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+
+import com.example.demo.service.CustomUserDetailsService;
 
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -18,6 +22,9 @@ import jakarta.servlet.http.HttpServletResponse;
 @Configuration
 public class SecurityConfig {
 
+    @Autowired
+    private CustomUserDetailsService customUserDetailsService;
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -25,6 +32,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/index.html", "/assets/**", "/auth/**").permitAll()
+                        // .requestMatchers("/batch/**").authenticated()
                         .anyRequest().authenticated())
                 .formLogin(form -> form
                         .loginProcessingUrl("/auth/login")
@@ -34,13 +42,15 @@ public class SecurityConfig {
 
                             String username = authentication.getName();
                             response.getWriter()
-                                    .write("{ \"message\": \"Login successful\", \"username\": \"" + username + "\" }");
+                            .write("{ \"message\": \"Login successful\", \"username\": \"" + username + "\" }");
+                            
                         })
                         .failureHandler((request, response, exception) -> {
                             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                             response.setContentType("application/json");
                             response.getWriter().write("{ \"error\": \"Invalid credentials\" }");
                         })
+                        .defaultSuccessUrl("/", true)
                         .permitAll())
                 // .and()
                 .logout(logout -> logout
@@ -58,4 +68,9 @@ public class SecurityConfig {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
+    // @Bean
+    // public UserDetailsService userDetailsService() {
+    //     return customUserDetailsService;
+    // }
 }
