@@ -16,6 +16,8 @@
 # frontend dist files 
 /frontend/dist
 
+/frontend/e2e/test-results/
+
 *.txt
 
 # misc

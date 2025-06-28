@@ -964,13 +964,13 @@ function Flow() {
           datatype="contextMenu"
         >
 
-          {!contextMenu.detail && <button onClick={() => moveToSubMenu("create")}>Create</button>}
+          {!contextMenu.detail && <button className='create_button' onClick={() => moveToSubMenu("create")}>Create</button>}
           {!contextMenu.detail && <button >Delete</button>}
           {!contextMenu.detail && <button onClick={() => copyNode()}>Copy</button>}
           {!contextMenu.detail && <button onClick={() => moveToSubMenu("mute-2nd")}> Mute </button>}
           {!contextMenu.detail && <button onClick={() => moveToSubMenu("renderDirection")}> Display </button>}
 
-          {contextMenu.detail == 'create' && <button onClick={() => updateElement('Node')}> Node </button>}
+          {contextMenu.detail == 'create' && <button className='create_node_button' onClick={() => updateElement('Node')}> Node </button>}
           {contextMenu.detail == 'create' && <button onClick={() => updateElement('Prop')}> Prop </button>}
           {contextMenu.detail == 'create' && <button onClick={() => moveToSubMenu("create-attribute-2nd")}> Attribute </button>}
 

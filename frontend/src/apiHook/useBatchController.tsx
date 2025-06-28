@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 
 export interface CreateNodeDto {
@@ -10,7 +9,7 @@ export interface CreateNodeDto {
 interface BatchRequestPayload {
   created: {
     nodes: CreateNodeDto[];
-    pipes: any[]; // Define types if needed
+    pipes: any[]; 
     attributes: any[];
     attributeContents: any[];
   };
@@ -58,11 +57,12 @@ export function useBatchController() {
       if (!response.ok) {
         const message = await response.text();
         throw new Error(`HTTP ${response.status}: ${message}`);
-      }else{
-        console.log("Response: ", response);
+      } else {
+        console.log("Response object: ", response);
       }
 
       const result: BatchResponse = await response.json();
+      console.log("Response body: ", result);
       return result;
     } catch (err: any) {
       setError(err);

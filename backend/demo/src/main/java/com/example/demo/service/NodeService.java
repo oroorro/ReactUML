@@ -3,6 +3,7 @@ package com.example.demo.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.example.demo.exception.InvalidRequestDataException;
 import com.example.demo.model.Node;
 import com.example.demo.model.User;
 import com.example.demo.repository.NodeRepository;
@@ -35,11 +36,27 @@ public class NodeService {
 
     public Node createNode(Integer userId, Node node) {
         // node.setUserId(userId); 
+
+        // System.err.println("node:" + node.getUid());
+        // //if node has no uid, throw an exception
+        // if (node.getUid() == null || node.getUid().trim().isEmpty()) {
+        //     throw new InvalidRequestDataException("uid must not be null");
+        // }
+
         User user = userRepository.findById(userId)
                     .orElseThrow(() -> new RuntimeException("User not found"));
         node.setUser(user); 
         return nodeRepository.save(node);
     }
+
+    // public Boolean createNode(Integer userId, Node node) {
+    //     // node.setUserId(userId); 
+    //     User user = userRepository.findById(userId)
+    //             .orElseThrow(() -> new EntityNotFoundException("user does not exist " + userId));
+    //     node.setUser(user);
+    //     nodeRepository.save(node);
+    //     return true;
+    // }
 
     public boolean deleteNode(Integer userId, Integer nodeId) {
         Optional<Node> nodeOpt = nodeRepository.findById(nodeId);
