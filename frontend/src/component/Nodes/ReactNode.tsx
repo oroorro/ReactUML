@@ -302,8 +302,8 @@ const ReactNode = ({
             totalNumberPropsForMutedChild = filteredMutedReactChilds.reduce((accumulator, node) => accumulator + node.numbersOfPropsGoingIn, 0);
 
             mutedReactChildCount = filteredMutedReactChilds.length;
-            //console.log("mutedAttributeCount", mutedReactChildCount);
-            //console.log(children, "filtered unmuted:", filteredUnMutedReactChilds, "filtered muted", filteredMutedReactChilds, "filtered muting", filteredMutingReactChilds)
+            console.log("mutedAttributeCount", mutedReactChildCount, "data Id:", data.id);
+            console.log(children, "filtered unmuted:", filteredUnMutedReactChilds, "filtered muted", filteredMutedReactChilds, "filtered muting", filteredMutingReactChilds, "data Id:", data.id)
         }
 
         //using same logic as updateStatesInArray
@@ -514,7 +514,7 @@ const ReactNode = ({
                                                 {/**inside mutingNodes chaging current Node's children Nodes' state into 'notMute' or 'mute'*/}
 
                                                 <div className='NodePositionWrapper'
-                                                    datatype='Node'
+                                                    // datatype='Node'
                                                 >
                                                     <div
                                                         className="childNode"
