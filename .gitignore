@@ -16,9 +16,13 @@
 # frontend dist files 
 /frontend/dist
 
-/frontend/e2e/test-results/
+/frontend/test-results/
 
 *.txt
+
+# vite
+.vite/
+frontend/node_modules/.vite/
 
 # misc
 .DS_Store

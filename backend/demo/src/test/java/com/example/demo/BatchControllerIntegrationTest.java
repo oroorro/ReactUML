@@ -3790,7 +3790,7 @@ class BatchControllerIntegrationTest {
     node.setPositionX(100);
     node.setPositionY(200);
     node.setIsStartingNode(false);
-    node.setParentId(12);
+    node.setParentId("12");
     node.setNumberOfPropsIn(1);
     nodeRepository.save(node);
 
@@ -3825,7 +3825,7 @@ class BatchControllerIntegrationTest {
             {"uid": "node-edit-1", "isStartingNode": true}
             """,
         """
-            {"uid": "node-edit-1", "parentId": 13}
+            {"uid": "node-edit-1", "parentId": "13"}
             """,
         """
             {"uid": "node-edit-1", "numberOfPropsIn": 7}
@@ -3858,7 +3858,7 @@ class BatchControllerIntegrationTest {
     assertEquals(300, updated.getPositionX());
     assertEquals(400, updated.getPositionY());
     assertTrue(updated.getIsStartingNode());
-    assertEquals(13, updated.getParentId());
+    assertEquals("13", updated.getParentId());
     assertEquals(7, updated.getNumberOfPropsIn());
   }
 
@@ -3896,7 +3896,7 @@ class BatchControllerIntegrationTest {
               {
                 "uid": "node-001",
                 "userId": %d,
-                "parentId": 12345
+                "parentId": "12345"
               }
             ]
           },
@@ -3914,7 +3914,7 @@ class BatchControllerIntegrationTest {
     Node updatedNode = nodeRepository.findByUid("node-001").orElseThrow();
 
     // Assert updated parentId
-    assertEquals(12345, updatedNode.getParentId());
+    assertEquals("12345", updatedNode.getParentId());
 
     // Assert other fields are unchanged
     assertEquals("Original Name", updatedNode.getName());
@@ -3936,7 +3936,7 @@ class BatchControllerIntegrationTest {
     Node node = new Node();
     node.setUid("node-full-update");
     node.setUser(user);
-    node.setParentId(1);
+    node.setParentId("1");
     node.setName("Old Name");
     node.setColor("blue");
     node.setPositionX(5);
@@ -3961,7 +3961,7 @@ class BatchControllerIntegrationTest {
             "nodes": [
               {
                 "uid": "node-full-update",
-                "parentId": 99,
+                "parentId": "99",
                 "name": "Updated Node",
                 "color": "red",
                 "positionX": 200,
@@ -3986,7 +3986,7 @@ class BatchControllerIntegrationTest {
     // 6. Verify via fetch
     Node updated = nodeRepository.findByUid("node-full-update").orElseThrow();
 
-    assertEquals(99, updated.getParentId());
+    assertEquals("99", updated.getParentId());
     assertEquals("Updated Node", updated.getName());
     assertEquals("red", updated.getColor());
     assertEquals(200, updated.getPositionX());
@@ -4017,7 +4017,7 @@ class BatchControllerIntegrationTest {
     Node node = new Node();
     node.setUid("node-idempotent");
     node.setUser(user);
-    node.setParentId(42);
+    node.setParentId("42");
     node.setName("Same Name");
     node.setColor("gray");
     node.setPositionX(100);
@@ -4036,7 +4036,7 @@ class BatchControllerIntegrationTest {
             "nodes": [
               {
                 "uid": "node-idempotent",
-                "parentId": 42,
+                "parentId": "42",
                 "name": "Same Name",
                 "color": "gray",
                 "positionX": 100,
@@ -4061,7 +4061,7 @@ class BatchControllerIntegrationTest {
     // 6. Fetch the node and verify it remains the same
     Node updated = nodeRepository.findByUid("node-idempotent").orElseThrow();
 
-    assertEquals(42, updated.getParentId());
+    assertEquals("42", updated.getParentId());
     assertEquals("Same Name", updated.getName());
     assertEquals("gray", updated.getColor());
     assertEquals(100, updated.getPositionX());
@@ -4092,7 +4092,7 @@ class BatchControllerIntegrationTest {
     Node node = new Node();
     node.setUid("node-null-fields");
     node.setUser(user);
-    node.setParentId(77);
+    node.setParentId("77");
     node.setName("Node Full");
     node.setColor("green");
     node.setState("LOADED");
@@ -4105,7 +4105,7 @@ class BatchControllerIntegrationTest {
 
     //check saved node
     Node savedNode = nodeRepository.findByUid("node-null-fields").orElseThrow();
-    assertEquals(77, savedNode.getParentId());
+    assertEquals("77", savedNode.getParentId());
     assertEquals("Node Full", savedNode.getName());
     assertEquals("green", savedNode.getColor());
     assertEquals("LOADED", savedNode.getState());
@@ -4143,7 +4143,8 @@ class BatchControllerIntegrationTest {
     // 6. Fetch the node again and assert all fields are null or fallback
     Node updated = nodeRepository.findByUid("node-null-fields").orElseThrow();
 
-    assertEquals(0, updated.getParentId());
+    //assertEquals(0, updated.getParentId());
+    assertNull(updated.getParentId());
     assertNull(updated.getName(), "name should be null");
     assertNull(updated.getColor(), "color should be null");
     assertNull(updated.getState(), "state should be null");

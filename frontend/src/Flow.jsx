@@ -1,4 +1,3 @@
-
 import React, { Children, forwardRef } from 'react';
 import { useCallback, useRef, useEffect, useState } from 'react';
 // import {ReactFlow, 
@@ -442,7 +441,7 @@ function Flow() {
   const interactingIdRef = useRef(null);
   const [contextMenu, setContextMenu] = useState(null);
   const nodeId = useRef(5);
-  const { createNode, loading, error } = useBatchController();
+  const { createNode, editNode, createAttribute, createPipe, loading, error } = useBatchController();
 
 
   useEffect(() => {
@@ -451,24 +450,80 @@ function Flow() {
 
 
 
-  const handleCreateNode = async () => {
-    await createNode({
-      uid: `node-${Date.now()}`,
+  const handleCreateNode = async (nodeUid, parentId = null) => {
+    const nodeData = {
+      uid: nodeUid,
       name: 'StartNode',
       isStartingNode: true,
+    };
+
+    // Only add parentId if it's provided
+    if (parentId !== null) {
+      nodeData.parentId = parentId;
+      nodeData.isStartingNode = false;
+    }
+
+    await createNode(nodeData);
+  };
+
+  const handleCreatePipe = async (sourceNodeColor, sourceNodeUId, targetNodUid = null) =>{
+
+    console.log("sourceNode", sourceNodeUId);
+    const pipeData = {
+      uid: generateUniqueId(),
+      name: "Pipe Name",
+      color: sourceNodeColor,
+      mute: false,
+      sourceNode: { uid: sourceNodeUId },
+      targetNode: null,
+    }
+
+    //add targetNode
+    if(targetNodUid != null){
+
+    }
+
+    await createPipe(pipeData);
+  }
+
+  const handleEditNode = async (nodeId, ) => {
+    const result = await editNode({
+      uid: "node-123",
+      name: "Updated Node Name",
     });
+    
+    if (result) {
+      console.log("Node updated successfully:", result);
+    }
+  };
+
+  const handleCreateAttribute = async (attributeUid, parentNodeUid, typeOfAttribute, totalNumber, mute) => {
+    const result = await createAttribute({
+      uid: attributeUid,
+      name: typeOfAttribute,
+      totalNumber: totalNumber,
+      mute: mute,
+      node: {
+        uid: parentNodeUid
+      }
+    });
+    
+    if (result) {
+      console.log("Attribute created successfully:", result);
+    }
   };
 
   function addNodeToInitialNodes(initialNodes, nodeData) {
     const newNode = {
-      id: nodeData.id,  
-      position: nodeData.position, 
-      type: nodeData.type, 
+      id: nodeData.data.id,
+      position: nodeData.position,
+      type: nodeData.type,
       data: {
-        label: nodeData.data.label, 
-        title: nodeData.data.title, 
-        color: nodeData.data.color, 
-        id: nodeData.data.id, 
+        label: nodeData.data.label,
+        title: nodeData.data.title,
+        color: nodeData.data.color,
+        id: nodeData.data.id,
+        children: [],
       }
     };
 
@@ -491,19 +546,21 @@ function Flow() {
         },
       ],
       attributes: [],
+      children: [],
     };
 
     let foundNode = findNodeById(id, root);
 
-    //console.log("found node in <Flow>", foundNode);
+    console.log("found node in <Flow>", foundNode, id);
 
     //creating Attribute 
     if (type == 'Attribute') {
+      const attributeUid = generateUniqueId();
       foundNode.attributes = [
         ...(foundNode.attributes || []),
         {
           nameOfAttribute: data ? data : 'empty',
-          id: generateUniqueId(),
+          id: attributeUid,
           totalNumberOfAttribute: 0,
           AttributeContents: [
             {
@@ -514,52 +571,55 @@ function Flow() {
           ]
         },
       ];
+      handleCreateAttribute(attributeUid, id, data ? data : 'empty', 0, false)
     }
     else if (type == 'Pipe') {
 
     }
     //creating Node and Prop
     else {
-
-
+      //create Node button has clicked on background, create a Node in the backgroun
       if (!foundNode) {
-        console.log("background should");
-         //handleCreateNode
-         handleCreateNode();
+        const nodeUid = generateUniqueId();
+        handleCreateNode(nodeUid);
         addNodeToInitialNodes(
           nodes, {
-          id: generateUniqueId(),
+          // id: generateUniqueId(),
           position: { x: 100, y: 100 },
           type: 'ReactNode',
-          
+
           data: {
             label: '4',
             title: 'NewComponent',
             color: generateRandomHexColor(),
-            id: generateUniqueId(),
-            attributes:[],
+            id: nodeUid,
+            attributes: [],
+            children: [],
           }
         });
       }
-      else{
+      //create button was not triggered in the background
+      else {
         // If the foundNode does not have children, create a new node ( child ) to that foundNode
+        console.log("foundNode", foundNode);
         if (!foundNode.children) {
           foundNode.children = [newChild];
-         
+          //create a new node with parentId being foundNode 
+          handleCreateNode(foundNode.id);
           //create Pipe
         } else { //if foundNode does have children then create a Node if create type was Node or create ghostNode(pipes pointing towards emptyNode) if type was Pipe
-          //background case 
+          //creating a pipe
           foundNode.children = [
             ...foundNode.children,
             type == 'Node' ? newChild : ghostChild,
           ];
+          handleCreatePipe(foundNode.color,id);
+
         }
       }
-
       //add newly craete Node into NodeIndexInArray
       NodeIndexInArray[newChild.id] = {};
       NodeIndexInArray[newChild.id] = newChild.color;
-      //console.log("NodeIndexInArray", NodeIndexInArray);
     }
   }
 
@@ -952,7 +1012,7 @@ function Flow() {
     >
       {contextMenu && contextMenu.nodeType === 'Node' &&
         <div
-          className='flex flex-col bg-white px-2 py-1'
+          className='flex flex-col bg-white px-2 py-1 NodeContextMenu'
           style={{
 
             position: 'absolute',
@@ -971,8 +1031,8 @@ function Flow() {
           {!contextMenu.detail && <button onClick={() => moveToSubMenu("renderDirection")}> Display </button>}
 
           {contextMenu.detail == 'create' && <button className='create_node_button' onClick={() => updateElement('Node')}> Node </button>}
-          {contextMenu.detail == 'create' && <button onClick={() => updateElement('Prop')}> Prop </button>}
-          {contextMenu.detail == 'create' && <button onClick={() => moveToSubMenu("create-attribute-2nd")}> Attribute </button>}
+          {contextMenu.detail == 'create' && <button className='create_pipe_button' onClick={() => updateElement('Prop')}> Prop </button>}
+          {contextMenu.detail == 'create' && <button className='create_attribute_button' onClick={() => moveToSubMenu("create-attribute-2nd")}> Attribute </button>}
 
           {/** mute 2nd layer of sub-menu */}
           {contextMenu.detail == 'mute-2nd' &&
@@ -993,8 +1053,8 @@ function Flow() {
           {/** Attribute 2nd layer of sub-menu*/}
           {contextMenu.detail == 'create-attribute-2nd' &&
             <div className='flex flex-col' datatype="contextMenu">
-              <button onClick={() => updateElement('Attribute')}> Just Create </button>
-              <button onClick={() => moveToSubMenu("create-attribute-3rd")} > Select Type </button>
+              <button className="attribute_button_sub_just_create" onClick={() => updateElement('Attribute')}> Just Create </button>
+              <button className="attribute_button_sub_select_type" onClick={() => moveToSubMenu("create-attribute-3rd")} > Select Type </button>
             </div>
           }
 
@@ -1002,7 +1062,7 @@ function Flow() {
           {contextMenu.detail == 'create-attribute-3rd' &&
             <div className='flex flex-col' datatype="contextMenu">
               {attributeColors.map((attribute) => (
-                <button onClick={() => updateElement('Attribute', attribute)}>{attribute}</button>
+                <button className={`attribute_button_sub_3rd_select_type ${attribute}`} onClick={() => updateElement('Attribute', attribute)}>{attribute}</button>
               ))}
             </div>
           }
