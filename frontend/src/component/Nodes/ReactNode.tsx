@@ -302,8 +302,8 @@ const ReactNode = ({
             totalNumberPropsForMutedChild = filteredMutedReactChilds.reduce((accumulator, node) => accumulator + node.numbersOfPropsGoingIn, 0);
 
             mutedReactChildCount = filteredMutedReactChilds.length;
-            console.log("mutedAttributeCount", mutedReactChildCount, "data Id:", data.id);
-            console.log(children, "filtered unmuted:", filteredUnMutedReactChilds, "filtered muted", filteredMutedReactChilds, "filtered muting", filteredMutingReactChilds, "data Id:", data.id)
+            //console.log("mutedAttributeCount", mutedReactChildCount, "data Id:", data.id);
+            //console.log(children, "filtered unmuted:", filteredUnMutedReactChilds, "filtered muted", filteredMutedReactChilds, "filtered muting", filteredMutingReactChilds, "data Id:", data.id)
         }
 
         //using same logic as updateStatesInArray

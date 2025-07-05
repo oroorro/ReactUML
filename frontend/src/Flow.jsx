@@ -450,11 +450,13 @@ function Flow() {
 
 
 
-  const handleCreateNode = async (nodeUid, parentId = null) => {
+  const handleCreateNode = async (color, nodeUid, isStartingNode, name, parentId = null) => {
+
     const nodeData = {
       uid: nodeUid,
-      name: 'StartNode',
-      isStartingNode: true,
+      name: name,
+      isStartingNode: isStartingNode,
+      color: color
     };
 
     // Only add parentId if it's provided
@@ -466,7 +468,7 @@ function Flow() {
     await createNode(nodeData);
   };
 
-  const handleCreatePipe = async (sourceNodeColor, sourceNodeUId, targetNodUid = null) =>{
+  const handleCreatePipe = async (sourceNodeColor, sourceNodeUId, targetNodUid = null) => {
 
     console.log("sourceNode", sourceNodeUId);
     const pipeData = {
@@ -479,22 +481,22 @@ function Flow() {
     }
 
     //add targetNode
-    if(targetNodUid != null){
+    if (targetNodUid != null) {
 
     }
 
     await createPipe(pipeData);
   }
 
-  const handleEditNode = async (nodeId, ) => {
+  const handleEditNode = async (nodeId,) => {
     const result = await editNode({
       uid: "node-123",
       name: "Updated Node Name",
     });
-    
-    if (result) {
-      console.log("Node updated successfully:", result);
-    }
+
+    // if (result) {
+    //   console.log("Node updated successfully:", result);
+    // }
   };
 
   const handleCreateAttribute = async (attributeUid, parentNodeUid, typeOfAttribute, totalNumber, mute) => {
@@ -507,10 +509,10 @@ function Flow() {
         uid: parentNodeUid
       }
     });
-    
-    if (result) {
-      console.log("Attribute created successfully:", result);
-    }
+
+    // if (result) {
+    //   console.log("Attribute created successfully:", result);
+    // }
   };
 
   function addNodeToInitialNodes(initialNodes, nodeData) {
@@ -551,7 +553,7 @@ function Flow() {
 
     let foundNode = findNodeById(id, root);
 
-    console.log("found node in <Flow>", foundNode, id);
+    //console.log("found node in <Flow>", foundNode, id);
 
     //creating Attribute 
     if (type == 'Attribute') {
@@ -573,15 +575,35 @@ function Flow() {
       ];
       handleCreateAttribute(attributeUid, id, data ? data : 'empty', 0, false)
     }
-    else if (type == 'Pipe') {
-
+    else if (type == 'Prop') {
+      //creating a pipe
+      foundNode.children = [
+        ...foundNode.children,
+        type == 'Node' ? newChild : ghostChild,
+      ];
+      handleCreatePipe(foundNode.color, id);
     }
     //creating Node and Prop
     else {
       //create Node button has clicked on background, create a Node in the backgroun
       if (!foundNode) {
         const nodeUid = generateUniqueId();
-        handleCreateNode(nodeUid);
+        const color = generateRandomHexColor(); 
+        handleCreateNode(color, nodeUid, true, 'StartNode');
+        nodes.children = [
+          ...(nodes.children || []),
+          {
+            title: 'StartNode',
+            id: nodeUid,
+            numbersOfPropsGoingIn: 0,
+            color: color,
+            renderChildrenDirection: 'horizontaol',
+            children: [],
+            attributes: [],
+            pipes: [],
+          },
+        ]; 
+
         addNodeToInitialNodes(
           nodes, {
           // id: generateUniqueId(),
@@ -591,30 +613,26 @@ function Flow() {
           data: {
             label: '4',
             title: 'NewComponent',
-            color: generateRandomHexColor(),
+            color: color,
             id: nodeUid,
             attributes: [],
             children: [],
           }
         });
+
+        console.log("nodes", nodes);
       }
       //create button was not triggered in the background
       else {
         // If the foundNode does not have children, create a new node ( child ) to that foundNode
-        console.log("foundNode", foundNode);
-        if (!foundNode.children) {
-          foundNode.children = [newChild];
-          //create a new node with parentId being foundNode 
-          handleCreateNode(foundNode.id);
+        //console.log("foundNode", foundNode);
+        if (foundNode.children != null) {
+          console.log("create a child Node within a Node ");
+          foundNode.children = [...foundNode.children, newChild];
+          handleCreateNode(newChild.color, newChild.id, false, 'StartNode');
+          
+          setNodes(nodes);
           //create Pipe
-        } else { //if foundNode does have children then create a Node if create type was Node or create ghostNode(pipes pointing towards emptyNode) if type was Pipe
-          //creating a pipe
-          foundNode.children = [
-            ...foundNode.children,
-            type == 'Node' ? newChild : ghostChild,
-          ];
-          handleCreatePipe(foundNode.color,id);
-
         }
       }
       //add newly craete Node into NodeIndexInArray

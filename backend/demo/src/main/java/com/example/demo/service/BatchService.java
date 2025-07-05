@@ -260,6 +260,9 @@ public class BatchService {
                             response.message = "Some entities failed to update";
                             System.out.println("Warning: Node with UID " + node.getUid() + " not found or failed to update.");
                         }
+                        else {
+                            response.addCreatedEntity("node", createdNode.getUid());
+                        }
                     }
                     catch(Exception e){
                         response.addError("nodes", node.getUid());
@@ -280,6 +283,9 @@ public class BatchService {
                             response.message = "Some entities failed to create";
                             System.out.println("Warning: Pipe with UID " + pipe.getUid() + " not found or failed to create.");
                         }
+                        else {
+                            response.addCreatedEntity("pipe", createdPipe.getUid());
+                        }
                     } catch (Exception e) {
                         response.addError("pipes", pipe.getUid());
                         response.success = false;
@@ -298,6 +304,9 @@ public class BatchService {
                             response.message = "Some entities failed to create";
                             System.out.println("Warning: Attribute with UID " + attribute.getUid() + " not found or failed to create.");
                         }
+                        else {
+                            response.addCreatedEntity("attribute", createdAttribute.getUid());
+                        }
                     } catch (Exception e) {
                         response.addError("attributes", attribute.getUid());
                         response.success = false;
@@ -315,6 +324,9 @@ public class BatchService {
                             response.success = false;
                             response.message = "Some entities failed to create";
                             System.out.println("Warning: AttributeContent with UID " + ac.getUid() + " not found or failed to create.");
+                        }
+                        else {
+                            response.addCreatedEntity("attributeContent", createdAC.getUid());
                         }
                     } catch (Exception e) {
                         response.addError("attributeContents", ac.getUid());

@@ -37,8 +37,8 @@ export interface CreatePipeDto {
   name?: string;
   color?: string;
   mute?: boolean;
-  sourceNode: {uid: string};
-  targetNode: { uid: string } | null; 
+  sourceNode: { uid: string };
+  targetNode: { uid: string } | null;
 }
 
 interface BatchRequestPayload {
@@ -67,6 +67,7 @@ export function useBatchController() {
   const [error, setError] = useState<Error | null>(null);
 
   const createNode = async (node: CreateNodeDto): Promise<BatchResponse | null> => {
+    console.log(`Creating NODE with UID: ${node.uid}`);
     setLoading(true);
     setError(null);
 
@@ -89,20 +90,38 @@ export function useBatchController() {
           headers: {
             'Content-Type': 'application/json',
           },
-          credentials: 'include', 
+          credentials: 'include',
           body: JSON.stringify(payload),
         }
       );
+      // const raw = await response.text();
+      // console.error(`❌ Error :`, raw);
 
+      // if (!response.ok) {
+      //   //const message = await response.text();
+      //   throw new Error(`HTTP ${response.status}: ${message}`);
+      // } else {
+      //   console.log("Response object: ", response);
+      // }
+
+      // const result: BatchResponse = await response.json();
+      // console.log("Response body: ", result);
+      // return result;
+
+      const text = await response.text(); // consume once
+
+      console.log("HTTP plain: ", text);
       if (!response.ok) {
-        const message = await response.text();
-        throw new Error(`HTTP ${response.status}: ${message}`);
-      } else {
-        console.log("Response object: ", response);
+        throw new Error(`HTTP ${response.status}: ${text}`);
       }
 
-      const result: BatchResponse = await response.json();
-      console.log("Response body: ", result);
+      let result: BatchResponse;
+      try {
+        result = JSON.parse(text);
+      } catch (e) {
+        console.error("Failed to parse JSON:", e);
+        throw new Error("Invalid JSON in response");
+      }
       return result;
     } catch (err: any) {
       setError(err);
@@ -115,6 +134,7 @@ export function useBatchController() {
 
 
   const createPipe = async (pipe: CreatePipeDto): Promise<BatchResponse | null> => {
+    console.log(`Creating PIPE with UID: ${pipe.uid}`);
     setLoading(true);
     setError(null);
 
@@ -162,6 +182,7 @@ export function useBatchController() {
   };
 
   const createAttribute = async (attribute: CreateAttributeDto): Promise<BatchResponse | null> => {
+    console.log(`Creating ATTRIBUTE with UID: ${attribute.uid}`);
     setLoading(true);
     setError(null);
 
@@ -184,7 +205,7 @@ export function useBatchController() {
           headers: {
             'Content-Type': 'application/json',
           },
-          credentials: 'include', 
+          credentials: 'include',
           body: JSON.stringify(payload),
         }
       );
@@ -209,6 +230,7 @@ export function useBatchController() {
   };
 
   const editNode = async (node: EditNodeDto): Promise<BatchResponse | null> => {
+    console.log(`Editing NODE with UID: ${node.uid}`);
     setLoading(true);
     setError(null);
 
@@ -236,7 +258,7 @@ export function useBatchController() {
           headers: {
             'Content-Type': 'application/json',
           },
-          credentials: 'include', 
+          credentials: 'include',
           body: JSON.stringify(payload),
         }
       );
