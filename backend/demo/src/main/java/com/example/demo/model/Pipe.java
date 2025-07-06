@@ -94,6 +94,10 @@ public class Pipe {
         return targetNode;
     }
 
+    public Integer getNumbersOfProps(){
+        return this.attributeContents.size();
+    }
+
     public void setTargetNode(Node targetNode) {
         this.targetNode = targetNode;
     }

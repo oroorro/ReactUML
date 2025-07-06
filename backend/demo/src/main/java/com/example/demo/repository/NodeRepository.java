@@ -17,6 +17,7 @@ public interface NodeRepository extends JpaRepository<Node, Integer> {
     """)
     List<Node> getAllNodesWithAttributesAndContents(@Param("userId") Integer userId);
     Optional<Node> findByUid(String uid);
+    List<Node> findAllByUserId(Integer userId);
 
 }
 

@@ -69,6 +69,10 @@ public class AttributeContent {
         return belongingNode;
     }
 
+    public String getBelongingNodeUid() {
+        return belongingNode.getUid();
+    }
+
     public void setBelongingNode(Node belongingNode) {
         this.belongingNode = belongingNode;
     }

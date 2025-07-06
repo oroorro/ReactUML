@@ -10,4 +10,5 @@ import com.example.demo.model.Node;
 public interface AttributeRepository extends JpaRepository<Attribute, Integer> {
     Optional<Attribute> findByUid(String uid);
     List<Attribute> findByNode(Node node);
+    List<Attribute> findByNodeUid(String nodeUid);
 }

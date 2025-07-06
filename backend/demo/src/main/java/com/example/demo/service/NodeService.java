@@ -3,16 +3,25 @@ package com.example.demo.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.example.demo.dto.NodeDTO;
 import com.example.demo.exception.InvalidRequestDataException;
+import com.example.demo.mapper.NodeMapper;
+import com.example.demo.model.Attribute;
 import com.example.demo.model.Node;
+import com.example.demo.model.Pipe;
 import com.example.demo.model.User;
+import com.example.demo.repository.AttributeRepository;
 import com.example.demo.repository.NodeRepository;
+import com.example.demo.repository.PipeRepository;
 import com.example.demo.repository.UserRepository;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -25,6 +34,12 @@ public class NodeService {
     @Autowired
     private final UserRepository userRepository;
 
+    @Autowired
+    private PipeRepository pipeRepository;
+
+    @Autowired
+    private AttributeRepository attributeRepository;
+
     public NodeService(NodeRepository nodeRepository, UserRepository userRepository) {
         this.nodeRepository = nodeRepository;
         this.userRepository = userRepository;
@@ -32,6 +47,50 @@ public class NodeService {
 
     public List<Node> getAllNodesWithAttributesAndContents(Integer userId) {
         return nodeRepository.getAllNodesWithAttributesAndContents(userId);
+    }
+
+    public List<NodeDTO> getFullTreeFromRoot(Integer userId) {
+        List<Node> allNodes = nodeRepository.findAllByUserId(userId);
+
+        Map<String, List<Node>> parentMap = new HashMap<>();
+        for (Node node : allNodes) {
+            String parentId = node.getParentId();
+            parentMap.computeIfAbsent(parentId, k -> new ArrayList<>()).add(node);
+        }
+
+        List<Node> roots = allNodes.stream()
+                .filter(Node::getIsStartingNode)
+                // .findFirst()
+                // .orElseThrow(() -> new RuntimeException("No root node found"));
+                .toList();
+
+        if (roots.isEmpty()) {
+            throw new RuntimeException("No starting nodes found for user " + userId);
+        }
+
+        // return buildTree(root, parentMap);
+        return roots.stream()
+        .map(root -> buildTree(root, parentMap))
+        .toList();
+    }
+
+    private NodeDTO buildTree(Node node, Map<String, List<Node>> parentMap) {
+        NodeDTO dto = NodeMapper.toDto(node);
+
+        // Get attributes by node ID
+        List<Attribute> attributes = attributeRepository.findByNodeUid(node.getUid());
+        dto.attributes = attributes.stream().map(NodeMapper::toDto).toList();
+
+        // Get pipes where node is source
+        List<Pipe> pipes = pipeRepository.findBySourceNodeUid(node.getUid());
+        dto.pipes = pipes.stream().map(NodeMapper::toDto).toList();
+
+        // Recursively build children
+        List<Node> children = parentMap.getOrDefault(node.getUid(), List.of());
+        dto.children = children.stream()
+                .map(child -> buildTree(child, parentMap))
+                .toList();
+        return dto;
     }
 
     public Node createNode(Integer userId, Node node) {
@@ -94,10 +153,10 @@ public class NodeService {
 
         if (rawNode.has("parentId")) {
             JsonNode r = rawNode.get("parentId");
-            if (r.isNull()) { //if parentId was set as null from frontend, set it as null 
+            if (r.isNull()) { // if parentId was set as null from frontend, set it as null
                 existing.setParentId(null);
                 modified = true;
-            } else { //parentId wasn't null, updated it with given value 
+            } else { // parentId wasn't null, updated it with given value
                 String newParentId = rawNode.get("parentId").asText();
                 if (!java.util.Objects.equals(existing.getParentId(), newParentId)) {
                     existing.setParentId(newParentId);

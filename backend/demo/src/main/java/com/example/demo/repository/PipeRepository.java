@@ -13,5 +13,6 @@ import com.example.demo.model.Pipe;
 public interface PipeRepository extends JpaRepository<Pipe, Integer> {
     Optional<Pipe> findByUid(String uid);
     List<Pipe> findBySourceNode(Node node);
+    List<Pipe> findBySourceNodeUid(String nodeUid);
 }
 

@@ -17,6 +17,7 @@ import { type } from '@testing-library/user-event/dist/type';
 
 import { useStoreApi } from './hook/useStore';  // does not work since it is above the store level 
 import { useBatchController } from './apiHook/useBatchController';
+import { useNodeApiAuth } from './apiHook/useNodeApiAuth';
 
 
 const NodeIndexInArray = {
@@ -442,11 +443,24 @@ function Flow() {
   const [contextMenu, setContextMenu] = useState(null);
   const nodeId = useRef(5);
   const { createNode, editNode, createAttribute, createPipe, loading, error } = useBatchController();
+  const { getAllNodesForUser} = useNodeApiAuth();
 
+  const fetchNodes = async () => {
+    try {
+      const nodes = await getAllNodesForUser(); // No userId needed!
+      console.log('Fetched nodes:', nodes);
+    } catch (err) {
+      console.error('Error fetching nodes:', err);
+    }
+  };
 
   useEffect(() => {
     if (contextMenu) console.log("contextMenu is set as ", contextMenu)
   }, [contextMenu])
+
+  useEffect(()=>{
+    fetchNodes();
+  },[])
 
 
 
@@ -462,7 +476,6 @@ function Flow() {
     // Only add parentId if it's provided
     if (parentId !== null) {
       nodeData.parentId = parentId;
-      nodeData.isStartingNode = false;
     }
 
     await createNode(nodeData);
@@ -629,10 +642,8 @@ function Flow() {
         if (foundNode.children != null) {
           console.log("create a child Node within a Node ");
           foundNode.children = [...foundNode.children, newChild];
-          handleCreateNode(newChild.color, newChild.id, false, 'StartNode');
-          
+          handleCreateNode(newChild.color, newChild.id, false, 'StartNode', foundNode.id);
           setNodes(nodes);
-          //create Pipe
         }
       }
       //add newly craete Node into NodeIndexInArray
