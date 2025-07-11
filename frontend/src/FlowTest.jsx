@@ -39,383 +39,6 @@ const attributeColors = ['import', 'reactInBuilt', 'variable', 'function', 'hook
 
 let stateManger = { id: '' };
 
-let initialNodes = [
-  {
-    id: '3',
-    position: { x: 50, y: 50 },
-    type: 'ReactNode',
-
-    data: {
-      indexMap: NodeIndexInArray,
-      stateManager: stateManger,
-      label: '3',
-      title: 'ZoomPane',
-      color: '#dfe7f5',
-      id: '1qlx7vx-jj26d3',
-      attributes: [
-        {
-          nameOfAttribute: 'import',
-          id: '1949d9bf4d6-03aee0',
-          totalNumberOfAttribute: 15,
-          AttributeContents: [
-            {
-              name: 'initialNodes',
-              belongsTo: 'X2D',
-              id: '194bef45ea2-031087'
-            }
-          ]
-        },
-        {
-          nameOfAttribute: 'reactInBuilt',
-          id: '1949d9bf4d6-12831d',
-          totalNumberOfAttribute: 5,
-          AttributeContents: [
-            {
-              name: 'UseEffect',
-              belongsTo: 'X2D',
-              id: '194bef45ea2-0faf69'
-            }
-          ]
-        },
-        {
-          nameOfAttribute: 'variable',
-          id: '1949d9bf4d6-170d62',
-          totalNumberOfAttribute: 9,
-          AttributeContents: [
-            {
-              name: 'names',
-              type: 'string[]',
-              id: '194bef45ea2-0aa763',
-              belongsTo: '1949d9bf4d6-170d62',
-            },
-            {
-              name: 'users',
-              type: 'User[]',
-              id: '194bef45ea2-14f0d1',
-              belongsTo: '1949d9bf4d6-170d62',
-            },
-            {
-              name: 'userLocation',
-              type: '[string, number, number]',
-              id: '194bef45ea2-05e1b3',
-              belongsTo: '1949d9bf4d6-170d62',
-            },
-            {
-              name: 'buttonColor',
-              type: "red | green | blue",
-              id: '194bef45ea2-0fe9ab',
-              belongsTo: 'XW2',
-            },
-            {
-              name: 'userId',
-              type: 'string | number',
-              id: '194bef45ea2-059bfb',
-              belongsTo: 'X2D',
-            },
-            {
-              name: 'currentUserRole',
-              type: 'UserRole',
-              id: '194bef45ea2-0d0fc0',
-              //nestedType: {string 'nameOfType': object 'typeDef'}
-              belongsTo: 'X2D',
-            }
-          ]
-        },
-      ],
-      children: [
-        {
-          title: "NodeRenderer",
-          numbersOfPropsGoingIn: 18,
-          color: '#ffa8d5',
-          state: 'select',
-          id: '1qlx7vx-107d1f',
-          renderChildrenDirection: 'horizontal',
-          attributes: [
-            {
-              nameOfAttribute: 'import',
-              id: '1949d9bf4d6-0d6927',
-              mute: 'notMuted',
-              totalNumberOfAttribute: 15,
-              AttributeContents: [
-                {
-                  name: 'initialNodes',
-                  belongsTo: 'X2D',
-                  id: '194bef45ea2-14d67a'
-                }
-              ]
-            },
-            {
-              nameOfAttribute: 'import',
-              id: '1949d9bf4d6-169917',
-              mute: 'notMuted',
-              totalNumberOfAttribute: 15,
-              AttributeContents: [
-
-              ]
-            },
-            {
-              nameOfAttribute: 'variable',
-              id: '1949d9bf4d6-108cbe',
-              totalNumberOfAttribute: 12,
-              mute: 'notMuted',
-              AttributeContents: [
-                {
-                  name: 'names',
-                  type: 'string[]',
-                  belongsTo: 'X2D',
-                  id: '194bef45ea2-057271'
-                },
-                {
-                  name: 'users',
-                  type: 'User[]',
-                  belongsTo: 'X2D',
-                  id: '194bef45ea2-16a5de'
-                },
-                {
-                  name: 'userLocation',
-                  type: '[string, number, number]',
-                  belongsTo: 'X2D',
-                  id: '194bef45ea2-0100ed',
-                },
-                {
-                  name: 'buttonColor',
-                  type: "red | green | blue",
-                  belongsTo: 'XW2',
-                  id: '194bef45ea2-115e9f',
-                },
-                {
-                  name: 'userId',
-                  type: 'string | number',
-                  belongsTo: 'X2D',
-                  id: '194bef45ea2-03569b'
-                },
-                {
-                  name: 'currentUserRole',
-                  type: 'UserRole',
-                  //nestedType: {string 'nameOfType': object 'typeDef'}
-                  belongsTo: 'X2D',
-                  id: '194bef45ea2-073467'
-                }
-              ]
-            },
-          ],
-          pipes: [
-            {
-              color: '#dfe7f5',
-              numbersOfProps: 18,
-              name: "Node",
-              id: '194c3ff3761-09dc10',
-              attributeContents: []
-            },
-          ],
-          children: [
-            {
-              title: "EdgeRenderer",
-              numbersOfPropsGoingIn: 15,
-              color: '#f26d1f',
-              id: '1qlx7vx-011409',
-              // state: 'select',
-              pipes: [
-                {
-                  color: '#dfe7f5',
-                  numbersOfProps: 8,
-                  id: '194c3ff3761-07d567',
-                  name: "Node",
-                  attributeContents:[],
-                },
-                {
-                  color: '#ffa8d5',
-                  numbersOfProps: 7,
-                  id: '194c3ff3761-183b89',
-                  name: "Edge",
-                  attributeContents:[],
-                },
-              ],
-              children: [
-                {
-                  title: "Pane",
-                  numbersOfPropsGoingIn: 1,
-                  color: '#49abf5',
-                  id: '1qlx7vx-def456',
-                  attributes: [
-                    {
-                      nameOfAttribute: 'import',
-                      id: '1949d9bf4d6-0e2d64',
-                      totalNumberOfAttribute: 15,
-                      AttributeContents: [
-                        {
-                          name: 'initialNodes',
-                          belongsTo: 'X2D',
-                          id: '194bef45ea2-04db24'
-                        }
-                      ]
-                    },
-                    {
-                      nameOfAttribute: 'reactInBuilt',
-                      id: '1949d9bf4d6-0816c7',
-                      totalNumberOfAttribute: 5,
-                      AttributeContents: [
-                        {
-                          typeOfReactInbuilt: 'UseEffect',
-                          reactInbuiltAttributes: [
-                            {
-                              name: '[Strarray, numArray]',
-                              belongsTo: '2X',
-                            }
-                          ],
-                          id: '194bef45ea2-01d4c4'
-                        }
-                      ]
-                    },
-                  ],
-                  pipes: [
-                    {
-                      color: '#dfe7f5',
-                      numbersOfProps: 4,
-                      name: "Node",
-                      id: '194c3ff3761-1597d2',
-                      attributeContents: [
-                        { name: "Attribute_1", type: "string", id: '194c3ff3762-185170' },
-                        { name: "Attribute_2", type: "number", id: '194c3ff3762-04eb6c' },
-                        { name: "Attribute_3", type: "boolean", id: '194c3ff3762-0bf8ac' },
-                        { name: "Attribute_4", type: "Date", id: '194c3ff3762-09dcac' },
-                      ]
-                    },
-                    {
-                      color: '#ffa8d5',
-                      numbersOfProps: 11,
-                      name: "Edge",
-                      id: '194c3ff3762-094898',
-                      attributeContents: [
-                        { name: "Attribute_8", type: "boolean", belongsTo: "OP", id: "194d3686e6a-12d4f9" },
-                        { name: "Attribute_9", type: "Date", belongsTo: "QR", id: "194d3686e6a-125ce6" },
-                        { name: "Attribute_10", type: "object", belongsTo: "ST", id: "194d3686e6a-00a0c5" },
-                        { name: "Attribute_11", type: "string", belongsTo: "UV", id: "194d3686e6a-144c1b" },
-                        { name: "Attribute_12", type: "number", belongsTo: "WX", id: "194d3686e6a-0eda68" },
-                        { name: "Attribute_13", type: "boolean", belongsTo: "YZ", id: "194d3686e6a-0b9c3a" },
-                        { name: "Attribute_14", type: "Date", belongsTo: "AA", id: "194d3686e6a-04b7df" },
-                        { name: "Attribute_15", type: "object", belongsTo: "BB", id: "194d3686e6a-0f1e64" },
-                        { name: "Attribute_16", type: "string", belongsTo: "CC", id: "194d3686e6a-05d9c3" },
-                        { name: "Attribute_17", type: "number", belongsTo: "DD", id: "194d3686e6a-06c9a4" },
-                        { name: "Attribute_18", type: "boolean", belongsTo: "EE", id: "194d3686e6a-0a12b7" },
-                        { name: "Attribute_19", type: "Date", belongsTo: "FF", id: "194d3686e6a-08fd6e" }
-                      ]
-                    },
-                    {
-                      color: 'blue',
-                      numbersOfProps: 6,
-                      name: "Edge",
-                      id: '194c3ff3762-16f298',
-                      attributeContents: [
-                        { name: "FirstName", type: "string", belongsTo: "AB", id: "194d36a4fa3-08dae3" },
-                        { name: "LastName", type: "string", belongsTo: "CD", id: "194d36a4fa3-02e7fb" },
-                        { name: "Age", type: "number", belongsTo: "EF", id: "194d36a4fa3-03286e" },
-                        { name: "IsActive", type: "boolean", belongsTo: "GH", id: "194d36a4fa3-0128af" },
-                        { name: "CreatedAt", type: "Date", belongsTo: "IJ", id: "194d36a4fa3-0ab8d9" },
-                        { name: "Address", type: "object", belongsTo: "KL", id: "194d36a4fa3-0f983d" }
-                      ]
-                    },
-                    {
-                      color: '#f26d1f',
-                      numbersOfProps: 11,
-                      name: "ZoomScale",
-                      id: '194c3ff3762-037d40',
-                      attributeContents: [
-                        { name: "PhoneNumber", type: "string", belongsTo: "MN", id: "194d36c42f2-055ae8" },
-                        { name: "Email", type: "string", belongsTo: "OP", id: "194d36c42f2-03f881" },
-                        { name: "Salary", type: "number", belongsTo: "QR", id: "194d36c42f2-072e2c" },
-                        { name: "IsVerified", type: "boolean", belongsTo: "ST", id: "194d36c42f2-09398c" },
-                        { name: "HireDate", type: "Date", belongsTo: "UV", id: "194d36c42f2-111ac1" },
-                        { name: "Department", type: "string", belongsTo: "WX", id: "194d36c42f2-05ad85" },
-                        { name: "Role", type: "string", belongsTo: "YZ", id: "194d36c42f2-01d8b0" },
-                        { name: "ProjectDetails", type: "object", belongsTo: "AA", id: "194d36c42f2-06b112" },
-                        { name: "Country", type: "string", belongsTo: "BB", id: "194d36c42f2-13ab7e" },
-                        { name: "City", type: "string", belongsTo: "CC", id: "194d36c42f2-079302" },
-                        { name: "PostalCode", type: "string", belongsTo: "DD", id: "194d36c42f2-14cf29" }
-                      ]
-                    },
-                  ],
-                },
-                {
-                  title: "Zoom",
-                  numbersOfPropsGoingIn: 4,
-                  color: '#e8c390',
-                  id: '1qlx7vx-093e0a',
-                  pipes: [
-                    {
-                      color: '#dfe7f5',
-                      numbersOfProps: 5,
-                      name: "Node",
-                      id: '194c3ff3762-068b33',
-                      attributeContents: []
-                    },
-                    {
-                      color: '#ffa8d5',
-                      numbersOfProps: 52,
-                      name: "Edge",
-                      id: '194c3ff3762-1390bf',
-                      attributeContents: []
-                    },
-                    {
-                      color: 'green',
-                      numbersOfProps: 3,
-                      name: "Edge",
-                      id: '194c3ff3762-02e023',
-                      attributeContents: []
-                    },
-                    {
-                      color: 'blue',
-                      numbersOfProps: 11,
-                      name: "Edge",
-                      id: '194c3ff3762-12cc15',
-                      attributeContents: []
-                    },
-                    {
-                      color: '#f26d1f',
-                      numbersOfProps: 1,
-                      name: "ZoomScale",
-                      id: '194c3ff3762-0d0e6a',
-                      attributeContents: []
-                    },
-                  ],
-                },
-                {
-                  title: 'ghost',
-                  type: 'ghost',
-                  id: '1qlx7vx-0106d3',
-                  pipes: [
-                    {
-                      color: '#dfe7f5',
-                      numbersOfProps: 5,
-                      name: "Node",
-                      id: '194c3ff3762-040828',
-                      attributeContents: []
-                    },
-                  ]
-                }
-              ],
-            },
-          ],
-        },
-        {
-          title: "Store",
-          numbersOfPropsGoingIn: 2,
-          color: '#ffdc6b',
-          id: '1qlx7vx-99k6j3',
-          pipes: [
-            {
-              color: '#dfe7f5',
-              numbersOfProps: 2,
-              name: "InitialNodes[]",
-              id: '194c3ff3762-091b09'
-            },
-          ],
-        },
-      ],
-    },
-  },
-
-];
 
 const initialEdges = [{ id: 'e1-2', source: '1', target: '2' }];
 
@@ -426,6 +49,15 @@ function generateUniqueId() {
   return `${timestamp}-${randomValue}`;
 }
 
+let initialNodes = [
+    // {
+    //   id: '3',
+    //   position: { x: 50, y: 50 },
+    //   type: 'ReactNode',
+    //   data: {}
+
+    // }
+]
 
 //used for creating Pipe 
 const ghostChild = {
@@ -554,7 +186,7 @@ function Flow() {
     initialNodes.push(newNode);
   }
 
-  function performUpdateElement(root, id, type, data = null) {
+  function performUpdateElement(root, id, type, data = null, e = null) {
 
     const newChild = {
       title: 'NewNode',
@@ -589,7 +221,7 @@ function Flow() {
           totalNumberOfAttribute: 0,
           AttributeContents: [
             {
-              name: 'initialNodes',
+              name: 'initial',
               belongsTo: 'X2D',
               id: generateUniqueId()
             }
@@ -630,7 +262,7 @@ function Flow() {
         addNodeToInitialNodes(
           nodes, {
           // id: generateUniqueId(),
-          position: { x: 100, y: 100 },
+          position: { x: e.clientX - 80 , y: e.clientY - 10 },
           type: 'ReactNode',
 
           data: {
@@ -666,13 +298,14 @@ function Flow() {
   //add/delete element; Node, Prop and Attribute
   //this function calls performUpdateElement 
   //then setNodes 
-  const updateElement = (type, data = null) => {
+  const updateElement = (type, data = null, e = null) => {
     //we need to format data in order to add Node correctly,
     //making data to be the root 
+    console.log("updateElement : ", e);
 
     const currentNodes = [...nodes.map(node => node.data)];
     //performUpdateElement(nodes[0].data.children, contextMenu.nodeId, type, data);
-    performUpdateElement(currentNodes, contextMenu.nodeId, type, data);
+    performUpdateElement(currentNodes, contextMenu.nodeId, type, data, e);
 
     const updatedNode = [...nodes];
 
@@ -810,8 +443,7 @@ function Flow() {
     // console.log("stateManger", stateManger);
     nodes[0].data.stateManager.id = ids[1];
     const updatedNode = [...nodes];
-    //console.log("updatedReactChild WITH DATA", initialNodes)
-    //update node
+  //update node
 
     const currentNodes = [...nodes.map(node => node.data)];
     //updateElementState('attribute', nodes[0].data.children, ids[0], 'editing');
@@ -1070,7 +702,7 @@ function Flow() {
           {!contextMenu.detail && <button onClick={() => moveToSubMenu("mute-2nd")}> Mute </button>}
           {!contextMenu.detail && <button onClick={() => moveToSubMenu("renderDirection")}> Display </button>}
 
-          {contextMenu.detail == 'create' && <button className='create_node_button' onClick={() => updateElement('Node')}> Node </button>}
+          {contextMenu.detail == 'create' && <button className='create_node_button' onClick={(e) => updateElement('Node', null, e)}> Node </button>}
           {contextMenu.detail == 'create' && <button className='create_pipe_button' onClick={() => updateElement('Prop')}> Prop </button>}
           {contextMenu.detail == 'create' && <button className='create_attribute_button' onClick={() => moveToSubMenu("create-attribute-2nd")}> Attribute </button>}
 

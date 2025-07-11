@@ -21,7 +21,7 @@ public class AttributeContent {
     @JoinColumn(name = "pipe_id") 
     private Pipe pipe;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = true)
     @JoinColumn(name = "belonging_node_id")
     private Node belongingNode;
 

@@ -52,26 +52,28 @@ public class AttributeContentService {
         Node belongingNode = content.getBelongingNode();
 
         if (pipe == null && attribute == null) {
-            throw new IllegalArgumentException("AttributeContent must be linked to either an Attribute or a Pipe");
+            throw new IllegalArgumentException("AttributeContentService: AttributeContent must be linked to either an Attribute or a Pipe");
         }
 
         if (pipe != null && pipe.getUid() != null) {
             Pipe resolvedPipe = pipeRepository.findByUid(pipe.getUid())
-                    .orElseThrow(() -> new EntityNotFoundException("Pipe not found with UID: " + pipe.getUid()));
+                    .orElseThrow(() -> new EntityNotFoundException("AttributeContentService: Pipe not found with UID: " + pipe.getUid()));
             content.setPipe(resolvedPipe);
         }
 
         //  Attach managed Attribute entity if present
         if (attribute != null && attribute.getUid() != null) {
             Attribute resolvedAttribute = attributeRepository.findByUid(attribute.getUid())
-                    .orElseThrow(() -> new EntityNotFoundException("Attribute not found with UID: " + attribute.getUid()));
+                    .orElseThrow(() -> new EntityNotFoundException("AttributeContentService: Attribute not found with UID: " + attribute.getUid()));
             content.setAttribute(resolvedAttribute);
+        }else {
+            content.setAttribute(null); //  Ensure transient attribute reference is cleared
         }
 
         //  Attach managed BelongingNode entity if present
         if (belongingNode != null && belongingNode.getUid() != null) {
             Node resolvedNode = nodeRepository.findByUid(belongingNode.getUid())
-                    .orElseThrow(() -> new EntityNotFoundException("Node not found with UID: " + belongingNode.getUid()));
+                    .orElseThrow(() -> new EntityNotFoundException("AttributeContentService: Node not found with UID: " + belongingNode.getUid()));
             content.setBelongingNode(resolvedNode);
         }
 

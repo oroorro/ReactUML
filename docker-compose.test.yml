@@ -1,11 +1,14 @@
 services:
   backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    depends_on:
+      - mysql
     environment:
       - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/reactumlapp
-      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-prod}
+      - SPRING_PROFILES_ACTIVE=test
 
-  frontend:
-    command: npm run dev  # Start Vite dev server
 
   mysql:
     image: mysql:8.0
@@ -14,3 +17,4 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: reactumlapp
+

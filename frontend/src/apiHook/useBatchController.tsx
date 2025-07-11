@@ -5,7 +5,7 @@ export interface CreateNodeDto {
   name: string;
   isStartingNode: boolean;
   parentId?: string;
-  userId: number;
+  //userId: number;
 }
 
 export interface EditNodeDto {
@@ -28,6 +28,21 @@ export interface CreateAttributeDto {
   totalNumber?: number;
   mute?: boolean;
   node: {
+    uid: string;
+  };
+}
+
+export interface CreateAttributeContentDto {
+  uid: string;
+  name: string;
+  holdingValue?: string;
+  attribute?: {
+    uid: string | null;
+  };
+  pipe?: {
+    uid: string;
+  };
+  belongingNode: {
     uid: string;
   };
 }
@@ -229,6 +244,104 @@ export function useBatchController() {
     }
   };
 
+  const createContentAttribute = async (attributeContent: CreateAttributeContentDto): Promise<BatchResponse | null> => {
+    console.log(`Creating ATTRIBUTE CONTENT with UID: `,attributeContent.belongingNode.uid, attributeContent.pipe?.uid, attributeContent.uid);
+    setLoading(true);
+    setError(null);
+
+    const payload: BatchRequestPayload = {
+      created: {
+        nodes: [],
+        pipes: [],
+        attributes: [],
+        attributeContents: [attributeContent],
+      },
+      updated: null,
+      deleted: null,
+    };
+
+    try {
+      const response = await fetch(
+        `${'http://localhost:8080'}/batch`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+          body: JSON.stringify(payload),
+        }
+      );
+
+      if (!response.ok) {
+        const message = await response.text();
+        throw new Error(`HTTP ${response.status}: ${message}`);
+      } else {
+        console.log("Response object: ", response);
+      }
+
+      const result: BatchResponse = await response.json();
+      console.log("Response body: ", result);
+      return result;
+    } catch (err: any) {
+      setError(err);
+      console.error('Create attribute content error:', err);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const deleteContentAttribute = async (uid: string): Promise<BatchResponse | null> => {
+    console.log(`Deleting ATTRIBUTE CONTENT with UID: ${uid}`);
+    setLoading(true);
+    setError(null);
+
+    const payload: BatchRequestPayload = {
+      created: {
+        nodes: [],
+        pipes: [],
+        attributes: [],
+        attributeContents: [],
+      },
+      updated: null,
+      deleted: {
+        attributeContentUids: [uid],
+      },
+    };
+
+    try {
+      const response = await fetch(
+        `${'http://localhost:8080'}/batch`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+          body: JSON.stringify(payload),
+        }
+      );
+
+      if (!response.ok) {
+        const message = await response.text();
+        throw new Error(`HTTP ${response.status}: ${message}`);
+      } else {
+        console.log("Response object: ", response);
+      }
+
+      const result: BatchResponse = await response.json();
+      console.log("Response body: ", result);
+      return result;
+    } catch (err: any) {
+      setError(err);
+      console.error('Delete attribute content error:', err);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const editNode = async (node: EditNodeDto): Promise<BatchResponse | null> => {
     console.log(`Editing NODE with UID: ${node.uid}`);
     setLoading(true);
@@ -282,5 +395,5 @@ export function useBatchController() {
     }
   };
 
-  return { createNode, createAttribute, createPipe, editNode, loading, error };
+  return { createNode, createAttribute, createPipe, createContentAttribute, deleteContentAttribute, editNode, loading, error };
 }

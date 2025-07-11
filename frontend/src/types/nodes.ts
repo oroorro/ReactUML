@@ -161,7 +161,7 @@ export type Pipe = {
   numbersOfProps: number // number of props that is associated with current pipe color
   name?: string //name of prop that is associated with current pipe color
   id: UniqueId //unique id that each pipe has 
-  props: AttributeContent[], //will be using AttributeContent type since, it has all of necessary data type, we may change the name of AttributeContent in the future 
+  attributeContents: AttributeContent[], //will be using AttributeContent type since, it has all of necessary data type, we may change the name of AttributeContent in the future 
   //props = {name:string, type:string, belongsTo:string }
   mute?: boolean,
   state?: 'editing' | 'none' | 'selected' | 'showOptions' | 'selecting' | 'muted'

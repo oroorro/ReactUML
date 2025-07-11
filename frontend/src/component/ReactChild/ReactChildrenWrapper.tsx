@@ -149,7 +149,8 @@ const ReactChildrenWrapper = ({
                     //get Node with child.id 
                     const nodes = getNodes();
 
-                    const reactChild: ReactChild[] = [nodes[0].data];
+                    //const reactChild: ReactChild[] = [nodes[0].data];
+                    const reactChild: ReactChild[] = nodes.map(node => node.data);
 
                     let node = findNodeById(child.id, reactChild);
 

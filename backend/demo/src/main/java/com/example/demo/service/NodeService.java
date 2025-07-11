@@ -140,6 +140,10 @@ public class NodeService {
         return false;
     }
 
+    public Optional<Node> getNodeByUid(String uid) {
+        return nodeRepository.findByUid(uid);
+    }
+
     @Transactional
     public Node editNode(Node updated, JsonNode rawNode) {
         if (updated == null || updated.getUid() == null) {
