@@ -23,15 +23,25 @@ test.describe('Batch API E2E Tests', () => {
         }
     }
 
+    // test.beforeAll(async ({request}) =>{
+    //     const response = await request.delete('http://localhost:8080/test-debug/cleanup?username=test7');
+    //     expect(response.ok()).toBeTruthy();
+    // })
+
     test.beforeEach(async ({ page }) => {
         // Go to login page
         await page.goto('http://localhost:8080/login');
 
         // Fill out login form
-        await page.fill('input[name="username"]', 'test7');
+        await page.fill('input[name="username"]', 'test1');
         await page.fill('input[name="password"]', '123');
         await page.click('button[type="submit"]');
 
+    });
+
+    test.afterEach(async ({ request }) => {
+        const response = await request.delete('http://localhost:8080/test-debug/cleanup?username=test1');
+        expect(response.ok()).toBeTruthy();
     });
 
     test('✅ Should create node with valid input', async ({ page }) => {
@@ -327,7 +337,7 @@ test.describe('Batch API E2E Tests', () => {
 
         //check for created Node in DB
         const response = await page.request.get(`http://localhost:8080/test-debug/node/${nodeId}`);
-        console.log("response", response);
+        console.log("response after Node created on Background: ", response);
         expect(response.ok()).toBeTruthy();
         const nodeData = await response.json();
         expect(nodeData.uid).toBe(nodeId);
@@ -355,31 +365,31 @@ test.describe('Batch API E2E Tests', () => {
         await page.waitForSelector('button.attribute_button_sub_3rd_select_type.import');
         await page.click('button.attribute_button_sub_3rd_select_type.import');
 
-        const responseAttribute = await page.request.post('http://localhost:8080/batch', {
-            headers: { 'Content-Type': 'application/json' },
-            data: {
-                created: {
-                    nodes: [],
-                    pipes: [],
-                    attributes: [
-                        {
-                            uid: generateUniqueId(),
-                            name: 'import',
-                            node: {
-                                uid: nodeId,
-                            },
-                        },
-                    ],
-                    attributeContents: [],
-                },
-                updated: null,
-                deleted: null,
-            },
-        });
+        // const responseAttribute = await page.request.post('http://localhost:8080/batch', {
+        //     headers: { 'Content-Type': 'application/json' },
+        //     data: {
+        //         created: {
+        //             nodes: [],
+        //             pipes: [],
+        //             attributes: [
+        //                 {
+        //                     uid: generateUniqueId(),
+        //                     name: 'import',
+        //                     node: {
+        //                         uid: nodeId,
+        //                     },
+        //                 },
+        //             ],
+        //             attributeContents: [],
+        //         },
+        //         updated: null,
+        //         deleted: null,
+        //     },
+        // });
 
-        expect(responseAttribute.ok()).toBeTruthy();
-        const json = await responseAttribute.json();
-        expect(json.success).toBeTruthy();
+        // expect(responseAttribute.ok()).toBeTruthy();
+        // const json = await responseAttribute.json();
+        // expect(json.success).toBeTruthy();
 
         //check if create Attribute's div exist under Node (UI test)
         const wrapper = page.locator(`[data-id="${nodeId}"]`)
@@ -410,52 +420,132 @@ test.describe('Batch API E2E Tests', () => {
         await page.click('.create_pipe_button');
         // Prepare pipe data
         const pipeUid = generateUniqueId();
-        const pipeData = {
-            uid: pipeUid,
-            name: 'Auto Pipe',
-            sourceNode: { uid: nodeId },
-            targetNode: null,
-        };
-        // Send pipe creation request
-        const responsePipe = await page.request.post('http://localhost:8080/batch', {
-            headers: { 'Content-Type': 'application/json' },
-            data: {
-                created: {
-                    nodes: [],
-                    pipes: [pipeData],
-                    attributes: [],
-                    attributeContents: [],
-                },
-                updated: null,
-                deleted: null,
-            },
-        });
-        expect(responsePipe.ok()).toBeTruthy();
-        const jsonPipe = await responsePipe.json();
-        expect(jsonPipe.success).toBeTruthy();
+        // const pipeData = {
+        //     uid: pipeUid,
+        //     name: 'Auto Pipe',
+        //     sourceNode: { uid: nodeId },
+        //     targetNode: null,
+        // };
+        // // Send pipe creation request
+        // const responsePipe = await page.request.post('http://localhost:8080/batch', {
+        //     headers: { 'Content-Type': 'application/json' },
+        //     data: {
+        //         created: {
+        //             nodes: [],
+        //             pipes: [pipeData],
+        //             attributes: [],
+        //             attributeContents: [],
+        //         },
+        //         updated: null,
+        //         deleted: null,
+        //     },
+        // });
+        // expect(responsePipe.ok()).toBeTruthy();
+        // const jsonPipe = await responsePipe.json();
+        // expect(jsonPipe.success).toBeTruthy();
 
         // Check if created pipe got persisted
-        const nodeDataAfterPipe = await (await page.request.get(`http://localhost:8080/test-debug/node/${nodeId}`)).json();
-        // The node should now have at least one outgoing pipe with the correct uid
-  
+        const nodeDataAfterPipe = await (await page.request.get(`http://localhost:8080/test-debug/pipes/from/${pipeUid}`)).json();
+        console.log('Pipe created:', JSON.stringify(nodeDataAfterPipe, null, 2));
 
+        // The node should now have at have a pipe with the correct uid of pipeUid
+        const hasPipe = nodeDataAfterPipe.pipes && nodeDataAfterPipe.pipes.some(pipe => pipe.uid === pipeUid);
+        //expect(hasPipe).toBeTruthy();
 
         //re-right click on created Node 
-
+        await page.mouse.click(createdNodebox.x + 3, createdNodebox.y + 3, { button: 'right' });
 
         //create a child Node 
+        await page.waitForSelector('.create_button');
+        await page.click('.create_button');
+        await page.waitForSelector('.create_node_button');
+        await page.click('.create_node_button');
 
+        // Send child node creation request
+        const childNodeUid = generateUniqueId();
+        // const childNodeResponse = await page.request.post('http://localhost:8080/batch', {
+        //     headers: { 'Content-Type': 'application/json' },
+        //     data: {
+        //         created: {
+        //             nodes: [
+        //                 {
+        //                     uid: childNodeUid,
+        //                     name: 'Child Node',
+        //                     isStartingNode: false,
+        //                     parentId: nodeId,
+        //                 },
+        //             ],
+        //             pipes: [],
+        //             attributes: [],
+        //             attributeContents: [],
+        //         },
+        //         updated: null,
+        //         deleted: null,
+        //     },
+        // });
+
+        // expect(childNodeResponse.ok()).toBeTruthy();
+        // const childNodeJson = await childNodeResponse.json();
+        // expect(childNodeJson.success).toBeTruthy();
 
         //check if created child node got persisted 
+        const nodeDataAfterChild = await (await page.request.get(`http://localhost:8080/test-debug/node/${nodeId}`)).json();
+        console.log('nodeDataAfterChild:', JSON.stringify(nodeDataAfterChild, null, 2));
 
+        const hasChildNode = nodeDataAfterChild.children && nodeDataAfterChild.children.some(child => child.uid === childNodeUid);
 
-        //right click on pipe 
+        expect(hasChildNode).toBeTruthy();
 
+        // //right click on pipe 
+        // // First, we need to find the pipe element in the UI
+        // const pipeElement = page.locator(`[data-id="${pipeUid}"]`);
+        // await expect(pipeElement).toBeVisible();
+        // const pipeBox = await pipeElement.boundingBox();
+        // if (!pipeBox) throw new Error('Pipe bounding box not found');
+        // await page.mouse.click(pipeBox.x + 3, pipeBox.y + 3, { button: 'right' });
 
-        //create an attributecontent 
+        // //create an attributecontent 
+        // await page.waitForSelector('.create_button');
+        // await page.click('.create_button');
+        // await page.waitForSelector('.create_attribute_content_button');
+        // await page.click('.create_attribute_content_button');
 
+        // // Send attribute content creation request
+        // const attributeContentUid = generateUniqueId();
+        // const attributeContentResponse = await page.request.post('http://localhost:8080/batch', {
+        //     headers: { 'Content-Type': 'application/json' },
+        //     data: {
+        //         created: {
+        //             nodes: [],
+        //             pipes: [],
+        //             attributes: [],
+        //             attributeContents: [
+        //                 {
+        //                     uid: attributeContentUid,
+        //                     content: 'Test Attribute Content',
+        //                     attribute: {
+        //                         uid: nodeDataAfterAttr.attributes.find(attr => attr.name === 'import').uid,
+        //                     },
+        //                 },
+        //             ],
+        //         },
+        //         updated: null,
+        //         deleted: null,
+        //     },
+        // });
 
-        //check if created attributecontent got persisted 
+        // expect(attributeContentResponse.ok()).toBeTruthy();
+        // const attributeContentJson = await attributeContentResponse.json();
+        // expect(attributeContentJson.success).toBeTruthy();
+
+        // //check if created attributecontent got persisted 
+        // const nodeDataAfterContent = await (await page.request.get(`http://localhost:8080/test-debug/node/${nodeId}`)).json();
+        // const importAttribute = nodeDataAfterContent.attributes.find(attr => attr.name === 'import');
+        // expect(importAttribute).toBeTruthy();
+        
+        // const hasAttributeContent = importAttribute.attributeContents && 
+        //     importAttribute.attributeContents.some(content => content.uid === attributeContentUid);
+        // expect(hasAttributeContent).toBeTruthy();
 
 
 

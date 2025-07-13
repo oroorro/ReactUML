@@ -5,8 +5,10 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 public interface NodeRepository extends JpaRepository<Node, Integer> {
      @Query("""
@@ -18,6 +20,11 @@ public interface NodeRepository extends JpaRepository<Node, Integer> {
     List<Node> getAllNodesWithAttributesAndContents(@Param("userId") Integer userId);
     Optional<Node> findByUid(String uid);
     List<Node> findAllByUserId(Integer userId);
+
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM Node n WHERE n.userId = :userId")
+    void deleteByUserId(@Param("userId") Integer userId);
 
 }
 

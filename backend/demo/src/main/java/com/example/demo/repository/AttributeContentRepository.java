@@ -4,6 +4,10 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.demo.model.Attribute;
 import com.example.demo.model.AttributeContent;
@@ -21,5 +25,13 @@ public interface AttributeContentRepository extends JpaRepository<AttributeConte
     Optional <AttributeContent> findByUid(String uid);
     
     void deleteByAttribute(Attribute attribute); 
-}
 
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM AttributeContent ac WHERE ac.attribute.id IN (" +
+           "SELECT a.id FROM Attribute a WHERE a.node.userId = :userId" +
+           ") OR ac.pipe.id IN (" +
+           "SELECT p.id FROM Pipe p WHERE p.sourceNode.userId = :userId OR p.targetNode.userId = :userId" +
+           ")")
+    void deleteByUserId(@Param("userId") Integer userId);
+}

@@ -604,7 +604,7 @@ function Flow() {
         ...foundNode.children,
         type == 'Node' ? newChild : ghostChild,
       ];
-      handleCreatePipe(foundNode.color, id);
+      handleCreatePipe(ghostChild.id, foundNode.color, id);
     }
     //creating Node and Prop
     else {

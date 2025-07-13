@@ -6,9 +6,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.dto.NodeDTO;
@@ -18,6 +20,7 @@ import com.example.demo.repository.PipeRepository;
 import com.example.demo.repository.NodeRepository;
 import com.example.demo.security.CustomUserDetails;
 import com.example.demo.service.NodeService;
+import com.example.demo.service.TestCleanupService;
 
 @RestController
 @RequestMapping("/test-debug")
@@ -30,11 +33,14 @@ public class TestController {
 
     private final NodeRepository nodeRepository;
 
+    private final TestCleanupService testCleanupService;
+
     @Autowired
-    public TestController(NodeService nodeService, PipeRepository pipeRepository, NodeRepository nodeRepository) {
+    public TestController(NodeService nodeService, PipeRepository pipeRepository, NodeRepository nodeRepository, TestCleanupService testCleanupService) {
         this.nodeService = nodeService;
         this.pipeRepository = pipeRepository;
         this.nodeRepository = nodeRepository;
+        this.testCleanupService = testCleanupService;
     }
     @GetMapping("/tree")
     public ResponseEntity<List<NodeDTO>> getTestTree(@AuthenticationPrincipal CustomUserDetails user) {
@@ -57,5 +63,11 @@ public class TestController {
     @GetMapping("/pipes/from/{uid}")
     public ResponseEntity<List<Pipe>> getPipes(@PathVariable String uid) {
         return ResponseEntity.ok(pipeRepository.findBySourceNodeUid(uid));
+    }
+
+    @DeleteMapping("/cleanup")
+    public ResponseEntity<?> cleanupForUser(@RequestParam String username) {
+        testCleanupService.deleteAllDataForUser(username);
+        return ResponseEntity.ok().build();
     }
 }
