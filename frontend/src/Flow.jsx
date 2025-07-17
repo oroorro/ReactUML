@@ -221,14 +221,14 @@ let initialNodes = [
                   numbersOfProps: 8,
                   id: '194c3ff3761-07d567',
                   name: "Node",
-                  attributeContents:[],
+                  attributeContents: [],
                 },
                 {
                   color: '#ffa8d5',
                   numbersOfProps: 7,
                   id: '194c3ff3761-183b89',
                   name: "Edge",
-                  attributeContents:[],
+                  attributeContents: [],
                 },
               ],
               children: [
@@ -427,23 +427,7 @@ function generateUniqueId() {
 }
 
 
-//used for creating Pipe 
-const ghostChild = {
-  title: 'ghost',
-  numbersOfPropsGoingIn: 1,
-  color: '#abcdef',
-  id: generateUniqueId(),
-  pipes: [
-    {
-      color: '#dfe7f5',
-      numbersOfProps: 18,
-      name: "Node",
-      id: generateUniqueId(),
-    },
-  ],
-  attributes: [],
-  type: 'ghost',
-};
+
 
 function Flow() {
 
@@ -452,7 +436,7 @@ function Flow() {
   const [contextMenu, setContextMenu] = useState(null);
   const nodeId = useRef(5);
   const { createNode, editNode, createAttribute, createPipe, loading, error } = useBatchController();
-  const { getAllNodesForUser} = useNodeApiAuth();
+  const { getAllNodesForUser } = useNodeApiAuth();
 
   const fetchNodes = async () => {
     try {
@@ -467,9 +451,9 @@ function Flow() {
     if (contextMenu) console.log("contextMenu is set as ", contextMenu)
   }, [contextMenu])
 
-  useEffect(()=>{
+  useEffect(() => {
     fetchNodes();
-  },[])
+  }, [])
 
 
 
@@ -554,7 +538,25 @@ function Flow() {
     initialNodes.push(newNode);
   }
 
-  function performUpdateElement(root, id, type, data = null) {
+  function performUpdateElement(root, id, type, data = null, e = null) {
+
+    //used for creating Pipe 
+    const ghostChild = {
+      title: 'ghost',
+      numbersOfPropsGoingIn: 1,
+      color: '#abcdef',
+      id: generateUniqueId(),
+      pipes: [
+        {
+          color: '#dfe7f5',
+          numbersOfProps: 18,
+          name: "Node",
+          id: generateUniqueId(),
+        },
+      ],
+      attributes: [],
+      type: 'ghost',
+    };
 
     const newChild = {
       title: 'NewNode',
@@ -599,19 +601,22 @@ function Flow() {
       handleCreateAttribute(attributeUid, id, data ? data : 'empty', 0, false)
     }
     else if (type == 'Prop') {
+      //console.log("create a prop");
       //creating a pipe
       foundNode.children = [
         ...foundNode.children,
         type == 'Node' ? newChild : ghostChild,
       ];
-      handleCreatePipe(ghostChild.id, foundNode.color, id);
+      //console.log("pipe Id: ", ghostChild.id, "parentNode Id: ", id)
+      handleCreateNode(ghostChild.color, ghostChild.id, false, 'ghost', foundNode.id);
+      handleCreatePipe(ghostChild.pipes[0].id, foundNode.color, id);
     }
     //creating Node and Prop
     else {
       //create Node button has clicked on background, create a Node in the backgroun
       if (!foundNode) {
         const nodeUid = generateUniqueId();
-        const color = generateRandomHexColor(); 
+        const color = generateRandomHexColor();
         handleCreateNode(color, nodeUid, true, 'StartNode');
         // nodes.children = [
         //   ...(nodes.children || []),
@@ -630,7 +635,7 @@ function Flow() {
         addNodeToInitialNodes(
           nodes, {
           // id: generateUniqueId(),
-          position: { x: 100, y: 100 },
+          position: { x: e.clientX - 80, y: e.clientY - 10 },
           type: 'ReactNode',
 
           data: {
@@ -643,7 +648,7 @@ function Flow() {
           }
         });
 
-        console.log("nodes", nodes);
+        //console.log("nodes", nodes);
       }
       //create button was not triggered in the background
       else {
@@ -666,13 +671,13 @@ function Flow() {
   //add/delete element; Node, Prop and Attribute
   //this function calls performUpdateElement 
   //then setNodes 
-  const updateElement = (type, data = null) => {
+  const updateElement = (type, data = null, e = null) => {
     //we need to format data in order to add Node correctly,
     //making data to be the root 
 
     const currentNodes = [...nodes.map(node => node.data)];
     //performUpdateElement(nodes[0].data.children, contextMenu.nodeId, type, data);
-    performUpdateElement(currentNodes, contextMenu.nodeId, type, data);
+    performUpdateElement(currentNodes, contextMenu.nodeId, type, data, e);
 
     const updatedNode = [...nodes];
 
@@ -1070,7 +1075,7 @@ function Flow() {
           {!contextMenu.detail && <button onClick={() => moveToSubMenu("mute-2nd")}> Mute </button>}
           {!contextMenu.detail && <button onClick={() => moveToSubMenu("renderDirection")}> Display </button>}
 
-          {contextMenu.detail == 'create' && <button className='create_node_button' onClick={() => updateElement('Node')}> Node </button>}
+          {contextMenu.detail == 'create' && <button className='create_node_button' onClick={() => updateElement('Node', null, e)}> Node </button>}
           {contextMenu.detail == 'create' && <button className='create_pipe_button' onClick={() => updateElement('Prop')}> Prop </button>}
           {contextMenu.detail == 'create' && <button className='create_attribute_button' onClick={() => moveToSubMenu("create-attribute-2nd")}> Attribute </button>}
 

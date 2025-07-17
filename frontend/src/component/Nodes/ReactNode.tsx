@@ -572,7 +572,7 @@ const ReactNode = ({
                 }
                 {/* //filter children by it's state being mute|muting|unmuted or undefined  */}
 
-                {filteredMutingReactChilds &&
+                {filteredMutingReactChilds.length > 0 &&
                     <ReactChildrenWrapper
                         reactChildren={filteredMutingReactChilds}
                         renderChildren={renderChildren}
@@ -592,7 +592,7 @@ const ReactNode = ({
                         renderDirection={renderDirection}
                     />
                 }
-                {filteredUnMutedReactChilds &&
+                {filteredUnMutedReactChilds.length > 0 &&
                     <ReactChildrenWrapper
                         reactChildren={filteredUnMutedReactChilds}
                         renderChildren={renderChildren}

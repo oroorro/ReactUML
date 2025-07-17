@@ -50,32 +50,16 @@ function generateUniqueId() {
 }
 
 let initialNodes = [
-    // {
-    //   id: '3',
-    //   position: { x: 50, y: 50 },
-    //   type: 'ReactNode',
-    //   data: {}
+  // {
+  //   id: '3',
+  //   position: { x: 50, y: 50 },
+  //   type: 'ReactNode',
+  //   data: {}
 
-    // }
+  // }
 ]
 
-//used for creating Pipe 
-const ghostChild = {
-  title: 'ghost',
-  numbersOfPropsGoingIn: 1,
-  color: '#abcdef',
-  id: generateUniqueId(),
-  pipes: [
-    {
-      color: '#dfe7f5',
-      numbersOfProps: 18,
-      name: "Node",
-      id: generateUniqueId(),
-    },
-  ],
-  attributes: [],
-  type: 'ghost',
-};
+
 
 function Flow() {
 
@@ -84,7 +68,7 @@ function Flow() {
   const [contextMenu, setContextMenu] = useState(null);
   const nodeId = useRef(5);
   const { createNode, editNode, createAttribute, createPipe, loading, error } = useBatchController();
-  const { getAllNodesForUser} = useNodeApiAuth();
+  const { getAllNodesForUser } = useNodeApiAuth();
 
   const fetchNodes = async () => {
     try {
@@ -99,9 +83,9 @@ function Flow() {
     if (contextMenu) console.log("contextMenu is set as ", contextMenu)
   }, [contextMenu])
 
-  useEffect(()=>{
-    fetchNodes();
-  },[])
+  useEffect(() => {
+    //fetchNodes();
+  }, [])
 
 
 
@@ -188,6 +172,24 @@ function Flow() {
 
   function performUpdateElement(root, id, type, data = null, e = null) {
 
+    //used for creating Pipe 
+    const ghostChild = {
+      title: 'ghost',
+      numbersOfPropsGoingIn: 1,
+      color: '#abcdef',
+      id: generateUniqueId(),
+      pipes: [
+        {
+          color: '#dfe7f5',
+          numbersOfProps: 18,
+          name: "Node",
+          id: generateUniqueId(),
+        },
+      ],
+      attributes: [],
+      type: 'ghost',
+    };
+
     const newChild = {
       title: 'NewNode',
       numbersOfPropsGoingIn: 1,
@@ -231,38 +233,28 @@ function Flow() {
       handleCreateAttribute(attributeUid, id, data ? data : 'empty', 0, false)
     }
     else if (type == 'Prop') {
+      //console.log("create a prop");
       //creating a pipe
       foundNode.children = [
         ...foundNode.children,
         type == 'Node' ? newChild : ghostChild,
       ];
-      handleCreatePipe(ghostChild.id, foundNode.color, id);
+      //console.log("pipe Id: ", ghostChild.id, "parentNode Id: ", id)
+      handleCreateNode(ghostChild.color, ghostChild.id, false, 'ghost', foundNode.id);
+      handleCreatePipe(ghostChild.pipes[0].id, foundNode.color, id);
     }
     //creating Node and Prop
     else {
       //create Node button has clicked on background, create a Node in the backgroun
       if (!foundNode) {
         const nodeUid = generateUniqueId();
-        const color = generateRandomHexColor(); 
+        const color = generateRandomHexColor();
         handleCreateNode(color, nodeUid, true, 'StartNode');
-        // nodes.children = [
-        //   ...(nodes.children || []),
-        //   {
-        //     title: 'StartNode',
-        //     id: nodeUid,
-        //     numbersOfPropsGoingIn: 0,
-        //     color: color,
-        //     renderChildrenDirection: 'horizontaol',
-        //     children: [],
-        //     attributes: [],
-        //     pipes: [],
-        //   },
-        // ]; 
 
         addNodeToInitialNodes(
           nodes, {
           // id: generateUniqueId(),
-          position: { x: e.clientX - 80 , y: e.clientY - 10 },
+          position: { x: e.clientX - 80, y: e.clientY - 10 },
           type: 'ReactNode',
 
           data: {
@@ -275,7 +267,7 @@ function Flow() {
           }
         });
 
-        console.log("nodes", nodes);
+        //console.log("nodes", nodes);
       }
       //create button was not triggered in the background
       else {
@@ -443,7 +435,7 @@ function Flow() {
     // console.log("stateManger", stateManger);
     nodes[0].data.stateManager.id = ids[1];
     const updatedNode = [...nodes];
-  //update node
+    //update node
 
     const currentNodes = [...nodes.map(node => node.data)];
     //updateElementState('attribute', nodes[0].data.children, ids[0], 'editing');
@@ -754,8 +746,8 @@ function Flow() {
           id={contextMenu.nodeId}
           datatype="contextMenu"
         >
-          {!contextMenu.detail && <button datatype="contextMenu" onClick={() => moveToSubMenu("mute-2nd-pipe")}>Mute</button>}
-          {!contextMenu.detail && <button datatype="contextMenu" onClick={() => elementStateHandler('pipe', 'editing')} >add</button>}
+          {!contextMenu.detail && <button datatype="contextMenu" className='pipe_mute_button' onClick={() => moveToSubMenu("mute-2nd-pipe")}>Mute</button>}
+          {!contextMenu.detail && <button datatype="contextMenu" className='pipe_add_button' onClick={() => elementStateHandler('pipe', 'editing')} >add</button>}
 
           {contextMenu.detail == 'mute-2nd-pipe' &&
             <div className='flex flex-col' datatype="contextMenu">

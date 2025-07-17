@@ -48,7 +48,7 @@ const PipeContentWrapper = ({
                         // belongsTo: pipe.id , we need Node's id that is trying to pass down this prop
                     }
                     //adding newly created AttributeContent with previously existing AttributeContents in target Attribute 
-                    targetPipe.attributeContents = [...targetPipe.attributeContents as AttributeContent[], newAttributeContet];
+                    targetPipe.attributeContents = [...(targetPipe.attributeContents ?? []), newAttributeContet];
 
                     
 
@@ -227,20 +227,20 @@ const PipeContentWrapper = ({
                     >+</button>}
 
                 {pipe.state == 'editing' &&
-                    <div className="relative flex">
+                    <div className="relative flex contentAttribute_editing_input_wrapper">
                         <input ref={contentNameRef} style={{ width: '120px' }} />
                         <span>: </span>
                         <input ref={contentTypeRef} style={{ width: '120px' }} />
                         <div >
                             <button 
-                                className="bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold px-2 rounded-xl"
+                                className="contentAttribute_editing_add_button bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold px-2 rounded-xl"
                                 onClick={() => handleUpdateAttributeContent('add')}
                             >
                                 +
                             </button>
                             {/**change current pipe'state to be 'none' */}
                             <button 
-                                className="bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold px-2 rounded-xl"
+                                className="contentAttribute_editing_add_cancel bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold px-2 rounded-xl"
                                 onClick={() => handleUpdateAttributeContent('cancelAdd')}
                             >
                                 x

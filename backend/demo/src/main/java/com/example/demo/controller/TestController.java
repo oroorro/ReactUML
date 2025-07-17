@@ -1,6 +1,7 @@
 package com.example.demo.controller;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
@@ -60,9 +61,13 @@ public class TestController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/pipes/from/{uid}")
-    public ResponseEntity<List<Pipe>> getPipes(@PathVariable String uid) {
-        return ResponseEntity.ok(pipeRepository.findBySourceNodeUid(uid));
+    @GetMapping("/pipes/byUid/{uid}")
+    public ResponseEntity<Pipe> getPipeByUid(@PathVariable String uid) {
+        
+        //return ResponseEntity.ok(pipeRepository.findByUid(uid));
+        return pipeRepository.findByUid(uid)
+            .map(ResponseEntity::ok)
+            .orElse(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/cleanup")
