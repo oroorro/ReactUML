@@ -1,6 +1,13 @@
 import { test, expect, Request } from '@playwright/test';
 import { generateUniqueId } from '../util/util';
 
+// Extend Window interface for E2E testing
+declare global {
+    interface Window {
+        frontendNodes?: any;
+    }
+}
+
 test.describe('Batch API E2E Tests', () => {
 
 
@@ -37,8 +44,8 @@ test.describe('Batch API E2E Tests', () => {
     });
 
     test.afterEach(async ({ request }) => {
-        // const response = await request.delete('http://localhost:8080/test-debug/cleanup?username=test1');
-        // expect(response.ok()).toBeTruthy();
+        const response = await request.delete('http://localhost:8080/test-debug/cleanup?username=test1');
+        expect(response.ok()).toBeTruthy();
     });
 
     test('✅ Should create node with valid input', async ({ page }) => {
@@ -382,33 +389,6 @@ test.describe('Batch API E2E Tests', () => {
         // Wait for the response to complete
         await batchResponse.finished();
 
-        // const responseAttribute = await page.request.post('http://localhost:8080/batch', {
-        //     headers: { 'Content-Type': 'application/json' },
-        //     data: {
-        //         created: {
-        //             nodes: [],
-        //             pipes: [],
-        //             attributes: [
-        //                 {
-        //                     uid: generateUniqueId(),
-        //                     name: 'import',
-        //                     node: {
-        //                         uid: nodeId,
-        //                     },
-        //                 },
-        //             ],
-        //             attributeContents: [],
-        //         },
-        //         updated: null,
-        //         deleted: null,
-        //     },
-        // });
-
-        // expect(responseAttribute.ok()).toBeTruthy();
-        // const json = await responseAttribute.json();
-        // expect(json.success).toBeTruthy();
-
-
         //check if created attribute got persisted 
         // Fetch node data from backend and check if attribute exists
         const nodeDataAfterAttr = await (await page.request.get(`http://localhost:8080/test-debug/node/${nodeId}`)).json();
@@ -443,6 +423,17 @@ test.describe('Batch API E2E Tests', () => {
         const hasImportAttrUid = nodeDataAfterAttr.attributes && nodeDataAfterAttr.attributes.some(attr => attr.uid === attributeUid);
         expect(hasImportAttrUid).toBeTruthy();
 
+        //call test-debug/attribute/attributeUid 
+        const attributeResponse = await page.request.get(`http://localhost:8080/test-debug/attribute/${attributeUid}`);
+
+        //handle error case 
+        if (attributeResponse.ok()) {
+            const attributeData = await attributeResponse.json();
+            console.log('attributeData:', JSON.stringify(attributeData, null, 2));
+            expect(attributeData.uid).toBe(attributeUid);
+        } else {
+            throw new Error(`Attribute not found - status: ${attributeResponse.status()} - response: ${await attributeResponse.text()}`);
+        }
 
         //re-right click on created Node 
         await page.mouse.click(createdNodebox.x + 3, createdNodebox.y + 3, { button: 'right' });
@@ -626,9 +617,11 @@ test.describe('Batch API E2E Tests', () => {
         const parentDiv = page.locator('.contentAttribute_editing_input_wrapper');
 
         const inputs = parentDiv.locator('input');
+        const attributecontent_1_name = 'foo';
+        const attributecontent_1_holdingValue = 'bar';
 
-        await inputs.nth(0).fill('foo');
-        await inputs.nth(1).fill('bar');
+        await inputs.nth(0).fill(attributecontent_1_name);
+        await inputs.nth(1).fill(attributecontent_1_holdingValue);
 
         await page.waitForSelector('.contentAttribute_editing_add_button');
         await page.click('.contentAttribute_editing_add_button');//calls create attributecontent
@@ -642,34 +635,194 @@ test.describe('Batch API E2E Tests', () => {
         // Wait for the response to complete
         await batchResponseForCreatingContentAttrib.finished();
 
+        //get attributecontent uid from UI 
+        const attributecontentDiv = page.locator(`div.attributeContentWrapper`)
+        const attributecontentDataUidFromUI = await attributecontentDiv.getAttribute('data-id');
+        const attributecontentUidFromUI = attributecontentDataUidFromUI?.split('+')[2];
 
-        // //check if created attributecontent got persisted 
-        // const nodeDataAfterContent = await (await page.request.get(`http://localhost:8080/test-debug/node/${nodeId}`)).json();
-        // const importAttribute = nodeDataAfterContent.attributes.find(attr => attr.name === 'import');
-        // expect(importAttribute).toBeTruthy();
-
-        // const hasAttributeContent = importAttribute.attributeContents && 
-        //     importAttribute.attributeContents.some(content => content.uid === attributeContentUid);
-        // expect(hasAttributeContent).toBeTruthy();
-
+        //call attributeContent api /test-debug 
         const pipeResponseforContentAttrib = await page.request.get(`http://localhost:8080/test-debug/pipes/byUid/${pipeUidFromUI}`);
         let pipeDataAfterContentAttrib: any = null;
 
         if (pipeResponse.ok()) {
-            //pipeDataAfterContentAttrib = await pipeResponseforContentAttrib.json();
-            //console.log('pipeDataAfterContentAttrib:', JSON.stringify(pipeDataAfterContentAttrib, null, 2));
-            const rawText = await pipeResponseforContentAttrib.text();
-console.log('Raw response:', rawText);
+            pipeDataAfterContentAttrib = await pipeResponseforContentAttrib.json();
+            console.log('pipeDataAfterContentAttrib:', JSON.stringify(pipeDataAfterContentAttrib, null, 2));
+            // const rawText = await pipeResponseforContentAttrib.text();
+            // console.log('Raw response:', rawText);
             // The pipe should  have a sourceNode to ghostNode uid 
-            ///expect(nodeDataAfterPipe.uid).toBe(pipeUidFromUI);
+            expect(pipeDataAfterContentAttrib.attributeContents[0].uid).toBe(attributecontentUidFromUI);
         } else {
-            
             throw new Error(`Pipe not found - status: ${pipeResponseforContentAttrib.status()} - response: ${await pipeResponseforContentAttrib.text()}`);
         }
 
+        //call http://localhost:8080/test-debug/attributeContent/attributecontentDataUidFromUI
+        try {
+            const attrContentResponse = await page.request.get(`http://localhost:8080/test-debug/attribute-content/${attributecontentUidFromUI}`);
+            if (attrContentResponse.ok()) {
+                const attrContentData = await attrContentResponse.json();
+                //console.log('AttributeContent data:', JSON.stringify(attrContentData, null, 2));
+                //assert and evalute with attributecontentUidFromUI with AttributeContent.uid
+                //assert and evalute with attributecontent_1_name with AttributeContent.name
+                //assert and evalute with attributecontent_1_holdingValue with AttributeContent.holdingValue  
+                //assert and evalute with nodeId with AttributeContent.belongingNodeUid
+                expect(attrContentData.uid).toBe(attributecontentUidFromUI);
+                expect(attrContentData.name).toBe(attributecontent_1_name);
+                expect(attrContentData.holdingValue).toBe(attributecontent_1_holdingValue);
+                //expect(attrContentData.belongingNodeUid).toBe(nodeId);
+            } else {
+                const errorText = await attrContentResponse.text();
+                throw new Error(`AttributeContent not found - status: ${attrContentResponse.status()} - response: ${errorText}`);
+            }
+        } catch (err) {
+            console.error('Error fetching AttributeContent:', err);
+            throw err; // rethrow to fail the test
+        }
+
+        // Call /tree API and compare with frontend nodes
+        try {
+            const treeResponse = await page.request.get('http://localhost:8080/test-debug/tree');
+            if (treeResponse.ok()) {
+                const treeData = await treeResponse.json();
+                console.log('Tree API response:', JSON.stringify(treeData, null, 2));
+                
+                // Get frontend nodes state
+                const frontendNodes = await page.evaluate(() => {
+                    // Access nodes through the global variable exposed by Flow component
+                    return (window as any).frontendNodes || null;
+                });
+                
+                console.log('Frontend nodes:', JSON.stringify(frontendNodes, null, 2));
+                
+                // Compare the structures
+                if (frontendNodes) {
+                    // Basic structure comparison
+                    expect(Array.isArray(frontendNodes)).toBe(true);
+                    expect(Array.isArray(treeData)).toBe(true);
+                    
+                    // Compare node counts
+                    expect(frontendNodes.length).toBe(treeData.length);
+
+                                         //----------- compare firstly created node in the background-----------------
+                     // First node of treeData is the root node 
+                     let firstCreateNode = treeData[0];
+                     // First node of frontendNodes is the root node 
+                     let firstCreateNodeFromFrontend = frontendNodes[0];
+
+                    //  // Compare firstCreateNode and firstCreateNodeFromFrontend
+                    //  expect(firstCreateNode.uid).toBe(firstCreateNodeFromFrontend.id);
+                    //  expect(firstCreateNode.name).toBe(firstCreateNodeFromFrontend.data.title);
+                     
+                     // Compare the root node's data.id with nodeId (should be same as nodeId)
+                     expect(firstCreateNodeFromFrontend.data.id).toBe(nodeId);
+                     
+                     // Get the ghost child node (first child)
+                     let ghostChildFromFrontend = firstCreateNodeFromFrontend.data.children[0];
+                     let ghostChildFromBackend = firstCreateNode.children[0];
+
+                     //log both ghostChildFromFrontend and ghostChildFromBackend
+                     //console.log('ghostChildFromFrontend:', JSON.stringify(ghostChildFromFrontend, null, 2));
+                     console.log('ghostChildFromBackend:', JSON.stringify(ghostChildFromBackend, null, 2));
+                     
+                     // Ghost node should have title "ghost"
+                     expect(ghostChildFromFrontend.title).toBe("ghost");
+                     expect(ghostChildFromBackend.title).toBe("ghost");
+                     
+                     // Ghost node's id should be same as ghostNodeUidFromUI
+                     expect(ghostChildFromFrontend.id).toBe(ghostNodeUidFromUI);
+                     expect(ghostChildFromBackend.uid).toBe(ghostNodeUidFromUI); 
+                     
+                     // Ghost node should have pipes array with length of 1
+                     expect(ghostChildFromFrontend.pipes.length).toBe(1);
+                     expect(ghostChildFromBackend.pipes.length).toBe(1);
+                     
+                     // Ghost node's pipe id should be same as pipeUidFromUI
+                     expect(ghostChildFromFrontend.pipes[0].id).toBe(pipeUidFromUI);
+                     expect(ghostChildFromBackend.pipes[0].id).toBe(pipeUidFromUI);
+                     
+                     // Ghost node's pipe should have attributeContents array with length of 1
+                     expect(ghostChildFromFrontend.pipes[0].attributeContents.length).toBe(1);
+                     expect(ghostChildFromBackend.pipes[0].attributeContents.length).toBe(1);
+                     
+                     // Ghost node's pipe's attributeContent id should be same as attributecontentUidFromUI
+                     expect(ghostChildFromFrontend.pipes[0].attributeContents[0].id).toBe(attributecontentUidFromUI);
+                     expect(ghostChildFromBackend.pipes[0].attributeContents[0].id).toBe(attributecontentUidFromUI);
+                     
+                     // Ghost node's pipe's attributeContent name should be "foo"
+                     expect(ghostChildFromFrontend.pipes[0].attributeContents[0].name).toBe("foo");
+                     expect(ghostChildFromBackend.pipes[0].attributeContents[0].name).toBe("foo");
+                     
+                     // Ghost node's pipe's attributeContent type should be "bar"
+                     expect(ghostChildFromFrontend.pipes[0].attributeContents[0].type).toBe("bar");
+                     expect(ghostChildFromBackend.pipes[0].attributeContents[0].type).toBe("bar");
+                     
+                     // Get the child node (second child)
+                     let childNodeFromFrontend = firstCreateNodeFromFrontend.data.children[1];
+                     let childNodeFromBackend = firstCreateNode.children[1];
+                     
+                     // Child node should have title "NewNode"
+                     expect(childNodeFromFrontend.title).toBe("NewNode");
+                     expect(childNodeFromBackend.name).toBe("NewNode");
+                     
+                     // Child node's id should be same as childNodeUIDFromUI
+                     expect(childNodeFromFrontend.id).toBe(childNodeUIDFromUI);
+                     expect(childNodeFromBackend.uid).toBe(childNodeUIDFromUI);
+                     
+                     // Child node should have pipes array with length of 1
+                     expect(childNodeFromFrontend.pipes.length).toBe(1);
+                     expect(childNodeFromBackend.pipes.length).toBe(1);
+                     
+                     // Child node's pipe id should be same as childNodeUIDFromUI (for the pipe)
+                     expect(childNodeFromFrontend.pipes[0].id).toBe(childNodeUIDFromUI);
+                     expect(childNodeFromBackend.pipes[0].uid).toBe(childNodeUIDFromUI);
+                     
+                     // Root node should have attributes array with length of 1
+                     expect(firstCreateNodeFromFrontend.data.attributes.length).toBe(1);
+                     expect(firstCreateNode.attributes.length).toBe(1);
+                     
+                     // Root node's attribute id should be same as attributeUid
+                     expect(firstCreateNodeFromFrontend.data.attributes[0].id).toBe(attributeUid);
+                     expect(firstCreateNode.attributes[0].id).toBe(attributeUid);
+                     
+                     // Root node's attribute name should be "import"
+                     expect(firstCreateNodeFromFrontend.data.attributes[0].nameOfAttribute).toBe("import");
+                     expect(firstCreateNode.attributes[0].name).toBe("import");
 
 
+
+
+                    // Compare specific nodes by ID
+                    // frontendNodes.forEach((frontendNode, index) => {
+                        
+                    //     expect(frontendNode.id).toBe(backendNode.uid);
+                    //     expect(frontendNode.data.title).toBe(backendNode.name);
+                        
+                    //     // Compare attributes if they exist
+                    //     if (frontendNode.data.attributes && backendNode.attributes) {
+                    //         expect(frontendNode.data.attributes.length).toBe(backendNode.attributes.length);
+                    //     }
+                        
+                    //     // Compare children if they exist
+                    //     if (frontendNode.data.children && backendNode.children) {
+                    //         expect(frontendNode.data.children.length).toBe(backendNode.children.length);
+                    //     }
+                    // });
+                    
+                    console.log('✅ Frontend and backend nodes match!');
+                } else {
+                    console.warn('⚠️ Could not access frontend nodes state');
+                }
+                
+            } else {
+                const errorText = await treeResponse.text();
+                throw new Error(`Tree API failed - status: ${treeResponse.status()} - response: ${errorText}`);
+            }
+        } catch (err) {
+            console.error('Error comparing frontend/backend nodes:', err);
+            throw err;
+        }
     });
+
+    //call /tree api 
 
 
 });

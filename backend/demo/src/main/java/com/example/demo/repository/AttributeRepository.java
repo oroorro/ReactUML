@@ -16,6 +16,9 @@ public interface AttributeRepository extends JpaRepository<Attribute, Integer> {
     List<Attribute> findByNode(Node node);
     List<Attribute> findByNodeUid(String nodeUid);
 
+    @Query("SELECT a FROM Attribute a WHERE a.node.user.id = :userId")
+    List<Attribute> findByUserId(@Param("userId") Integer userId);
+
     @Modifying
     @Transactional
     @Query("DELETE FROM Attribute a WHERE a.node.userId = :userId")

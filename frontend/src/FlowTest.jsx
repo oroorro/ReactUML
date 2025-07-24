@@ -84,7 +84,7 @@ function Flow() {
   }, [contextMenu])
 
   useEffect(() => {
-    //fetchNodes();
+    fetchNodes();
   }, [])
 
 
@@ -170,38 +170,46 @@ function Flow() {
     initialNodes.push(newNode);
   }
 
-  function performUpdateElement(root, id, type, data = null, e = null) {
+  async function performUpdateElement(root, id, type, data = null, e = null) {
 
+    const ghostNodeUid = generateUniqueId();
     //used for creating Pipe 
     const ghostChild = {
       title: 'ghost',
       numbersOfPropsGoingIn: 1,
       color: '#abcdef',
-      id: generateUniqueId(),
+      id: ghostNodeUid,
       pipes: [
         {
           color: '#dfe7f5',
           numbersOfProps: 18,
           name: "Node",
           id: generateUniqueId(),
+          sourceNode:{
+            uid: ghostNodeUid
+          }
         },
       ],
       attributes: [],
       type: 'ghost',
     };
 
+    const newChildUid = generateUniqueId();
     const newChild = {
       title: 'NewNode',
       numbersOfPropsGoingIn: 1,
       color: generateRandomHexColor(),
-      id: generateUniqueId(),
+      id: newChildUid,
       pipes: [
         {
           color: '#dfe7f5',
           numbersOfProps: 18,
           name: "Node",
           id: generateUniqueId(),
-          attributeContents: []
+          attributeContents: [],
+          sourceNode:{
+            uid: newChildUid
+          }
         },
       ],
       attributes: [],
@@ -241,7 +249,7 @@ function Flow() {
       ];
       //console.log("pipe Id: ", ghostChild.id, "parentNode Id: ", id)
       handleCreateNode(ghostChild.color, ghostChild.id, false, 'ghost', foundNode.id);
-      handleCreatePipe(ghostChild.pipes[0].id, foundNode.color, id);
+      handleCreatePipe(ghostChild.pipes[0].id, foundNode.color, ghostChild.id);
     }
     //creating Node and Prop
     else {
@@ -277,7 +285,7 @@ function Flow() {
           console.log("create a child Node within a Node ");
           foundNode.children = [...foundNode.children, newChild];
           handleCreateNode(newChild.color, newChild.id, false, 'StartNode', foundNode.id);
-          handleCreatePipe(newChild.pipes[0].id, foundNode.color, id);
+          handleCreatePipe(newChild.pipes[0].id, foundNode.color, newChild.id);
           setNodes(nodes);
         }
       }
@@ -290,14 +298,14 @@ function Flow() {
   //add/delete element; Node, Prop and Attribute
   //this function calls performUpdateElement 
   //then setNodes 
-  const updateElement = (type, data = null, e = null) => {
+  const updateElement = async (type, data = null, e = null) => {
     //we need to format data in order to add Node correctly,
     //making data to be the root 
     console.log("updateElement : ", e);
 
     const currentNodes = [...nodes.map(node => node.data)];
     //performUpdateElement(nodes[0].data.children, contextMenu.nodeId, type, data);
-    performUpdateElement(currentNodes, contextMenu.nodeId, type, data, e);
+    await performUpdateElement(currentNodes, contextMenu.nodeId, type, data, e);
 
     const updatedNode = [...nodes];
 
@@ -448,6 +456,15 @@ function Flow() {
 
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+
+    // Expose nodes state to window for E2E testing
+    useEffect(() => {
+      if (typeof window !== 'undefined') {
+        // Expose nodes state to window for E2E testing
+        window.frontendNodes = nodes;
+        console.log("frontendNodes", window.frontendNodes);
+      }
+    }, [nodes]);
 
   const onConnect = useCallback((params) => setEdges((eds) => addEdge(params, eds)), [setEdges]);
 
@@ -694,8 +711,8 @@ function Flow() {
           {!contextMenu.detail && <button onClick={() => moveToSubMenu("mute-2nd")}> Mute </button>}
           {!contextMenu.detail && <button onClick={() => moveToSubMenu("renderDirection")}> Display </button>}
 
-          {contextMenu.detail == 'create' && <button className='create_node_button' onClick={(e) => updateElement('Node', null, e)}> Node </button>}
-          {contextMenu.detail == 'create' && <button className='create_pipe_button' onClick={() => updateElement('Prop')}> Prop </button>}
+          {contextMenu.detail == 'create' && <button className='create_node_button' onClick={async (e) => await updateElement('Node', null, e)}> Node </button>}
+          {contextMenu.detail == 'create' && <button className='create_pipe_button' onClick={async () => await updateElement('Prop')}> Prop </button>}
           {contextMenu.detail == 'create' && <button className='create_attribute_button' onClick={() => moveToSubMenu("create-attribute-2nd")}> Attribute </button>}
 
           {/** mute 2nd layer of sub-menu */}
@@ -717,7 +734,7 @@ function Flow() {
           {/** Attribute 2nd layer of sub-menu*/}
           {contextMenu.detail == 'create-attribute-2nd' &&
             <div className='flex flex-col' datatype="contextMenu">
-              <button className="attribute_button_sub_just_create" onClick={() => updateElement('Attribute')}> Just Create </button>
+              <button className="attribute_button_sub_just_create" onClick={async () => await updateElement('Attribute')}> Just Create </button>
               <button className="attribute_button_sub_select_type" onClick={() => moveToSubMenu("create-attribute-3rd")} > Select Type </button>
             </div>
           }
@@ -726,7 +743,7 @@ function Flow() {
           {contextMenu.detail == 'create-attribute-3rd' &&
             <div className='flex flex-col' datatype="contextMenu">
               {attributeColors.map((attribute) => (
-                <button className={`attribute_button_sub_3rd_select_type ${attribute}`} onClick={() => updateElement('Attribute', attribute)}>{attribute}</button>
+                <button className={`attribute_button_sub_3rd_select_type ${attribute}`} onClick={async () => await updateElement('Attribute', attribute)}>{attribute}</button>
               ))}
             </div>
           }

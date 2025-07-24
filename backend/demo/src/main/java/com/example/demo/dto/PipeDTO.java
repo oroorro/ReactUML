@@ -8,4 +8,5 @@ public class PipeDTO {
     public String color;
     public Integer numbersOfProps;
     public List<AttributeContentDTO> attributeContents;
+    public String sourceNodeUid;    
 }

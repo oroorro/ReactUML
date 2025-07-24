@@ -49,6 +49,7 @@ public class NodeMapper {
         dto.name = pipe.getName();
         dto.color = pipe.getColor();
         dto.numbersOfProps = pipe.getNumbersOfProps();
+        dto.sourceNodeUid = pipe.getSourceNode().getUid();
 
         dto.attributeContents = pipe.getAttributeContents() != null
             ? pipe.getAttributeContents().stream()

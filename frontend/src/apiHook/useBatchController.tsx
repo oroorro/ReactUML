@@ -150,6 +150,9 @@ export function useBatchController() {
 
   const createPipe = async (pipe: CreatePipeDto): Promise<BatchResponse | null> => {
     console.log(`Creating PIPE with UID: ${pipe.uid}`);
+    //log entire pipe object
+    console.log("Pipe object:", pipe);
+
     setLoading(true);
     setError(null);
 

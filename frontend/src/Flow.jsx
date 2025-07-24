@@ -457,6 +457,7 @@ function Flow() {
 
 
 
+
   const handleCreateNode = async (color, nodeUid, isStartingNode, name, parentId = null) => {
 
     const nodeData = {
@@ -829,7 +830,14 @@ function Flow() {
 
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
-
+  // Expose nodes state to window for E2E testing
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      // Expose nodes state to window for E2E testing
+      window.frontendNodes = nodes;
+      console.log("frontendNodes", window.frontendNodes);
+    }
+  }, [nodes]);
   const onConnect = useCallback((params) => setEdges((eds) => addEdge(params, eds)), [setEdges]);
 
   function FlowClickHandler(event) {
@@ -1075,7 +1083,7 @@ function Flow() {
           {!contextMenu.detail && <button onClick={() => moveToSubMenu("mute-2nd")}> Mute </button>}
           {!contextMenu.detail && <button onClick={() => moveToSubMenu("renderDirection")}> Display </button>}
 
-          {contextMenu.detail == 'create' && <button className='create_node_button' onClick={() => updateElement('Node', null, e)}> Node </button>}
+          {contextMenu.detail == 'create' && <button className='create_node_button' onClick={(e) => updateElement('Node', null, e)}> Node </button>}
           {contextMenu.detail == 'create' && <button className='create_pipe_button' onClick={() => updateElement('Prop')}> Prop </button>}
           {contextMenu.detail == 'create' && <button className='create_attribute_button' onClick={() => moveToSubMenu("create-attribute-2nd")}> Attribute </button>}
 

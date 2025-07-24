@@ -83,6 +83,12 @@ public class NodeService {
 
         // Get pipes where node is source
         List<Pipe> pipes = pipeRepository.findBySourceNodeUid(node.getUid());
+
+        //log pipes by looping through pipes
+        System.err.println("pipes found for given source node:" + node.getUid() + " are:");
+        for (Pipe pipe : pipes) {
+            System.err.println("pipe:" + pipe.getUid());
+        }
         dto.pipes = pipes.stream().map(NodeMapper::toDto).toList();
 
         // Recursively build children

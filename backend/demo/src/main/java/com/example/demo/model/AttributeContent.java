@@ -1,5 +1,7 @@
 package com.example.demo.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.*;
 
 @Entity
@@ -19,6 +21,7 @@ public class AttributeContent {
 
     @ManyToOne(optional = true)
     @JoinColumn(name = "pipe_id") 
+    @JsonBackReference
     private Pipe pipe;
 
     @ManyToOne(optional = true)
