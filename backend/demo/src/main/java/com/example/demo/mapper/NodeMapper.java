@@ -65,6 +65,7 @@ public class NodeMapper {
         dto.uid = content.getUid();
         dto.name = content.getName();
         dto.belongsTo = content.getBelongingNodeUid();
+        dto.type = content.getHoldingValue();
         return dto;
     }
 }

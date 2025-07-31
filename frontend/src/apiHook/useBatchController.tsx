@@ -201,6 +201,7 @@ export function useBatchController() {
 
   const createAttribute = async (attribute: CreateAttributeDto): Promise<BatchResponse | null> => {
     console.log(`Creating ATTRIBUTE with UID: ${attribute.uid}`);
+    console.log("attribute object:", attribute);
     setLoading(true);
     setError(null);
 
@@ -248,7 +249,9 @@ export function useBatchController() {
   };
 
   const createContentAttribute = async (attributeContent: CreateAttributeContentDto): Promise<BatchResponse | null> => {
-    console.log(`Creating ATTRIBUTE CONTENT with UID: `,attributeContent.belongingNode.uid, attributeContent.pipe?.uid, attributeContent.uid);
+    //console.log(`Creating ATTRIBUTE CONTENT with UID: `,attributeContent.belongingNode.uid, attributeContent.pipe?.uid, attributeContent.uid);
+    //log entire attributeContent object
+    console.log("AttributeContent object:", attributeContent);
     setLoading(true);
     setError(null);
 
@@ -398,5 +401,66 @@ export function useBatchController() {
     }
   };
 
-  return { createNode, createAttribute, createPipe, createContentAttribute, deleteContentAttribute, editNode, loading, error };
+  // New flexible batch function
+  const createBatch = async (entities: {
+    nodes?: CreateNodeDto[];
+    pipes?: CreatePipeDto[];
+    attributes?: CreateAttributeDto[];
+    attributeContents?: CreateAttributeContentDto[];
+  }): Promise<BatchResponse | null> => {
+    console.log('Creating BATCH with entities:', entities);
+    setLoading(true);
+    setError(null);
+
+    const payload: BatchRequestPayload = {
+      created: {
+        nodes: entities.nodes || [],
+        pipes: entities.pipes || [],
+        attributes: entities.attributes || [],
+        attributeContents: entities.attributeContents || [],
+      },
+      updated: null,
+      deleted: null,
+    };
+
+    try {
+      const response = await fetch(
+        `${'http://localhost:8080'}/batch`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+          body: JSON.stringify(payload),
+        }
+      );
+
+      const text = await response.text();
+      console.log('Batch response:', text);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${text}`);
+      }
+
+      let result: BatchResponse;
+      try {
+        result = JSON.parse(text);
+      } catch (e) {
+        console.error("Failed to parse JSON:", e);
+        throw new Error("Invalid JSON in response");
+      }
+      
+      console.log('Batch result:', result);
+      return result;
+    } catch (err: any) {
+      setError(err);
+      console.error('Create batch error:', err);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return { createNode, createAttribute, createPipe, createContentAttribute, deleteContentAttribute, editNode, createBatch, loading, error };
 }

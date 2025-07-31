@@ -67,7 +67,7 @@ function Flow() {
   const interactingIdRef = useRef(null);
   const [contextMenu, setContextMenu] = useState(null);
   const nodeId = useRef(5);
-  const { createNode, editNode, createAttribute, createPipe, loading, error } = useBatchController();
+  const { createNode, editNode, createAttribute, createPipe, createBatch, loading, error } = useBatchController();
   const { getAllNodesForUser } = useNodeApiAuth();
 
   const fetchNodes = async () => {
@@ -230,11 +230,11 @@ function Flow() {
           id: attributeUid,
           totalNumberOfAttribute: 0,
           AttributeContents: [
-            {
-              name: 'initial',
-              belongsTo: 'X2D',
-              id: generateUniqueId()
-            }
+            // {
+            //   name: 'initial',
+            //   belongsTo: 'X2D',
+            //   id: generateUniqueId()
+            // }
           ]
         },
       ];
@@ -248,8 +248,24 @@ function Flow() {
         type == 'Node' ? newChild : ghostChild,
       ];
       //console.log("pipe Id: ", ghostChild.id, "parentNode Id: ", id)
-      handleCreateNode(ghostChild.color, ghostChild.id, false, 'ghost', foundNode.id);
-      handleCreatePipe(ghostChild.pipes[0].id, foundNode.color, ghostChild.id);
+      // handleCreateNode(ghostChild.color, ghostChild.id, false, 'ghost', foundNode.id);
+      // handleCreatePipe(ghostChild.pipes[0].id, foundNode.color, ghostChild.id);
+      const result = await createBatch({
+        nodes: [{
+          uid: ghostChild.id,
+          name: 'ghost',
+          isStartingNode: false,
+          parentId: foundNode.id,
+          color: ghostChild.color
+        }],
+        pipes: [{
+          uid: ghostChild.pipes[0].id,
+          name: "Pipe Name",
+          color: foundNode.color,
+          sourceNode: { uid: ghostChild.id },
+          targetNode: null
+        }]
+      });
     }
     //creating Node and Prop
     else {
@@ -284,8 +300,24 @@ function Flow() {
         if (foundNode.children != null) {
           console.log("create a child Node within a Node ");
           foundNode.children = [...foundNode.children, newChild];
-          handleCreateNode(newChild.color, newChild.id, false, 'StartNode', foundNode.id);
-          handleCreatePipe(newChild.pipes[0].id, foundNode.color, newChild.id);
+          //handleCreateNode(newChild.color, newChild.id, false, 'StartNode', foundNode.id);
+          //handleCreatePipe(newChild.pipes[0].id, foundNode.color, newChild.id);
+          const result = await createBatch({
+            nodes: [{
+              uid: newChild.id,
+              name: newChild.title,
+              isStartingNode: false,
+              parentId: foundNode.id,
+              color: newChild.color
+            }],
+            pipes: [{
+              uid: newChild.pipes[0].id,
+              name: "Pipe Name",
+              color: foundNode.color,
+              sourceNode: { uid: newChild.id },
+              targetNode: null
+            }]
+          });
           setNodes(nodes);
         }
       }

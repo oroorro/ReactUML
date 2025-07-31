@@ -454,20 +454,22 @@ test.describe('Batch API E2E Tests', () => {
         await page.click('.create_pipe_button');//will trigger calling POST call to http://localhost:8080/batch , one for pipe and one for Node(ghost)
 
         // const secondBatchRequest = await secondBatchRequestPromise;
-        while (batchRequests.length < 2) {
-            await new Promise(res => setTimeout(res, 100));
-          }
+        // while (batchRequests.length < 2) {
+        //     await new Promise(res => setTimeout(res, 100));
+        //   }
           
-        // Wait for both responses to finish
-        for (const req of batchRequests) {
-            const resp = await req.response();
-            if (resp) {
-            await resp.finished();
-            }
-        }  
+        // // Wait for both responses to finish
+        // for (const req of batchRequests) {
+        //     const resp = await req.response();
+        //     if (resp) {
+        //     await resp.finished();
+        //     }
+        // }  
 
-        console.log('Batch 1:', batchRequests[0].postData());
-        console.log('Batch 2:', batchRequests[1].postData());
+        await batchResponse.finished();
+
+        // console.log('Batch 1:', batchRequests[0].postData());
+        // console.log('Batch 2:', batchRequests[1].postData());
 
         //check if either one of them has node, pipe created 
 
@@ -566,15 +568,19 @@ test.describe('Batch API E2E Tests', () => {
         await childNodeBatchResponse.finished();
         const childNodeBatchData = await childNodeBatchResponse.json();
         
+        console.log('childNodeBatchData:', JSON.stringify(childNodeBatchData, null, 2));
         //check if the /batch response have valid object of createdEntities array holding uid and type with node 
         expect(Array.isArray(childNodeBatchData.createdEntities)).toBe(true);
         expect(typeof childNodeBatchData.createdEntities[0]).toBe('object');
         expect(childNodeBatchData.createdEntities[0]).toHaveProperty('uid');
         expect(childNodeBatchData.createdEntities[0]).toHaveProperty('type', 'node');
+        expect(childNodeBatchData.createdEntities[1]).toHaveProperty('uid');
+        expect(childNodeBatchData.createdEntities[1]).toHaveProperty('type', 'pipe');
 
         // get create childNode's UID 
         const childNodeUIDFromUI = childNodeBatchData.createdEntities[0].uid;
-        console.log('printing childNodeUIDFromUI:', childNodeUIDFromUI);
+        const pipeUIDOfchildNodeFromUI = childNodeBatchData.createdEntities[1].uid; 
+        //console.log('printing childNodeUIDFromUI:', childNodeUIDFromUI);
         //check if a childNode was created in UI 
 
  
@@ -735,9 +741,11 @@ test.describe('Batch API E2E Tests', () => {
                      expect(ghostChildFromFrontend.pipes.length).toBe(1);
                      expect(ghostChildFromBackend.pipes.length).toBe(1);
                      
+
+                     
                      // Ghost node's pipe id should be same as pipeUidFromUI
                      expect(ghostChildFromFrontend.pipes[0].id).toBe(pipeUidFromUI);
-                     expect(ghostChildFromBackend.pipes[0].id).toBe(pipeUidFromUI);
+                     expect(ghostChildFromBackend.pipes[0].uid).toBe(pipeUidFromUI);
                      
                      // Ghost node's pipe should have attributeContents array with length of 1
                      expect(ghostChildFromFrontend.pipes[0].attributeContents.length).toBe(1);
@@ -745,7 +753,7 @@ test.describe('Batch API E2E Tests', () => {
                      
                      // Ghost node's pipe's attributeContent id should be same as attributecontentUidFromUI
                      expect(ghostChildFromFrontend.pipes[0].attributeContents[0].id).toBe(attributecontentUidFromUI);
-                     expect(ghostChildFromBackend.pipes[0].attributeContents[0].id).toBe(attributecontentUidFromUI);
+                     expect(ghostChildFromBackend.pipes[0].attributeContents[0].uid).toBe(attributecontentUidFromUI);
                      
                      // Ghost node's pipe's attributeContent name should be "foo"
                      expect(ghostChildFromFrontend.pipes[0].attributeContents[0].name).toBe("foo");
@@ -761,7 +769,7 @@ test.describe('Batch API E2E Tests', () => {
                      
                      // Child node should have title "NewNode"
                      expect(childNodeFromFrontend.title).toBe("NewNode");
-                     expect(childNodeFromBackend.name).toBe("NewNode");
+                     expect(childNodeFromBackend.title).toBe("NewNode");
                      
                      // Child node's id should be same as childNodeUIDFromUI
                      expect(childNodeFromFrontend.id).toBe(childNodeUIDFromUI);
@@ -771,21 +779,23 @@ test.describe('Batch API E2E Tests', () => {
                      expect(childNodeFromFrontend.pipes.length).toBe(1);
                      expect(childNodeFromBackend.pipes.length).toBe(1);
                      
+                     
                      // Child node's pipe id should be same as childNodeUIDFromUI (for the pipe)
-                     expect(childNodeFromFrontend.pipes[0].id).toBe(childNodeUIDFromUI);
-                     expect(childNodeFromBackend.pipes[0].uid).toBe(childNodeUIDFromUI);
+                     expect(childNodeFromFrontend.pipes[0].id).toBe(pipeUIDOfchildNodeFromUI);
+                     expect(childNodeFromBackend.pipes[0].uid).toBe(pipeUIDOfchildNodeFromUI);
                      
                      // Root node should have attributes array with length of 1
                      expect(firstCreateNodeFromFrontend.data.attributes.length).toBe(1);
-                     expect(firstCreateNode.attributes.length).toBe(1);
+                     expect(firstCreateNode.attributes.length).toBe(1); 
                      
                      // Root node's attribute id should be same as attributeUid
                      expect(firstCreateNodeFromFrontend.data.attributes[0].id).toBe(attributeUid);
-                     expect(firstCreateNode.attributes[0].id).toBe(attributeUid);
+                     console.log('firstCreateNode:', JSON.stringify(firstCreateNode, null, 2));
+                     expect(firstCreateNode.attributes[0].uid).toBe(attributeUid);
                      
                      // Root node's attribute name should be "import"
                      expect(firstCreateNodeFromFrontend.data.attributes[0].nameOfAttribute).toBe("import");
-                     expect(firstCreateNode.attributes[0].name).toBe("import");
+                     expect(firstCreateNode.attributes[0].nameOfAttribute).toBe("import");
 
 
 

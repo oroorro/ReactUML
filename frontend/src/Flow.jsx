@@ -591,11 +591,11 @@ function Flow() {
           id: attributeUid,
           totalNumberOfAttribute: 0,
           AttributeContents: [
-            {
-              name: 'initialNodes',
-              belongsTo: 'X2D',
-              id: generateUniqueId()
-            }
+            // {
+            //   name: 'initialNodes',
+            //   belongsTo: 'X2D',
+            //   id: generateUniqueId()
+            // }
           ]
         },
       ];
