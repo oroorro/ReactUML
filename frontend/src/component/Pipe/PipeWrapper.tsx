@@ -32,7 +32,7 @@ const PipeWrapper = ({
     setUpdatingPipeIds,
     mutedPipeAmount,
     updatePipeState
-}:PipeWrapperProps) => {
+}: PipeWrapperProps) => {
 
     // const [updatingPipeIds, setUpdatingPipeIds] = useState<UniqueId[]>([]);
     const isExpanded: boolean = expandedAttributes.includes(pipe.id);
@@ -59,19 +59,18 @@ const PipeWrapper = ({
     //add selected pipe's id when Node's state change into 'selectingPipe' 
     const handleCheckboxChange = (id: UniqueId) => {
 
-        setUpdatingPipeIds((prevIds) =>
-            {
+        setUpdatingPipeIds((prevIds) => {
             if (prevIds.includes(id)) {
                 const updated = prevIds.filter((prevId) => prevId !== id);
                 return updated;
             }
             return [...prevIds, id];
-            });
-      };
+        });
+    };
 
 
     return (
-        <div id="pipes" className={ indexOfCurrentPipe == child.pipes.length - 1 ? "flex-col flex -left-2 relative": "flex -left-2 relative gap-0.5"} key={indexOfCurrentPipe}
+        <div id="pipes" className={indexOfCurrentPipe == child.pipes.length - 1 ? "flex-col flex -left-2 relative" : "flex -left-2 relative gap-0.5"} key={indexOfCurrentPipe}
             style={{ transition: 'all 0.3s ease' }}
         >
             { // circle data when pipe is clicked 
@@ -94,7 +93,8 @@ const PipeWrapper = ({
             }
 
             {/** rendering each pipes except the tail */}
-            {indexOfCurrentPipe != child.pipes.length  && pipe.state != 'muted' && 
+            {indexOfCurrentPipe != child.pipes.length && pipe.state != 'muted' && 
+            // indexOfCurrentPipe != 0 && fix 
                 <div className='flex'
                     datatype='pipe'
                     data-id={`${child.id}+${pipe.id}`}
@@ -113,34 +113,27 @@ const PipeWrapper = ({
 
                     >
                     </div>
-                    {(state == 'select' || child.state == 'selectingPipe')&& 
-                        <input style={{ width: '13px', height: '13px' }} 
-                        onChange={() => handleCheckboxChange(pipe.id)}
-                        type="checkbox" 
-                    />}
+                    {(state == 'select' || child.state == 'selectingPipe') &&
+                        <input style={{ width: '13px', height: '13px' }}
+                            onChange={() => handleCheckboxChange(pipe.id)}
+                            type="checkbox"
+                        />}
                 </div>
             }
             {  // circle data when pipe is clicked , showing input when in 'editing' state 
                 (showProps || pipe.state == 'editing') &&
-                    <PipeContentWrapper pipe={pipe} showProps={showProps} nodeId={child.id} displayPropsData={displayPropsData}/>
+                <PipeContentWrapper pipe={pipe} showProps={showProps} nodeId={child.id} displayPropsData={displayPropsData} />
             }
+            {false && pipe.state == 'editing' &&
+                <div>
+                    {/**change current pipe'state to be 'none' */}
+                    <button className="bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold  px-2 rounded-md"
 
-            
-
-
-            
-            {false && pipe.state == 'editing' && 
-            <div>
-                {/**change current pipe'state to be 'none' */}
-                <button className="bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold  px-2 rounded-md"
-
-                >C</button>
-                {/**set  showProps to be false */}
-                <button className="bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold  px-2 rounded-md" title="Minimize">M</button>
-            </div>
+                    >C</button>
+                    {/**set  showProps to be false */}
+                    <button className="bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold  px-2 rounded-md" title="Minimize">M</button>
+                </div>
             }
-
-
             {/** redering tail: 
              *    when pipe's number is bigger than 1, render -- vertical arrow of parent's color pipe
              */}
@@ -148,37 +141,36 @@ const PipeWrapper = ({
                 <div
                     datatype='Node'
                     data-id={parentId}
+                    className='Here'
                 >
                     {/** render muted pipes, just need to display ... and when this is clicked, it shows muted ones and have options to go back or not, just like Attribute  */}
-                    {mutedPipeAmount != 0 && 
-                    
-                    <div
-                    style={{
-                        
-                        position: 'relative',
-                        // backgroundColor: pipe.color,
-                        height: `${20}px`,
-                        width: `${PIPE_HEIGHT_HORIZONTAL}px`,
-                        "--bg-color": 'gray',
-                        boxShadow: '0 -5px 5px -5px #333',
-                    } as React.CSSProperties & { [key: string]: any }}
-                    className='pipeElement '
-                    >
-                        <button className="flex flex-col bg-white border-x  border-black  border-solid rounded-xl"
-                            style={{ 
-                                writingMode: "vertical-rl", 
-                                textOrientation: "mixed", 
-                                letterSpacing: "1px", 
-                                lineHeight: "9px",
-                                textIndent: "2px"
-                            }}
-                            onClick={()=>updatePipeState('unmute')}
+                    {mutedPipeAmount != 0 &&
+                        <div
+                            style={{
+                                position: 'relative',
+                                // backgroundColor: pipe.color,
+                                height: `${20}px`,
+                                width: `${PIPE_HEIGHT_HORIZONTAL}px`,
+                                "--bg-color": 'gray',
+                                boxShadow: '0 -5px 5px -5px #333',
+                            } as React.CSSProperties & { [key: string]: any }}
+                            className='pipeElement Here'
                         >
-                            ...
-                        </button>
-                    </div>
-                
-                }
+                            <button className="flex flex-col bg-white border-x  border-black  border-solid rounded-xl"
+                                style={{
+                                    writingMode: "vertical-rl",
+                                    textOrientation: "mixed",
+                                    letterSpacing: "1px",
+                                    lineHeight: "9px",
+                                    textIndent: "2px"
+                                }}
+                                onClick={() => updatePipeState('unmute')}
+                            >
+                                ...
+                            </button>
+                        </div>
+
+                    }
                     {child.pipes.length > 1 &&
                         <div
                             className='pipeElement'
@@ -196,14 +188,14 @@ const PipeWrapper = ({
                     {child.pipes.length == 1 &&
                         <div
                             datatype='pipe'
+                            className="pipeTail_vertical"
                             style={{
                                 position: 'relative',
-                                height: `${PIPE_HEIGHT_HORIZONTAL}px`,
-                                width: `${PIPE_HEIGHT_HORIZONTAL}px`,
+                                height: `${PIPE_HEIGHT_VERTICAL}px`,
+                                width: `${PIPE_WIDTH_VERTICAL - 4}px`,
                                 backgroundColor: pipe.color,
-                                clipPath: 'polygon(0 0, 0 100%, 100% 100%, 100% 60%, 40% 60%, 40% 0%)',
-
-                            }}>
+                            }}
+                            >
                         </div>
                     }
                     {/** rendering Node  */}
@@ -211,7 +203,7 @@ const PipeWrapper = ({
                     {child.state == 'select' &&
                         <div>
                             {/* <input style={{ width: '18px', height: '18px' }} type="checkbox" />  */}
-                            <div className='flex justify-center'>
+                            <div className='flex justify-center relative top-[-10px]'>
                                 <div >
                                     <div className='bg-white px-1 rounded '>Selecting...</div>
                                 </div>
@@ -222,9 +214,9 @@ const PipeWrapper = ({
                             </div>
                         </div>}
 
-                    {child.type != 'ghost' && <div className='NodePositionWrapper relative'
-                        datatype='Node'
-                        data-id={`${pipe.color}`}
+                    {child.type != 'ghost' && <div className='NodePositionWrapper relative top-[-10px]'
+                    // datatype='Node'
+                    // data-id={`${pipe.color}`}
                     >
                         {state == 'select' && child.type != 'ghost' &&
                             <button className='absolute top-[0px] right-[0px] bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded'
@@ -246,7 +238,8 @@ const PipeWrapper = ({
                                 minWidth: '100px',
                                 minHeight: '70px',
                                 padding: '0px 5px 5px 5px',
-                                boxShadow: '5px 5px 10px'}}>  {/*child's outer boundary*/}
+                                boxShadow: '5px 5px 10px'
+                            }}>  {/*child's outer boundary*/}
 
 
                             {/** Child's boundary */}
@@ -265,19 +258,19 @@ const PipeWrapper = ({
                                         fontWeight: '900',
                                         padding: '0px 5px',
                                         // maxWidth: '200px'
-                                        
+
                                     }}
                                     onDoubleClick={handleDoubleClick}
                                     datatype='Node'
                                     data-id={child.id}
                                 >
                                     {!isEditing && currentNodetitle}
-                                    {isEditing && 
+                                    {isEditing &&
                                         <input
-                                        className="text-center w-full bg-transparent outline-none"
-                                        value={currentNodetitle}
-                                        onChange={handleChange}
-                                        onBlur={()=>handleBlur()}
+                                            className="text-center w-full bg-transparent outline-none"
+                                            value={currentNodetitle}
+                                            onChange={handleChange}
+                                            onBlur={() => handleBlur()}
                                         />
                                     }
                                 </div>

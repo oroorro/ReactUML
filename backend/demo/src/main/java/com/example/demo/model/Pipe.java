@@ -1,5 +1,11 @@
 package com.example.demo.model;
 
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import jakarta.persistence.*;
 
 @Entity
@@ -12,40 +18,99 @@ public class Pipe {
     @Column(unique = true, nullable = false, length = 20)
     private String uid;
 
+    @OneToMany(mappedBy = "pipe", cascade = CascadeType.ALL)
+    @JsonManagedReference
+    private Set<AttributeContent> attributeContents = new HashSet<>();
+
     @ManyToOne(optional = false)
-    @JoinColumn(name = "nodeID") 
-    private Node node;
+    @JoinColumn(name = "source_node_id", nullable = false)
+    private Node sourceNode;
+
+    @ManyToOne(optional = true)
+    @JoinColumn(name = "target_node_id", nullable = true)
+    private Node targetNode;
 
     private String name;
 
-    private Character color; 
+    private String color;
 
     private Boolean mute;
 
-    public Pipe() {}  
+    public Pipe() {
+    }
 
-    public Pipe(Node node, String name, Character color, Boolean mute) {
-        this.node = node;
+    public Pipe(Node sourceNode, String name, String color, Boolean mute) {
+        this.sourceNode = sourceNode;
         this.name = name;
         this.color = color;
         this.mute = mute;
     }
 
+    @PrePersist
+    @PreUpdate
+    public void validateNodesNotSame() {
+        if (sourceNode != null && targetNode != null) {
+            String sourceUid = sourceNode.getUid();
+            String targetUid = targetNode.getUid();
+
+            if (sourceUid != null && sourceUid.equals(targetUid)) {
+                throw new IllegalArgumentException("SourceNode and TargetNode must not be the same (UID matched)");
+            }
+        }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        Node node = (Node) o;
+        return Objects.equals(uid, node.getUid());
+    }
 
     public Integer getId() {
         return id;
+    }
+
+    public String getUid() {
+        return uid;
+    }
+
+    public void setUid(String uid) {
+        this.uid = uid;
     }
 
     public void setId(Integer id) {
         this.id = id;
     }
 
-    public Node getNode() {
-        return node;
+    public Node getSourceNode() {
+        return sourceNode;
     }
 
-    public void setNode(Node node) {
-        this.node = node;
+    public void setSourceNode(Node sourceNode) {
+        this.sourceNode = sourceNode;
+    }
+
+    public Node getTargetNode() {
+        return targetNode;
+    }
+
+    public Integer getNumbersOfProps(){
+        return this.attributeContents.size();
+    }
+
+    public void setTargetNode(Node targetNode) {
+        this.targetNode = targetNode;
+    }
+
+    public void setAttributeContents(Set<AttributeContent> attributeContents) {
+        this.attributeContents = attributeContents;
+    }
+
+    public Set<AttributeContent> getAttributeContents() {
+        return attributeContents;
     }
 
     public String getName() {
@@ -56,11 +121,11 @@ public class Pipe {
         this.name = name;
     }
 
-    public Character getColor() {
+    public String getColor() {
         return color;
     }
 
-    public void setColor(Character color) {
+    public void setColor(String color) {
         this.color = color;
     }
 
@@ -72,4 +137,3 @@ public class Pipe {
         this.mute = mute;
     }
 }
-

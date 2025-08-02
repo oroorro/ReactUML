@@ -1,14 +1,21 @@
 package com.example.demo;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+
+import com.example.demo.service.CustomUserDetailsService;
 
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -18,13 +25,19 @@ import jakarta.servlet.http.HttpServletResponse;
 @Configuration
 public class SecurityConfig {
 
+    @Autowired
+    private CustomUserDetailsService customUserDetailsService;
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf().disable()
+                .authenticationProvider(authenticationProvider())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/index.html", "/assets/**", "/auth/**").permitAll()
+                        .requestMatchers("/index.html", "/assets/**", "/auth/**", "/register").permitAll()
+                        .requestMatchers("/test-debug/**").permitAll() 
+                        // .requestMatchers("/batch/**").authenticated()
                         .anyRequest().authenticated())
                 .formLogin(form -> form
                         .loginProcessingUrl("/auth/login")
@@ -34,13 +47,15 @@ public class SecurityConfig {
 
                             String username = authentication.getName();
                             response.getWriter()
-                                    .write("{ \"message\": \"Login successful\", \"username\": \"" + username + "\" }");
+                            .write("{ \"message\": \"Login successful\", \"username\": \"" + username + "\" }");
+                            
                         })
                         .failureHandler((request, response, exception) -> {
                             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                             response.setContentType("application/json");
                             response.getWriter().write("{ \"error\": \"Invalid credentials\" }");
                         })
+                        .defaultSuccessUrl("/", true)
                         .permitAll())
                 // .and()
                 .logout(logout -> logout
@@ -57,5 +72,23 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public UserDetailsService userDetailsService() {
+        return customUserDetailsService;
+    }
+
+    @Bean
+    public DaoAuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+        authProvider.setUserDetailsService(customUserDetailsService);
+        authProvider.setPasswordEncoder(passwordEncoder());
+        return authProvider;
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+        return config.getAuthenticationManager();
     }
 }

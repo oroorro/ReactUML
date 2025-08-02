@@ -1,4 +1,3 @@
-
 import { PipeContentWrapperProps } from "../../types"
 import { useEffect, useRef, useState } from "react"
 import PipeContentPropWrapper from "./PipeContentPropWrapper"
@@ -8,6 +7,7 @@ import { useStoreApi } from "../../hook/useStore"
 import { useFindNodeById } from "../../hook/useFindNodeById"
 import { generateUniqueId } from "../../utils/generateId"
 import { isAttributeContent } from "../../utils/helper"
+import { useBatchController } from "../../apiHook/useBatchController"
 
 const PipeContentWrapper = ({
     pipe,
@@ -18,6 +18,7 @@ const PipeContentWrapper = ({
 
     const store = useStoreApi();
     const { setNodes, getNodes } = store.getState();
+    const {createContentAttribute, deleteContentAttribute} = useBatchController();
     const { findNodeById } = useFindNodeById();
 
     const contentNameRef = useRef<HTMLInputElement>(null);
@@ -28,7 +29,7 @@ const PipeContentWrapper = ({
 
         const nodes = getNodes();
 
-        const reactChild: ReactChild[] = [nodes[0].data];
+        const reactChild: ReactChild[] = nodes.map(node => node.data);
 
         let node = findNodeById(nodeId, reactChild);
 
@@ -38,21 +39,51 @@ const PipeContentWrapper = ({
             //add 
             if (option == 'add') {
                 if (contentNameRef.current && contentNameRef.current.value != '') {
-                    //create new AttributeContent 
+                    //create new AttributeContent in UI (frontend)
+                    const newAttributeContetUid = generateUniqueId();
                     const newAttributeContet: AttributeContent = { //AttributeContent used as Pipe's content since they have same property 
-                        id: generateUniqueId(),
+                        id: newAttributeContetUid,
                         name: contentNameRef.current?.value as string,
                         type: contentTypeRef.current?.value as string,
                         // belongsTo: pipe.id , we need Node's id that is trying to pass down this prop
                     }
                     //adding newly created AttributeContent with previously existing AttributeContents in target Attribute 
-                    targetPipe.props = [...targetPipe.props as AttributeContent[], newAttributeContet];
+                    targetPipe.attributeContents = [...(targetPipe.attributeContents ?? []), newAttributeContet];
 
-                    //clean <input/> if there was any input given 
-                    if (contentNameRef.current && contentTypeRef.current) {
-                        contentNameRef.current.value = "";
-                        contentTypeRef.current.value = "";
-                    }
+                    
+
+                    //call api for creating AttributeContent with Attribute's uid 
+                    const createAttributeContent = async () => {
+                        const attributeContentData = {
+                          uid: newAttributeContetUid,
+                          name: contentNameRef.current?.value as string,
+                          holdingValue: contentTypeRef.current?.value as string,
+                          belongingNode: {
+                            uid: nodeId  // Required: must reference an existing node
+                          },
+                          attribute: {
+                            uid: null  // Optional: link to an existing attribute
+                          },
+                          pipe:{
+                            uid: pipe.id
+                          }
+                        };
+                      
+                        const result = await createContentAttribute(attributeContentData);
+                        
+                        if (result?.success) {
+                          console.log('Attribute content created successfully');
+                        } else {
+                          console.error('Failed to create attribute content:', result?.message);
+                        }
+                      };
+                      createAttributeContent();
+                }
+
+                //clean <input/> if there was any input given 
+                if (contentNameRef.current && contentTypeRef.current) {
+                    contentNameRef.current.value = "";
+                    contentTypeRef.current.value = "";
                 }
             } else if (option == 'cancelAdd' || option == 'none') {
                 //change state to none 
@@ -69,7 +100,7 @@ const PipeContentWrapper = ({
             else if (option == 'changeValue') {
 
                 //find AttributeContent by given contentId
-                const targetContent: AttributeContent = targetPipe.props.find((content) => content.id == contentId) as AttributeContent;
+                const targetContent: AttributeContent = targetPipe.attributeContents.find((content) => content.id == contentId) as AttributeContent;
 
                 //change value using AttributeData
                 if (isAttributeContent(targetContent)) {
@@ -81,10 +112,24 @@ const PipeContentWrapper = ({
             //for given AttributeContent, change it's name and type into given value 
             else if (option == 'delete') {
                 if(contentId == '-') console.warn("id to delete was not given")
-                const contents: AttributeContent[] = targetPipe.props as AttributeContent[];
+                const contents: AttributeContent[] = targetPipe.attributeContents as AttributeContent[];
                 const filteredContents = contents.filter((attrib) => attrib.id != contentId)
                 console.log("filteredContents", filteredContents)
-                targetPipe.props = [...filteredContents];
+                targetPipe.attributeContents = [...filteredContents];
+                //call api for deleting AttributeContent
+                if (contentId !== '-') {
+                    deleteContentAttribute(contentId)
+                        .then(result => {
+                            if (result?.success) {
+                                console.log('Attribute content deleted successfully');
+                            } else {
+                                console.error('Failed to delete attribute content:', result?.message);
+                            }
+                        })
+                        .catch(err => {
+                            console.error('Error deleting attribute content:', err);
+                        });
+                }
             }
 
         } else {
@@ -98,7 +143,7 @@ const PipeContentWrapper = ({
     const getCurrentAttribute = (): Pipe | undefined => {
         const nodes = getNodes();
 
-        const reactChild: ReactChild[] = [nodes[0].data];
+        const reactChild: ReactChild[] = nodes.map(node => node.data);
 
         let node = findNodeById(nodeId, reactChild);
 
@@ -149,7 +194,7 @@ const PipeContentWrapper = ({
                     [key: string]: any
                 }}
             >
-                {(showProps || pipe.state == 'editing') && pipe.props && pipe.props.map(propContent => {
+                {(showProps || pipe.state == 'editing') && pipe.attributeContents && pipe.attributeContents.map(propContent => {
                     return (
                         // <AttributeContentWrapper content={propContent} />
                         <div className="flex">
@@ -182,20 +227,20 @@ const PipeContentWrapper = ({
                     >+</button>}
 
                 {pipe.state == 'editing' &&
-                    <div className="relative flex">
+                    <div className="relative flex contentAttribute_editing_input_wrapper">
                         <input ref={contentNameRef} style={{ width: '120px' }} />
                         <span>: </span>
                         <input ref={contentTypeRef} style={{ width: '120px' }} />
                         <div >
                             <button 
-                                className="bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold px-2 rounded-xl"
+                                className="contentAttribute_editing_add_button bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold px-2 rounded-xl"
                                 onClick={() => handleUpdateAttributeContent('add')}
                             >
                                 +
                             </button>
                             {/**change current pipe'state to be 'none' */}
                             <button 
-                                className="bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold px-2 rounded-xl"
+                                className="contentAttribute_editing_add_cancel bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold px-2 rounded-xl"
                                 onClick={() => handleUpdateAttributeContent('cancelAdd')}
                             >
                                 x

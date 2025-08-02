@@ -29,6 +29,7 @@ public class Attribute {
 
     private Boolean mute;
 
+    //shows a connection between the attribute and the attribute content
     @OneToMany(mappedBy = "attribute", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     //private List<AttributeContent> attributeContents;
     private Set<AttributeContent> attributeContents = new HashSet<>();
@@ -72,5 +73,21 @@ public class Attribute {
 
     public void setMute(Boolean mute) {
         this.mute = mute;
+    }
+
+    public String getUid() {
+        return uid;
+    }
+    
+    public void setUid(String uid) {
+        this.uid = uid;
+    }
+
+    public Set<AttributeContent> getAttributeContents() {
+        return attributeContents;
+    }
+    
+    public void setAttributeContents(Set<AttributeContent> attributeContents) {
+        this.attributeContents = attributeContents;
     }
 }

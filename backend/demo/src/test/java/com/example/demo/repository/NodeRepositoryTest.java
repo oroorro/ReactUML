@@ -43,19 +43,17 @@ class NodeRepositoryTest {
         assertEquals("uid-ge1g-123f", found.getUid());
         assertEquals("RepoTestAgain", foundAnother.getName());
         assertEquals("uid-dw123-dwad", foundAnother.getUid());
-
     }
 
     @Test
     void testFlushDetectsConstraintViolation() {
         Node node = new Node();
-        //node.setUid(null); // Assume this is @Column(nullable = false)
-
-        entityManager.persist(node);
+        node.setUid(null); // this is @Column(nullable = false)
+        //entityManager.persist(node); //throws an error outside of assertThrows
         
         assertThrows(PersistenceException.class, () -> {
-            //entityManager.persist(node);
-            //entityManager.flush(); // forces DB to validate constraints
+            entityManager.persist(node);
+            entityManager.flush(); // forces DB to validate constraints
         });
     }
 }

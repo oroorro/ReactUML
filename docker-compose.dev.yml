@@ -2,6 +2,7 @@ services:
   backend:
     environment:
       - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/reactumlapp
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-prod}
 
   frontend:
     command: npm run dev  # Start Vite dev server

@@ -1,9 +1,12 @@
 package com.example.demo.controller;
 
+import com.example.demo.dto.NodeDTO;
 import com.example.demo.model.Node;
+import com.example.demo.security.CustomUserDetails;
 import com.example.demo.service.NodeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,10 +24,18 @@ public class NodeController {
 
     // + getAllNodesForUserId
     // GET /node/get/{userId}
-    @GetMapping("/get/{userId}")
-    public ResponseEntity<List<Node>> getAllNodesForUser(@PathVariable Integer userId) {
-        List<Node> nodes = nodeService.getAllNodesWithAttributesAndContents(userId);
-        return ResponseEntity.ok(nodes);
+    // @GetMapping("/get")
+    // public ResponseEntity<List<Node>> getAllNodesForUser(@AuthenticationPrincipal
+    // CustomUserDetails user) {
+    // List<Node> nodes =
+    // nodeService.getAllNodesWithAttributesAndContents(user.getId());
+    // return ResponseEntity.ok(nodes);
+    // }
+
+    @GetMapping("/get")
+    public ResponseEntity<List<NodeDTO>> getNodeTree(@AuthenticationPrincipal CustomUserDetails user) {
+        List<NodeDTO> roots = nodeService.getFullTreeFromRoot(user.getId());
+        return ResponseEntity.ok(roots);
     }
 
     // + CreateNode
@@ -32,7 +43,7 @@ public class NodeController {
     @PostMapping("/create/{userId}")
     public ResponseEntity<Node> createNode(@PathVariable Integer userId, @RequestBody Node node) {
         Node created = nodeService.createNode(userId, node);
-        //System.out.println("CREATED: " + created); 
+        // System.out.println("CREATED: " + created);
         return ResponseEntity.ok(created);
     }
 
@@ -50,15 +61,16 @@ public class NodeController {
 
     // + EditNode
     // PUT /node/edit/{nodeId}
-    @PutMapping("/edit/{nodeId}")
-    public ResponseEntity<Node> editNode(@PathVariable Integer nodeId, @RequestBody Node updatedNode) {
-        Node updated = nodeService.editNode(nodeId, updatedNode);
-        if (updated != null) {
-            return ResponseEntity.ok(updated);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
-    }
+    // @PutMapping("/edit/{nodeId}")
+    // public ResponseEntity<Node> editNode(@PathVariable Integer nodeId,
+    // @RequestBody Node updatedNode) {
+    // Node updated = nodeService.editNode(updatedNode);
+    // if (updated != null) {
+    // return ResponseEntity.ok(updated);
+    // } else {
+    // return ResponseEntity.notFound().build();
+    // }
+    // }
 
     @GetMapping("/test-return")
     public ResponseEntity<Node> testReturn() {

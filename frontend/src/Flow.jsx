@@ -1,4 +1,3 @@
-
 import React, { Children, forwardRef } from 'react';
 import { useCallback, useRef, useEffect, useState } from 'react';
 // import {ReactFlow, 
@@ -17,18 +16,20 @@ import { useNodesState, useEdgesState } from "./hook/useNodesEdgesState";
 import { type } from '@testing-library/user-event/dist/type';
 
 import { useStoreApi } from './hook/useStore';  // does not work since it is above the store level 
+import { useBatchController } from './apiHook/useBatchController';
+import { useNodeApiAuth } from './apiHook/useNodeApiAuth';
 
 
 const NodeIndexInArray = {
   '1qlx7vx-jj26d3': '#dfe7f5', //ZoomPane
-  '1qlx7vx-107d1f' : '#ffa8d5',  //NodeRenderer
-  '1qlx7vx-011409' : '#f26d1f', //EdgeRenderer
-  '1qlx7vx-def456' : '#49abf5', //Pane
-  '1qlx7vx-093e0a' : '#e8c390',  //Zoom
-  '1qlx7vx-99k6j3' : '#ffdc6b', //Store
+  '1qlx7vx-107d1f': '#ffa8d5',  //NodeRenderer
+  '1qlx7vx-011409': '#f26d1f', //EdgeRenderer
+  '1qlx7vx-def456': '#49abf5', //Pane
+  '1qlx7vx-093e0a': '#e8c390',  //Zoom
+  '1qlx7vx-99k6j3': '#ffdc6b', //Store
 }
 
-const generateRandomHexColor = ()=> {
+const generateRandomHexColor = () => {
   const randomColor = Math.floor(Math.random() * 16777215).toString(16);
   return `#${randomColor.padStart(6, '0')}`;
 };
@@ -84,7 +85,7 @@ let initialNodes = [
             {
               name: 'names',
               type: 'string[]',
-              id:'194bef45ea2-0aa763',
+              id: '194bef45ea2-0aa763',
               belongsTo: '1949d9bf4d6-170d62',
             },
             {
@@ -96,13 +97,13 @@ let initialNodes = [
             {
               name: 'userLocation',
               type: '[string, number, number]',
-              id: '194bef45ea2-05e1b3', 
+              id: '194bef45ea2-05e1b3',
               belongsTo: '1949d9bf4d6-170d62',
             },
             {
               name: 'buttonColor',
               type: "red | green | blue",
-              id:'194bef45ea2-0fe9ab',
+              id: '194bef45ea2-0fe9ab',
               belongsTo: 'XW2',
             },
             {
@@ -203,7 +204,8 @@ let initialNodes = [
               color: '#dfe7f5',
               numbersOfProps: 18,
               name: "Node",
-              id: '194c3ff3761-09dc10'
+              id: '194c3ff3761-09dc10',
+              attributeContents: []
             },
           ],
           children: [
@@ -219,12 +221,14 @@ let initialNodes = [
                   numbersOfProps: 8,
                   id: '194c3ff3761-07d567',
                   name: "Node",
+                  attributeContents: [],
                 },
                 {
                   color: '#ffa8d5',
                   numbersOfProps: 7,
                   id: '194c3ff3761-183b89',
                   name: "Edge",
+                  attributeContents: [],
                 },
               ],
               children: [
@@ -270,11 +274,11 @@ let initialNodes = [
                       numbersOfProps: 4,
                       name: "Node",
                       id: '194c3ff3761-1597d2',
-                      props: [
-                        { name: "Attribute_1", type: "string", id: '194c3ff3762-185170'},
-                        { name: "Attribute_2", type: "number", id: '194c3ff3762-04eb6c'},
+                      attributeContents: [
+                        { name: "Attribute_1", type: "string", id: '194c3ff3762-185170' },
+                        { name: "Attribute_2", type: "number", id: '194c3ff3762-04eb6c' },
                         { name: "Attribute_3", type: "boolean", id: '194c3ff3762-0bf8ac' },
-                        { name: "Attribute_4", type: "Date",  id: '194c3ff3762-09dcac' },
+                        { name: "Attribute_4", type: "Date", id: '194c3ff3762-09dcac' },
                       ]
                     },
                     {
@@ -282,7 +286,7 @@ let initialNodes = [
                       numbersOfProps: 11,
                       name: "Edge",
                       id: '194c3ff3762-094898',
-                      props: [
+                      attributeContents: [
                         { name: "Attribute_8", type: "boolean", belongsTo: "OP", id: "194d3686e6a-12d4f9" },
                         { name: "Attribute_9", type: "Date", belongsTo: "QR", id: "194d3686e6a-125ce6" },
                         { name: "Attribute_10", type: "object", belongsTo: "ST", id: "194d3686e6a-00a0c5" },
@@ -302,7 +306,7 @@ let initialNodes = [
                       numbersOfProps: 6,
                       name: "Edge",
                       id: '194c3ff3762-16f298',
-                      props: [
+                      attributeContents: [
                         { name: "FirstName", type: "string", belongsTo: "AB", id: "194d36a4fa3-08dae3" },
                         { name: "LastName", type: "string", belongsTo: "CD", id: "194d36a4fa3-02e7fb" },
                         { name: "Age", type: "number", belongsTo: "EF", id: "194d36a4fa3-03286e" },
@@ -316,7 +320,7 @@ let initialNodes = [
                       numbersOfProps: 11,
                       name: "ZoomScale",
                       id: '194c3ff3762-037d40',
-                      props: [
+                      attributeContents: [
                         { name: "PhoneNumber", type: "string", belongsTo: "MN", id: "194d36c42f2-055ae8" },
                         { name: "Email", type: "string", belongsTo: "OP", id: "194d36c42f2-03f881" },
                         { name: "Salary", type: "number", belongsTo: "QR", id: "194d36c42f2-072e2c" },
@@ -342,31 +346,36 @@ let initialNodes = [
                       color: '#dfe7f5',
                       numbersOfProps: 5,
                       name: "Node",
-                      id: '194c3ff3762-068b33'
+                      id: '194c3ff3762-068b33',
+                      attributeContents: []
                     },
                     {
                       color: '#ffa8d5',
                       numbersOfProps: 52,
                       name: "Edge",
-                      id: '194c3ff3762-1390bf'
+                      id: '194c3ff3762-1390bf',
+                      attributeContents: []
                     },
                     {
                       color: 'green',
                       numbersOfProps: 3,
                       name: "Edge",
-                      id: '194c3ff3762-02e023'
+                      id: '194c3ff3762-02e023',
+                      attributeContents: []
                     },
                     {
                       color: 'blue',
                       numbersOfProps: 11,
                       name: "Edge",
-                      id: '194c3ff3762-12cc15'
+                      id: '194c3ff3762-12cc15',
+                      attributeContents: []
                     },
                     {
                       color: '#f26d1f',
                       numbersOfProps: 1,
                       name: "ZoomScale",
-                      id: '194c3ff3762-0d0e6a'
+                      id: '194c3ff3762-0d0e6a',
+                      attributeContents: []
                     },
                   ],
                 },
@@ -379,7 +388,8 @@ let initialNodes = [
                       color: '#dfe7f5',
                       numbersOfProps: 5,
                       name: "Node",
-                      id: '194c3ff3762-040828'
+                      id: '194c3ff3762-040828',
+                      attributeContents: []
                     },
                   ]
                 }
@@ -404,6 +414,7 @@ let initialNodes = [
       ],
     },
   },
+
 ];
 
 const initialEdges = [{ id: 'e1-2', source: '1', target: '2' }];
@@ -416,23 +427,7 @@ function generateUniqueId() {
 }
 
 
-//used for creating Pipe 
-const ghostChild = {
-  title: 'ghost',
-  numbersOfPropsGoingIn: 1,
-  color: '#abcdef',
-  id: generateUniqueId(),
-  pipes: [
-    {
-      color: '#dfe7f5',
-      numbersOfProps: 18,
-      name: "Node",
-      id: generateUniqueId(),
-    },
-  ],
-  attributes: [],
-  type: 'ghost',
-};
+
 
 function Flow() {
 
@@ -440,12 +435,129 @@ function Flow() {
   const interactingIdRef = useRef(null);
   const [contextMenu, setContextMenu] = useState(null);
   const nodeId = useRef(5);
+  const { createNode, editNode, createAttribute, createPipe, loading, error } = useBatchController();
+  const { getAllNodesForUser } = useNodeApiAuth();
 
-  useEffect(()=>{
-    if(contextMenu) console.log("contextMenu is set as ", contextMenu)
-  },[contextMenu])
+  const fetchNodes = async () => {
+    try {
+      const nodes = await getAllNodesForUser(); // No userId needed!
+      console.log('Fetched nodes:', nodes);
+    } catch (err) {
+      console.error('Error fetching nodes:', err);
+    }
+  };
 
-  function performUpdateElement(root, id, type, data = null) {
+  useEffect(() => {
+    if (contextMenu) console.log("contextMenu is set as ", contextMenu)
+  }, [contextMenu])
+
+  useEffect(() => {
+    fetchNodes();
+  }, [])
+
+
+
+
+  const handleCreateNode = async (color, nodeUid, isStartingNode, name, parentId = null) => {
+
+    const nodeData = {
+      uid: nodeUid,
+      name: name,
+      isStartingNode: isStartingNode,
+      color: color
+    };
+
+    // Only add parentId if it's provided
+    if (parentId !== null) {
+      nodeData.parentId = parentId;
+    }
+
+    await createNode(nodeData);
+  };
+
+  const handleCreatePipe = async (pipeUid, sourceNodeColor, sourceNodeUId, targetNodUid = null) => {
+
+    console.log("pipeUid in handleCreatePipe", pipeUid);
+    const pipeData = {
+      uid: pipeUid,
+      name: "Pipe Name",
+      color: sourceNodeColor,
+      mute: false,
+      sourceNode: { uid: sourceNodeUId },
+      targetNode: null,
+    }
+
+    //add targetNode
+    if (targetNodUid != null) {
+
+    }
+
+    await createPipe(pipeData);
+  }
+
+  const handleEditNode = async (nodeId,) => {
+    const result = await editNode({
+      uid: "node-123",
+      name: "Updated Node Name",
+    });
+
+    // if (result) {
+    //   console.log("Node updated successfully:", result);
+    // }
+  };
+
+  const handleCreateAttribute = async (attributeUid, parentNodeUid, typeOfAttribute, totalNumber, mute) => {
+    const result = await createAttribute({
+      uid: attributeUid,
+      name: typeOfAttribute,
+      totalNumber: totalNumber,
+      mute: mute,
+      node: {
+        uid: parentNodeUid
+      }
+    });
+
+    // if (result) {
+    //   console.log("Attribute created successfully:", result);
+    // }
+  };
+
+  function addNodeToInitialNodes(initialNodes, nodeData) {
+    const newNode = {
+      id: nodeData.data.id,
+      position: nodeData.position,
+      type: nodeData.type,
+      data: {
+        label: nodeData.data.label,
+        title: nodeData.data.title,
+        color: nodeData.data.color,
+        id: nodeData.data.id,
+        children: [],
+      }
+    };
+
+    initialNodes.push(newNode);
+  }
+
+  function performUpdateElement(root, id, type, data = null, e = null) {
+
+    //used for creating Pipe 
+    const ghostChild = {
+      title: 'ghost',
+      numbersOfPropsGoingIn: 1,
+      color: '#abcdef',
+      id: generateUniqueId(),
+      pipes: [
+        {
+          color: '#dfe7f5',
+          numbersOfProps: 18,
+          name: "Node",
+          id: generateUniqueId(),
+        },
+      ],
+      attributes: [],
+      type: 'ghost',
+    };
 
     const newChild = {
       title: 'NewNode',
@@ -457,67 +569,116 @@ function Flow() {
           color: '#dfe7f5',
           numbersOfProps: 18,
           name: "Node",
-          id: 'X2'
+          id: generateUniqueId(),
+          attributeContents: []
         },
       ],
       attributes: [],
+      children: [],
     };
 
     let foundNode = findNodeById(id, root);
 
-    //console.log("found node in <Flow>", foundNode);
+    //console.log("found node in <Flow>", foundNode, id);
 
     //creating Attribute 
     if (type == 'Attribute') {
+      const attributeUid = generateUniqueId();
       foundNode.attributes = [
         ...(foundNode.attributes || []),
         {
           nameOfAttribute: data ? data : 'empty',
-          id: generateUniqueId(),
+          id: attributeUid,
           totalNumberOfAttribute: 0,
           AttributeContents: [
-            {
-              name: 'initialNodes',
-              belongsTo: 'X2D',
-              id: generateUniqueId()
-            }
+            // {
+            //   name: 'initialNodes',
+            //   belongsTo: 'X2D',
+            //   id: generateUniqueId()
+            // }
           ]
         },
       ];
+      handleCreateAttribute(attributeUid, id, data ? data : 'empty', 0, false)
     }
-    else if(type == 'Pipe'){
-
+    else if (type == 'Prop') {
+      //console.log("create a prop");
+      //creating a pipe
+      foundNode.children = [
+        ...foundNode.children,
+        type == 'Node' ? newChild : ghostChild,
+      ];
+      //console.log("pipe Id: ", ghostChild.id, "parentNode Id: ", id)
+      handleCreateNode(ghostChild.color, ghostChild.id, false, 'ghost', foundNode.id);
+      handleCreatePipe(ghostChild.pipes[0].id, foundNode.color, id);
     }
     //creating Node and Prop
     else {
+      //create Node button has clicked on background, create a Node in the backgroun
+      if (!foundNode) {
+        const nodeUid = generateUniqueId();
+        const color = generateRandomHexColor();
+        handleCreateNode(color, nodeUid, true, 'StartNode');
+        // nodes.children = [
+        //   ...(nodes.children || []),
+        //   {
+        //     title: 'StartNode',
+        //     id: nodeUid,
+        //     numbersOfPropsGoingIn: 0,
+        //     color: color,
+        //     renderChildrenDirection: 'horizontaol',
+        //     children: [],
+        //     attributes: [],
+        //     pipes: [],
+        //   },
+        // ]; 
 
-      // If the child at the current index doesn't exist, create a placeholder node
-      if (!foundNode.children) {
-        foundNode.children = [newChild];
-      } else {
-        foundNode.children = [
-          ...foundNode.children,
-          type == 'Node' ? newChild : ghostChild,
-        ];
+        addNodeToInitialNodes(
+          nodes, {
+          // id: generateUniqueId(),
+          position: { x: e.clientX - 80, y: e.clientY - 10 },
+          type: 'ReactNode',
+
+          data: {
+            label: '4',
+            title: 'NewComponent',
+            color: color,
+            id: nodeUid,
+            attributes: [],
+            children: [],
+          }
+        });
+
+        //console.log("nodes", nodes);
       }
-
+      //create button was not triggered in the background
+      else {
+        // If the foundNode does not have children, create a new node ( child ) to that foundNode
+        //console.log("foundNode", foundNode);
+        if (foundNode.children != null) {
+          console.log("create a child Node within a Node ");
+          foundNode.children = [...foundNode.children, newChild];
+          handleCreateNode(newChild.color, newChild.id, false, 'StartNode', foundNode.id);
+          handleCreatePipe(newChild.pipes[0].id, foundNode.color, id);
+          setNodes(nodes);
+        }
+      }
       //add newly craete Node into NodeIndexInArray
       NodeIndexInArray[newChild.id] = {};
       NodeIndexInArray[newChild.id] = newChild.color;
-      //console.log("NodeIndexInArray", NodeIndexInArray);
     }
   }
 
   //add/delete element; Node, Prop and Attribute
   //this function calls performUpdateElement 
   //then setNodes 
-  const updateElement = (type, data = null) => {
+  const updateElement = (type, data = null, e = null) => {
     //we need to format data in order to add Node correctly,
     //making data to be the root 
 
     const currentNodes = [...nodes.map(node => node.data)];
-   //performUpdateElement(nodes[0].data.children, contextMenu.nodeId, type, data);
-    performUpdateElement(currentNodes, contextMenu.nodeId, type, data);
+    //performUpdateElement(nodes[0].data.children, contextMenu.nodeId, type, data);
+    performUpdateElement(currentNodes, contextMenu.nodeId, type, data, e);
 
     const updatedNode = [...nodes];
 
@@ -601,7 +762,7 @@ function Flow() {
     console.log("target context", nodeDataId);
     console.log("nodeDataType", nodeDataType);
 
-    if (nodeDataType === 'Node') {
+    if (nodeDataType === 'Node' || elementWithDatatype.getAttribute('datatype') === 'Background') {
       console.log("target context", nodeDataId);
       setContextMenu({
         nodeId: nodeDataId,
@@ -626,7 +787,7 @@ function Flow() {
         top: event.clientY
       })
 
-    }else if(elementWithDatatype.getAttribute('datatype') === 'AttributeContent'){
+    } else if (elementWithDatatype.getAttribute('datatype') === 'AttributeContent') {
       setContextMenu({
         nodeId: elementWithDatatype.getAttribute('data-id'),
         nodeType: 'AttributeContent',
@@ -634,7 +795,7 @@ function Flow() {
         top: event.clientY
       })
     }
-    else if(elementWithDatatype.getAttribute('datatype') === 'AttributeContent'){
+    else if (elementWithDatatype.getAttribute('datatype') === 'AttributeContent') {
       setContextMenu({
         nodeId: elementWithDatatype.getAttribute('data-id'),
         nodeType: 'Node',
@@ -663,13 +824,20 @@ function Flow() {
     updateElementState('attribute', currentNodes, ids[0], 'editing');
 
     setNodes(updatedNode);
-   
+
     setContextMenu(null)
   }
 
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
-
+  // Expose nodes state to window for E2E testing
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      // Expose nodes state to window for E2E testing
+      window.frontendNodes = nodes;
+      console.log("frontendNodes", window.frontendNodes);
+    }
+  }, [nodes]);
   const onConnect = useCallback((params) => setEdges((eds) => addEdge(params, eds)), [setEdges]);
 
   function FlowClickHandler(event) {
@@ -695,12 +863,12 @@ function Flow() {
   }
 
   //update node's state by given node's id 
-  const updateElementState = (target, root, nodeId, state) => { 
+  const updateElementState = (target, root, nodeId, state) => {
     const updatedRoot = [...root];
     // let currentNode = updatedRoot;
     // let foundNode = findNodeById(nodeId, updatedRoot);
 
-    if(target == 'node'){
+    if (target == 'node') {
       let foundNode = findNodeById(nodeId, updatedRoot);
       if (state == 'mute') {
         foundNode.muteAll = true;
@@ -708,24 +876,24 @@ function Flow() {
       else if (state == 'select') {
         foundNode.state = 'select';
       }
-      else if(state == 'renderDirection'){
-        if(!foundNode.renderChildrenDirection) foundNode.renderChildrenDirection = {};
-        foundNode.renderChildrenDirection = foundNode.renderChildrenDirection == 'horizontal' ? 'vertical': 'horizontal';
-      } 
-    }else if(target == 'attribute'){
+      else if (state == 'renderDirection') {
+        if (!foundNode.renderChildrenDirection) foundNode.renderChildrenDirection = {};
+        foundNode.renderChildrenDirection = foundNode.renderChildrenDirection == 'horizontal' ? 'vertical' : 'horizontal';
+      }
+    } else if (target == 'attribute') {
       const ids = contextMenu.nodeId.split('+');// id[0] is nodeid and id[1] is attribute id 
       let foundNode = findNodeById(ids[0], updatedRoot);
-      const attribute = foundNode.attributes.find((attrib)=> attrib.id == ids[1]);
+      const attribute = foundNode.attributes.find((attrib) => attrib.id == ids[1]);
       attribute.state = state;
       // console.log("found attribute", attribute);
-    }else if(target == 'pipe'){
+    } else if (target == 'pipe') {
       const ids = contextMenu.nodeId.split('+'); // id[0] is nodeid and id[1] is pipe id
       let foundNode = findNodeById(ids[0], updatedRoot);
-      if(state == 'selectingPipe'){
+      if (state == 'selectingPipe') {
         console.log("selectingPipe");
         foundNode.state = state;
-      }else{
-        const pipe = foundNode.pipes.find((pipe)=> pipe.id == ids[1]);
+      } else {
+        const pipe = foundNode.pipes.find((pipe) => pipe.id == ids[1]);
         pipe.state = state;
       }
       console.log("foundNode", foundNode);
@@ -734,19 +902,19 @@ function Flow() {
   }
 
 
-  function findNodeParent(childNodeId, startingNode){
+  function findNodeParent(childNodeId, startingNode) {
 
     //get startingNode's children into initalnodes:[]
-      //shallow copy
-      //const initialnodes = [...startingNode.children]
+    //shallow copy
+    //const initialnodes = [...startingNode.children]
 
     //iterate initalnodes{
     //initialnodes.forEach((node)=>{ 
-      //if inital Node was the target childNodeId then return the initial Node  
-        //if(node.id == childNodeId) return startingNode
-      //if the initial Node wasn't empty call findNodeParent 
-        //else return findNodeParent(childNodeId, child)
-      //if the initial Node was empty then just  return
+    //if inital Node was the target childNodeId then return the initial Node  
+    //if(node.id == childNodeId) return startingNode
+    //if the initial Node wasn't empty call findNodeParent 
+    //else return findNodeParent(childNodeId, child)
+    //if the initial Node was empty then just  return
     //}) 
 
     //return 
@@ -793,24 +961,24 @@ function Flow() {
    * delete Prop 
    *  get Prop and it's Node that has the Prop then remove the Prop from the Node 
    */
-  const deleteElement = (type) =>{
+  const deleteElement = (type) => {
 
     const test = nodes.map(node => node.data);
 
     console.log("test", test);
     const testNode = [...test];
 
-    if(type == 'Attribute'){
+    if (type == 'Attribute') {
 
       const ids = contextMenu.nodeId.split('+');// ids[0] is nodeid and ids[1] is attribute id 
-      if(!ids) console.warn("No ids exist");
+      if (!ids) console.warn("No ids exist");
 
       //get Node 
       let foundNode = findNodeById(ids[0], testNode);
-      if(!foundNode) console.warn("Node couldn't be found")
+      if (!foundNode) console.warn("Node couldn't be found")
 
       //filter out Attribute except deleting Attribute 
-      const filtered = foundNode.attributes.filter((attrib)=> attrib.id != ids[1]);
+      const filtered = foundNode.attributes.filter((attrib) => attrib.id != ids[1]);
       foundNode.attributes = [...filtered];
     }
 
@@ -830,20 +998,20 @@ function Flow() {
       pipes: node.pipes ? node.pipes.map(pipe => ({
         ...pipe,
         id: generateUniqueId(), // Generate new ID for Pipe
-      })): [],
+      })) : [],
       attributes: node.attributes ? node.attributes.map(attribute => ({
         ...attribute,
         id: generateUniqueId(), // Generate new ID for Attribute
       })) : [],
       children: node.children ? node.children.map(child => deepCopyWithNewIds(child)) : [],
     };
-  
+
     // Debugging: Log the copied node before returning
     //console.log("Copied Node:", JSON.stringify(copiedNode, null, 2));
-  
+
     return copiedNode;
   }
-  
+
 
   const copyNode = () => {
     //get context-menued Node id 
@@ -872,18 +1040,18 @@ function Flow() {
         stateManager: stateManger,
         id: generateUniqueId(),
         children: [...newlyAssignedIdNode.children],
-        attributes:[...newlyAssignedIdNode.attributes]
+        attributes: [...newlyAssignedIdNode.attributes]
       }
     }
 
-    nodeId.current = nodeId.current  + 1;
+    nodeId.current = nodeId.current + 1;
     console.log("nodeId", nodeId.current)
 
     const updatedNodes = [...nodes, newNode];
     //nodes.push(newNode);
     setNodes(updatedNodes);
     setContextMenu(null);
-     console.log("nodes updated after copy", updatedNodes);
+    console.log("nodes updated after copy", updatedNodes);
     // console.warn("nodes now", foundNode, newlyAssignedIdNode);
 
   }
@@ -891,14 +1059,15 @@ function Flow() {
 
   return (
     <div className='Flow' style={{ width: "100vw", height: "100vh" }}
-    // onClick={(e) => FlowClickHandler(e)}
-    // onMouseDown={(e) => FlowClickHandler(e)}
+      // onClick={(e) => FlowClickHandler(e)}
+      // onMouseDown={(e) => FlowClickHandler(e)}
+      datatype="Background"
     >
       {contextMenu && contextMenu.nodeType === 'Node' &&
         <div
-          className='flex flex-col bg-white px-2 py-1'
+          className='flex flex-col bg-white px-2 py-1 NodeContextMenu'
           style={{
-           
+
             position: 'absolute',
             left: `${contextMenu.left}px`,
             top: `${contextMenu.top}px`,
@@ -907,16 +1076,16 @@ function Flow() {
           id={contextMenu.nodeId}
           datatype="contextMenu"
         >
-          
-          {!contextMenu.detail && <button onClick={() => moveToSubMenu("create")}>Create</button>}
+
+          {!contextMenu.detail && <button className='create_button' onClick={() => moveToSubMenu("create")}>Create</button>}
           {!contextMenu.detail && <button >Delete</button>}
-          {!contextMenu.detail && <button onClick={()=>copyNode()}>Copy</button>}
+          {!contextMenu.detail && <button onClick={() => copyNode()}>Copy</button>}
           {!contextMenu.detail && <button onClick={() => moveToSubMenu("mute-2nd")}> Mute </button>}
           {!contextMenu.detail && <button onClick={() => moveToSubMenu("renderDirection")}> Display </button>}
 
-          {contextMenu.detail == 'create' && <button onClick={() => updateElement('Node')}> Node </button>}
-          {contextMenu.detail == 'create' && <button onClick={() => updateElement('Prop')}> Prop </button>}
-          {contextMenu.detail == 'create' && <button onClick={() => moveToSubMenu("create-attribute-2nd")}> Attribute </button>}
+          {contextMenu.detail == 'create' && <button className='create_node_button' onClick={(e) => updateElement('Node', null, e)}> Node </button>}
+          {contextMenu.detail == 'create' && <button className='create_pipe_button' onClick={() => updateElement('Prop')}> Prop </button>}
+          {contextMenu.detail == 'create' && <button className='create_attribute_button' onClick={() => moveToSubMenu("create-attribute-2nd")}> Attribute </button>}
 
           {/** mute 2nd layer of sub-menu */}
           {contextMenu.detail == 'mute-2nd' &&
@@ -937,8 +1106,8 @@ function Flow() {
           {/** Attribute 2nd layer of sub-menu*/}
           {contextMenu.detail == 'create-attribute-2nd' &&
             <div className='flex flex-col' datatype="contextMenu">
-              <button onClick={() => updateElement('Attribute')}> Just Create </button>
-              <button onClick={() => moveToSubMenu("create-attribute-3rd")} > Select Type </button>
+              <button className="attribute_button_sub_just_create" onClick={() => updateElement('Attribute')}> Just Create </button>
+              <button className="attribute_button_sub_select_type" onClick={() => moveToSubMenu("create-attribute-3rd")} > Select Type </button>
             </div>
           }
 
@@ -946,7 +1115,7 @@ function Flow() {
           {contextMenu.detail == 'create-attribute-3rd' &&
             <div className='flex flex-col' datatype="contextMenu">
               {attributeColors.map((attribute) => (
-                <button onClick={() => updateElement('Attribute', attribute)}>{attribute}</button>
+                <button className={`attribute_button_sub_3rd_select_type ${attribute}`} onClick={() => updateElement('Attribute', attribute)}>{attribute}</button>
               ))}
             </div>
           }
@@ -966,8 +1135,8 @@ function Flow() {
           id={contextMenu.nodeId}
           datatype="contextMenu"
         >
-         { !contextMenu.detail && <button datatype="contextMenu" onClick={() => moveToSubMenu("mute-2nd-pipe")}>Mute</button>}
-          {!contextMenu.detail &&<button datatype="contextMenu" onClick={() => elementStateHandler('pipe', 'editing')} >add</button>}
+          {!contextMenu.detail && <button datatype="contextMenu" onClick={() => moveToSubMenu("mute-2nd-pipe")}>Mute</button>}
+          {!contextMenu.detail && <button datatype="contextMenu" onClick={() => elementStateHandler('pipe', 'editing')} >add</button>}
 
           {contextMenu.detail == 'mute-2nd-pipe' &&
             <div className='flex flex-col' datatype="contextMenu">
@@ -990,7 +1159,7 @@ function Flow() {
           }}
         >
           <button onClick={() => addAttributeContent()}> Add </button>
-          <button onClick={()=>deleteElement('Attribute')}> Delete </button>
+          <button onClick={() => deleteElement('Attribute')}> Delete </button>
         </div>}
       {/* {contextMenu && contextMenu.nodeType === 'AttributeContent' &&
         <div
