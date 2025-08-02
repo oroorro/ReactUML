@@ -14,6 +14,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.example.demo.service.CustomUserDetailsService;
 
@@ -21,12 +23,25 @@ import jakarta.servlet.http.HttpServletResponse;
 
 //@Profile("!test")
 //@Profile("test")
-@Profile({"default", "test"}) 
+@Profile({ "default", "test" })
 @Configuration
 public class SecurityConfig {
 
     @Autowired
     private CustomUserDetailsService customUserDetailsService;
+
+    @Bean
+    public WebMvcConfigurer corsConfigurer() {
+        return new WebMvcConfigurer() {
+            @Override
+            public void addCorsMappings(CorsRegistry registry) {
+                registry.addMapping("/auth/**")
+                        .allowedOrigins("http://coodule.com", "http://www.coodule.com")
+                        .allowedMethods("GET", "POST", "PUT", "DELETE")
+                        .allowCredentials(true);
+            }
+        };
+    }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -36,7 +51,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/index.html", "/assets/**", "/auth/**", "/register").permitAll()
-                        .requestMatchers("/test-debug/**").permitAll() 
+                        .requestMatchers("/test-debug/**").permitAll()
                         // .requestMatchers("/batch/**").authenticated()
                         .anyRequest().authenticated())
                 .formLogin(form -> form
@@ -47,8 +62,8 @@ public class SecurityConfig {
 
                             String username = authentication.getName();
                             response.getWriter()
-                            .write("{ \"message\": \"Login successful\", \"username\": \"" + username + "\" }");
-                            
+                                    .write("{ \"message\": \"Login successful\", \"username\": \"" + username + "\" }");
+
                         })
                         .failureHandler((request, response, exception) -> {
                             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
