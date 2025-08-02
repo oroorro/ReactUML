@@ -4,6 +4,8 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import jakarta.persistence.*;
 
 @Entity
@@ -17,6 +19,7 @@ public class Pipe {
     private String uid;
 
     @OneToMany(mappedBy = "pipe", cascade = CascadeType.ALL)
+    @JsonManagedReference
     private Set<AttributeContent> attributeContents = new HashSet<>();
 
     @ManyToOne(optional = false)
@@ -92,6 +95,10 @@ public class Pipe {
 
     public Node getTargetNode() {
         return targetNode;
+    }
+
+    public Integer getNumbersOfProps(){
+        return this.attributeContents.size();
     }
 
     public void setTargetNode(Node targetNode) {

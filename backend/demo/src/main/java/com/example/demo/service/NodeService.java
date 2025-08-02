@@ -3,15 +3,25 @@ package com.example.demo.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.example.demo.dto.NodeDTO;
+import com.example.demo.exception.InvalidRequestDataException;
+import com.example.demo.mapper.NodeMapper;
+import com.example.demo.model.Attribute;
 import com.example.demo.model.Node;
+import com.example.demo.model.Pipe;
 import com.example.demo.model.User;
+import com.example.demo.repository.AttributeRepository;
 import com.example.demo.repository.NodeRepository;
+import com.example.demo.repository.PipeRepository;
 import com.example.demo.repository.UserRepository;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -24,6 +34,12 @@ public class NodeService {
     @Autowired
     private final UserRepository userRepository;
 
+    @Autowired
+    private PipeRepository pipeRepository;
+
+    @Autowired
+    private AttributeRepository attributeRepository;
+
     public NodeService(NodeRepository nodeRepository, UserRepository userRepository) {
         this.nodeRepository = nodeRepository;
         this.userRepository = userRepository;
@@ -33,13 +49,80 @@ public class NodeService {
         return nodeRepository.getAllNodesWithAttributesAndContents(userId);
     }
 
+    public List<NodeDTO> getFullTreeFromRoot(Integer userId) {
+        List<Node> allNodes = nodeRepository.findAllByUserId(userId);
+
+        Map<String, List<Node>> parentMap = new HashMap<>();
+        for (Node node : allNodes) {
+            String parentId = node.getParentId();
+            parentMap.computeIfAbsent(parentId, k -> new ArrayList<>()).add(node);
+        }
+
+        List<Node> roots = allNodes.stream()
+                .filter(Node::getIsStartingNode)
+                // .findFirst()
+                // .orElseThrow(() -> new RuntimeException("No root node found"));
+                .toList();
+
+        if (roots.isEmpty()) {
+            throw new RuntimeException("No starting nodes found for user " + userId);
+        }
+
+        // return buildTree(root, parentMap);
+        return roots.stream()
+        .map(root -> buildTree(root, parentMap))
+        .toList();
+    }
+
+    private NodeDTO buildTree(Node node, Map<String, List<Node>> parentMap) {
+        NodeDTO dto = NodeMapper.toDto(node);
+
+        // Get attributes by node ID
+        List<Attribute> attributes = attributeRepository.findByNodeUid(node.getUid());
+        dto.attributes = attributes.stream().map(NodeMapper::toDto).toList();
+
+        // Get pipes where node is source
+        List<Pipe> pipes = pipeRepository.findBySourceNodeUid(node.getUid());
+
+        //log pipes by looping through pipes
+        System.err.println("pipes found for given source node:" + node.getUid() + " are:");
+        for (Pipe pipe : pipes) {
+            System.err.println("pipe:" + pipe.getUid());
+        }
+        dto.pipes = pipes.stream().map(NodeMapper::toDto).toList();
+
+        // Recursively build children
+        List<Node> children = parentMap.getOrDefault(node.getUid(), List.of());
+        dto.children = children.stream()
+                .map(child -> buildTree(child, parentMap))
+                .toList();
+        return dto;
+    }
+
     public Node createNode(Integer userId, Node node) {
-        // node.setUserId(userId); 
+        // node.setUserId(userId);
+
+        // System.err.println("node:" + node.getUid());
+        // //if node has no uid, throw an exception
+        // if (node.getUid() == null || node.getUid().trim().isEmpty()) {
+        // throw new InvalidRequestDataException("uid must not be null");
+        // }
+
         User user = userRepository.findById(userId)
-                    .orElseThrow(() -> new RuntimeException("User not found"));
-        node.setUser(user); 
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        node.setUser(user);
         return nodeRepository.save(node);
     }
+
+    // public Boolean createNode(Integer userId, Node node) {
+    // // node.setUserId(userId);
+    // User user = userRepository.findById(userId)
+    // .orElseThrow(() -> new EntityNotFoundException("user does not exist " +
+    // userId));
+    // node.setUser(user);
+    // nodeRepository.save(node);
+    // return true;
+    // }
 
     public boolean deleteNode(Integer userId, Integer nodeId) {
         Optional<Node> nodeOpt = nodeRepository.findById(nodeId);
@@ -52,14 +135,19 @@ public class NodeService {
 
     @Transactional
     public boolean deleteNodeByUid(String uid) {
-        if (uid == null || uid.isBlank()) return false;
-        
+        if (uid == null || uid.isBlank())
+            return false;
+
         Optional<Node> nodeOpt = nodeRepository.findByUid(uid);
         if (nodeOpt.isPresent()) {
             nodeRepository.delete(nodeOpt.get());
             return true;
         }
         return false;
+    }
+
+    public Optional<Node> getNodeByUid(String uid) {
+        return nodeRepository.findByUid(uid);
     }
 
     @Transactional
@@ -74,11 +162,16 @@ public class NodeService {
         boolean modified = false;
 
         if (rawNode.has("parentId")) {
-            Integer newParentId = rawNode.get("parentId").asInt();
-            if (!java.util.Objects.equals(existing.getParentId(), newParentId)) {
-                System.err.println("parentId updated");
-                existing.setParentId(newParentId);
+            JsonNode r = rawNode.get("parentId");
+            if (r.isNull()) { // if parentId was set as null from frontend, set it as null
+                existing.setParentId(null);
                 modified = true;
+            } else { // parentId wasn't null, updated it with given value
+                String newParentId = rawNode.get("parentId").asText();
+                if (!java.util.Objects.equals(existing.getParentId(), newParentId)) {
+                    existing.setParentId(newParentId);
+                    modified = true;
+                }
             }
         }
 
@@ -91,7 +184,7 @@ public class NodeService {
                 modified = true;
             }
         }
-        
+
         if (rawNode.has("name") && !java.util.Objects.equals(existing.getName(), updated.getName())) {
             existing.setName(updated.getName());
             modified = true;
@@ -100,7 +193,8 @@ public class NodeService {
             existing.setColor(updated.getColor());
             modified = true;
         }
-        if (rawNode.has("numberOfPropsIn") && !java.util.Objects.equals(existing.getNumberOfPropsIn(), updated.getNumberOfPropsIn())) {
+        if (rawNode.has("numberOfPropsIn")
+                && !java.util.Objects.equals(existing.getNumberOfPropsIn(), updated.getNumberOfPropsIn())) {
             existing.setNumberOfPropsIn(updated.getNumberOfPropsIn());
             modified = true;
         }
@@ -111,7 +205,8 @@ public class NodeService {
                 modified = true;
             }
         }
-        if (rawNode.has("isStartingNode") && !java.util.Objects.equals(existing.getIsStartingNode(), updated.getIsStartingNode())) {
+        if (rawNode.has("isStartingNode")
+                && !java.util.Objects.equals(existing.getIsStartingNode(), updated.getIsStartingNode())) {
             existing.setIsStartingNode(updated.getIsStartingNode());
             modified = true;
         }
@@ -129,20 +224,18 @@ public class NodeService {
             modified = true;
         }
 
-
         if (rawNode.has("user")) {
             JsonNode userNode = rawNode.get("user");
             if (userNode.has("id")) {
                 Integer newUserId = userNode.get("id").asInt();
                 if (existing.getUser() == null || !java.util.Objects.equals(existing.getUser().getId(), newUserId)) {
                     User newUser = userRepository.findById(newUserId)
-                        .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + newUserId));
+                            .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + newUserId));
                     existing.setUser(newUser);
                     modified = true;
                 }
             }
         }
-        
 
         if (modified) {
             nodeRepository.save(existing);

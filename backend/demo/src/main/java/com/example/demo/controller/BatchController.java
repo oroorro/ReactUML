@@ -2,8 +2,9 @@ package com.example.demo.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -58,6 +59,18 @@ public class BatchController {
     @PostMapping
     public ResponseEntity<BatchResponse> applyChanges(@RequestBody JsonNode dto,
             @AuthenticationPrincipal CustomUserDetails user) {
+                
+                Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+                System.out.println(">> Authentication: " + auth);
+                System.out.println(">> Principal: " + auth.getPrincipal());
+            
+                if (auth.getPrincipal() instanceof CustomUserDetails) {
+                    CustomUserDetails user2 = (CustomUserDetails) auth.getPrincipal();
+                    System.out.println(">> User ID from SecurityContext: " + user2.getId());
+                } else {
+                    System.out.println("❌ Principal is NOT CustomUserDetails: " + auth.getPrincipal().getClass());
+                }
+                System.out.println("User principal: " + user);
         try {
             ChangeSetDto changes = objectMapper.treeToValue(dto, ChangeSetDto.class);
             BatchResponse result = batchService.applyChanges(changes, dto, user.getId());

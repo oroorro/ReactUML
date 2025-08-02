@@ -252,22 +252,88 @@ public class BatchService {
         if (changes.created != null) {
             if (changes.created.nodes != null) {
                 for (Node node : changes.created.nodes) {
-                    nodeService.createNode(userId, node);
+                    try {
+                        Node createdNode = nodeService.createNode(userId, node);
+                        if(createdNode == null){
+                            response.addError("nodes", node.getUid());
+                            response.success = false;
+                            response.message = "Some entities failed to update";
+                            System.out.println("Warning: Node with UID " + node.getUid() + " not found or failed to update.");
+                        }
+                        else {
+                            response.addCreatedEntity("node", createdNode.getUid());
+                        }
+                    }
+                    catch(Exception e){
+                        response.addError("nodes", node.getUid());
+                        response.success = false;
+                        response.message = "Failed to process JSON for Node: " + e.getMessage();
+                        System.out.println("Error processing Node with UID " + node.getUid() + ": " + e.getMessage());
+                    }
+
                 }
             }
             if (changes.created.pipes != null) {
                 for (Pipe pipe : changes.created.pipes) {
-                    pipeService.createPipe(pipe);
+                    try {
+                        Pipe createdPipe = pipeService.createPipe(pipe);
+                        if (createdPipe == null) {
+                            response.addError("pipes", pipe.getUid());
+                            response.success = false;
+                            response.message = "Some entities failed to create";
+                            System.out.println("Warning: Pipe with UID " + pipe.getUid() + " not found or failed to create.");
+                        }
+                        else {
+                            response.addCreatedEntity("pipe", createdPipe.getUid());
+                        }
+                    } catch (Exception e) {
+                        response.addError("pipes", pipe.getUid());
+                        response.success = false;
+                        response.message = "Failed to process JSON for Pipe: " + e.getMessage();
+                        System.out.println("Error processing Pipe with UID " + pipe.getUid() + ": " + e.getMessage());
+                    }
                 }
             }
             if (changes.created.attributes != null) {
                 for (Attribute attribute : changes.created.attributes) {
-                    attributeService.createAttribute(attribute);
+                    try {
+                        Attribute createdAttribute = attributeService.createAttribute(attribute);
+                        if (createdAttribute == null) {
+                            response.addError("attributes", attribute.getUid());
+                            response.success = false;
+                            response.message = "Some entities failed to create";
+                            System.out.println("Warning: Attribute with UID " + attribute.getUid() + " not found or failed to create.");
+                        }
+                        else {
+                            response.addCreatedEntity("attribute", createdAttribute.getUid());
+                        }
+                    } catch (Exception e) {
+                        response.addError("attributes", attribute.getUid());
+                        response.success = false;
+                        response.message = "Failed to process JSON for Attribute: " + e.getMessage();
+                        System.out.println("Error processing Attribute with UID " + attribute.getUid() + ": " + e.getMessage());
+                    }
                 }
             }
             if (changes.created.attributeContents != null) {
                 for (AttributeContent ac : changes.created.attributeContents) {
-                    attributeContentService.createAttributeContent(ac);
+                    try {
+                        AttributeContent createdAC = attributeContentService.createAttributeContent(ac);
+                        if (createdAC == null) {
+                            response.addError("attributeContents", ac.getUid());
+                            response.success = false;
+                            response.message = "Some entities failed to create";
+                            System.out.println("Warning: AttributeContent with UID " + ac.getUid() + " not found or failed to create.");
+                        }
+                        else {
+                            response.addCreatedEntity("attributeContent", createdAC.getUid());
+                        }
+                    } catch (Exception e) {
+                        response.addError("attributeContents", ac.getUid());
+                        response.success = false;
+                        response.message = "Failed to process JSON for AttributeContent: " + e.getMessage();
+                        System.out.println("Error processing AttributeContent with UID " + ac.getUid() + ": " + e.getMessage());
+                    }
                 }
             }
         }

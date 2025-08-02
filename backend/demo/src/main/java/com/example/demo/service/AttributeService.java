@@ -31,15 +31,19 @@ public class AttributeService {
         if (attribute == null || attribute.getUid() == null) {
             throw new IllegalArgumentException("Attribute or its UID cannot be null.");
         }
-        System.err.println("Received attribute UID: " + attribute.getUid());
-        System.err.println("Node UID from JSON: " + attribute.getNode().getUid());
         
-        if (attribute.getNode() != null && attribute.getNode().getUid() != null) {
+        // Validate that node is provided and exists
+        if (attribute.getNode() == null || attribute.getNode().getUid() == null) {
+            throw new IllegalArgumentException("Attribute must have a valid node reference with UID.");
+        }
+        
+        // Find the node in database
             Node source = nodeRepository.findByUid(attribute.getNode().getUid())
-                .orElseThrow(() -> new EntityNotFoundException("node not found"));
+            .orElseThrow(() -> new EntityNotFoundException("Node not found with UID: " + attribute.getNode().getUid()));
+        
+        // Set the found node
                 attribute.setNode(source);
             System.err.println("Fetched Node from DB: " + source.getUid());
-        }
 
         return attributeRepository.save(attribute);
     }
