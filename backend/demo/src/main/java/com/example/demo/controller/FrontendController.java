@@ -11,7 +11,7 @@ public class FrontendController {
 
     //@RequestMapping(value = {"/{path:^(?!api|auth|static|assets|error).*$}", "/{path:^(?!api|auth|static|assets|error).*$}/**"})
     @RequestMapping({
-        "/", "/home", "/user", "/login", "/register" //these route will be sent to React's router which gets handled in frontend routing 
+        "/", "/home", "/user", "/login", "/register", "/test-e2e" //these route will be sent to React's router which gets handled in frontend routing 
     })
     public String forwardReactRoutes() {
         return "forward:/index.html";

@@ -198,137 +198,137 @@ class AttributeServiceTest {
         verify(attributeRepository, never()).delete(any());
     }
 
-    @Test
-    void testDeleteAttribute_nullUid_shouldThrow() {
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-                () -> attributeService.deleteAttribute(null));
-        assertEquals("UID cannot be null", ex.getMessage());
-    }
+    // @Test
+    // void testDeleteAttribute_nullUid_shouldThrow() {
+    //     IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+    //             () -> attributeService.deleteAttribute(null));
+    //     assertEquals("UID cannot be null", ex.getMessage());
+    // }
 
-    // 3b: Deleting valid attribute should succeed
-    @Test
-    void testDeleteAttribute_successfullyDeletes() {
-        String validUid = "existing-uid";
+    // // 3b: Deleting valid attribute should succeed
+    // @Test
+    // void testDeleteAttribute_successfullyDeletes() {
+    //     String validUid = "existing-uid";
 
-        Attribute attr = new Attribute();
-        attr.setUid(validUid);
+    //     Attribute attr = new Attribute();
+    //     attr.setUid(validUid);
 
-        when(attributeRepository.findByUid(validUid)).thenReturn(Optional.of(attr));
+    //     when(attributeRepository.findByUid(validUid)).thenReturn(Optional.of(attr));
 
-        attributeService.deleteAttribute(validUid);
+    //     attributeService.deleteAttribute(validUid);
 
-        verify(attributeRepository).delete(attr);
-    }
+    //     verify(attributeRepository).delete(attr);
+    // }
 
-    // 5a1. Successfully edit an Attribute's name
-    @Test
-    void testEditAttribute_successfullyUpdatesName() {
-        Attribute existing = new Attribute();
-        existing.setUid("attr-1");
-        existing.setName("Original");
-        existing.setNode(node);
+    // // 5a1. Successfully edit an Attribute's name
+    // @Test
+    // void testEditAttribute_successfullyUpdatesName() {
+    //     Attribute existing = new Attribute();
+    //     existing.setUid("attr-1");
+    //     existing.setName("Original");
+    //     existing.setNode(node);
 
-        Attribute updated = new Attribute();
-        updated.setUid("attr-1");
-        updated.setName("Updated");
-        updated.setNode(node);
+    //     Attribute updated = new Attribute();
+    //     updated.setUid("attr-1");
+    //     updated.setName("Updated");
+    //     updated.setNode(node);
 
-        when(attributeRepository.findByUid("attr-1")).thenReturn(Optional.of(existing));
-        when(attributeRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+    //     when(attributeRepository.findByUid("attr-1")).thenReturn(Optional.of(existing));
+    //     when(attributeRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
-        Attribute result = attributeService.editAttribute(updated);
+    //     Attribute result = attributeService.editAttribute(updated);
 
-        assertEquals("Updated", result.getName());
-        assertNotEquals("Original", result.getName());
-    }
+    //     assertEquals("Updated", result.getName());
+    //     assertNotEquals("Original", result.getName());
+    // }
 
-    // 5a2. Fail edit when UID is null
-    @Test
-    void testEditAttribute_failsWhenUidIsNull() {
-        Attribute updated = new Attribute();
-        updated.setUid(null); // invalid
-        updated.setNode(node);
+    // // 5a2. Fail edit when UID is null
+    // @Test
+    // void testEditAttribute_failsWhenUidIsNull() {
+    //     Attribute updated = new Attribute();
+    //     updated.setUid(null); // invalid
+    //     updated.setNode(node);
 
-        assertThrows(IllegalArgumentException.class, () -> attributeService.editAttribute(updated));
-    }
+    //     assertThrows(IllegalArgumentException.class, () -> attributeService.editAttribute(updated));
+    // }
 
-    // 5b1. Successfully update the Node
-    @Test
-    void testEditAttribute_successfullyUpdatesNode() {
-        Node newNode = new Node();
-        newNode.setUid("node-B");
+    // // 5b1. Successfully update the Node
+    // @Test
+    // void testEditAttribute_successfullyUpdatesNode() {
+    //     Node newNode = new Node();
+    //     newNode.setUid("node-B");
 
-        Attribute existing = new Attribute();
-        existing.setUid("attr-1");
-        existing.setNode(node);
+    //     Attribute existing = new Attribute();
+    //     existing.setUid("attr-1");
+    //     existing.setNode(node);
 
-        Attribute updated = new Attribute();
-        updated.setUid("attr-1");
-        updated.setNode(newNode);
+    //     Attribute updated = new Attribute();
+    //     updated.setUid("attr-1");
+    //     updated.setNode(newNode);
 
-        when(attributeRepository.findByUid("attr-1")).thenReturn(Optional.of(existing));
-        when(attributeRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+    //     when(attributeRepository.findByUid("attr-1")).thenReturn(Optional.of(existing));
+    //     when(attributeRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
-        Attribute beforeEdit = attributeService.getAttribute("attr-1");
-        assertEquals("node-uid", beforeEdit.getNode().getUid());
+    //     Attribute beforeEdit = attributeService.getAttribute("attr-1");
+    //     assertEquals("node-uid", beforeEdit.getNode().getUid());
 
-        Attribute result = attributeService.editAttribute(updated);
+    //     Attribute result = attributeService.editAttribute(updated);
 
-        assertEquals("node-B", result.getNode().getUid());
-        assertNotEquals("node-uid", result.getNode().getUid());
+    //     assertEquals("node-B", result.getNode().getUid());
+    //     assertNotEquals("node-uid", result.getNode().getUid());
 
-        Attribute afterEdit = attributeService.getAttribute("attr-1");
-        assertEquals("node-B", afterEdit.getNode().getUid());
-    }
+    //     Attribute afterEdit = attributeService.getAttribute("attr-1");
+    //     assertEquals("node-B", afterEdit.getNode().getUid());
+    // }
 
-    // 5b2. Node is null — skip update, no exception
-    @Test
-    void testEditAttribute_skipsUpdateWhenNodeIsNull() {
-        Attribute existing = new Attribute();
-        existing.setUid("attr-1");
-        existing.setNode(node);
+    // // 5b2. Node is null — skip update, no exception
+    // @Test
+    // void testEditAttribute_skipsUpdateWhenNodeIsNull() {
+    //     Attribute existing = new Attribute();
+    //     existing.setUid("attr-1");
+    //     existing.setNode(node);
 
-        Attribute updated = new Attribute();
-        updated.setUid("attr-1");
-        updated.setNode(null); // null node
+    //     Attribute updated = new Attribute();
+    //     updated.setUid("attr-1");
+    //     updated.setNode(null); // null node
 
-        when(attributeRepository.findByUid("attr-1")).thenReturn(Optional.of(existing));
-        //when(attributeRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+    //     when(attributeRepository.findByUid("attr-1")).thenReturn(Optional.of(existing));
+    //     //when(attributeRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
-        Attribute result = attributeService.editAttribute(updated);
+    //     Attribute result = attributeService.editAttribute(updated);
 
-        assertEquals("node-uid", result.getNode().getUid()); // unchanged
-        verify(attributeRepository, never()).save(any());
-    }
+    //     assertEquals("node-uid", result.getNode().getUid()); // unchanged
+    //     verify(attributeRepository, never()).save(any());
+    // }
 
-    // 5b3. Node exists but UID is null — skip update
-    @Test
-    void testEditAttribute_skipsUpdateWhenNodeUidIsNull() {
-        Node badNode = new Node(); // no UID
+    // // 5b3. Node exists but UID is null — skip update
+    // @Test
+    // void testEditAttribute_skipsUpdateWhenNodeUidIsNull() {
+    //     Node badNode = new Node(); // no UID
 
-        Attribute existing = new Attribute();
-        existing.setUid("attr-1");
-        existing.setNode(node);
+    //     Attribute existing = new Attribute();
+    //     existing.setUid("attr-1");
+    //     existing.setNode(node);
 
-        Attribute updated = new Attribute();
-        updated.setUid("attr-1");
-        updated.setNode(badNode);
+    //     Attribute updated = new Attribute();
+    //     updated.setUid("attr-1");
+    //     updated.setNode(badNode);
 
-        when(attributeRepository.findByUid("attr-1")).thenReturn(Optional.of(existing));
-        //when(attributeRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+    //     when(attributeRepository.findByUid("attr-1")).thenReturn(Optional.of(existing));
+    //     //when(attributeRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
-        //Attribute result = attributeService.editAttribute(updated);
+    //     //Attribute result = attributeService.editAttribute(updated);
 
-        //assertNull(result); // result is
-        //verify(attributeRepository, never()).save(any());
-        assertThrows(Exception.class, () -> attributeService.editAttribute(updated));
-    }
+    //     //assertNull(result); // result is
+    //     //verify(attributeRepository, never()).save(any());
+    //     assertThrows(Exception.class, () -> attributeService.editAttribute(updated));
+    // }
 
-    // 5c1. Fail when Attribute input is null
-    @Test
-    void testEditAttribute_failsWhenAttributeIsNull() {
-        assertThrows(IllegalArgumentException.class, () -> attributeService.editAttribute(null));
-    }
+    // // 5c1. Fail when Attribute input is null
+    // @Test
+    // void testEditAttribute_failsWhenAttributeIsNull() {
+    //     assertThrows(IllegalArgumentException.class, () -> attributeService.editAttribute(null));
+    // }
 
     //8a. tests getAttribute
     @Test

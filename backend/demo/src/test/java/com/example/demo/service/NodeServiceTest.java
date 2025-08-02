@@ -21,7 +21,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
-
 @ExtendWith(MockitoExtension.class)
 class NodeServiceTest {
 
@@ -38,25 +37,24 @@ class NodeServiceTest {
     void testCreateNodeAssignsUser() {
         User user = new User();
         user.setId(1);
-        when(userRepository.findById(1)).thenReturn(Optional.of(user)); 
-        // this will happen in nodeService layer, we are just pretending it 
-        // when userRepository.findById(1) is called in nodeService, it should return user with id 1
+        when(userRepository.findById(1)).thenReturn(Optional.of(user));
+        // this will happen in nodeService layer, we are just pretending it
+        // when userRepository.findById(1) is called in nodeService, it should return
+        // user with id 1
 
         Node node = new Node();
         node.setName("ServiceNode");
 
         when(nodeRepository.save(any(Node.class))).thenAnswer(i -> i.getArgument(0));
 
-
         Node created = nodeService.createNode(1, node);
         assertEquals("ServiceNode", created.getName());
-        assertEquals(user, created.getUser());//gets mockUser
+        assertEquals(user, created.getUser());// gets mockUser
     }
 
-
-     @Test
+    @Test
     void testDeleteNode_success() {
-        
+
         User user = new User();
         user.setId(1);
         Integer userId = 1;
@@ -64,7 +62,7 @@ class NodeServiceTest {
 
         Node node = new Node();
         node.setId(nodeId);
-        node.setUser(user); 
+        node.setUser(user);
 
         when(nodeRepository.findById(nodeId)).thenReturn(Optional.of(node));
 
@@ -78,7 +76,7 @@ class NodeServiceTest {
 
     @Test
     void testDeleteNode_wrongUser() {
-        
+
         User user = new User();
         user.setId(2);
         Integer userId = 1;
@@ -86,7 +84,7 @@ class NodeServiceTest {
 
         Node node = new Node();
         node.setId(nodeId);
-        node.setUser(user);  
+        node.setUser(user);
 
         when(nodeRepository.findById(nodeId)).thenReturn(Optional.of(node));
 
@@ -100,12 +98,11 @@ class NodeServiceTest {
 
     @Test
     void testDeleteNode_notFound() {
-        
+
         Integer userId = 1;
         Integer nodeId = 10;
 
         when(nodeRepository.findById(nodeId)).thenReturn(Optional.empty());
-
 
         boolean result = nodeService.deleteNode(userId, nodeId);
 
@@ -113,5 +110,32 @@ class NodeServiceTest {
         verify(nodeRepository, never()).deleteById(any());
     }
 
-}
+    @Test
+    void testDeleteNodeByUid_failsIfUidNotFound() {
+        String nonExistentUid = "missing-node";
 
+        when(nodeRepository.findByUid(nonExistentUid)).thenReturn(Optional.empty());
+
+        boolean result = nodeService.deleteNodeByUid(nonExistentUid);
+
+        assertFalse(result);
+        verify(nodeRepository, never()).delete(any());
+    }
+
+    @Test
+    void testDeleteNodeByUid_failsOnEmptyUid() {
+        boolean result = nodeService.deleteNodeByUid("");
+
+        assertFalse(result);
+        verify(nodeRepository, never()).findByUid(any());
+    }
+
+    @Test
+    void testDeleteNodeByUid_failsOnNullUid() {
+        boolean result = nodeService.deleteNodeByUid(null);
+
+        assertFalse(result);
+        verify(nodeRepository, never()).findByUid(any());
+    }
+
+}

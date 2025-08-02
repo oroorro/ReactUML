@@ -1,8 +1,11 @@
 package com.example.demo.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.*;
 
 @Entity
+@Table(name = "attribute_content")
 public class AttributeContent {
 
     @Id
@@ -18,11 +21,18 @@ public class AttributeContent {
 
     @ManyToOne(optional = true)
     @JoinColumn(name = "pipe_id") 
+    @JsonBackReference
     private Pipe pipe;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = true)
     @JoinColumn(name = "belonging_node_id")
     private Node belongingNode;
+
+    @Column(nullable = false)
+    private String name;
+    
+    @Column(nullable = true)
+    private String holdingValue;
 
     @PrePersist
     @PreUpdate
@@ -31,8 +41,6 @@ public class AttributeContent {
             throw new IllegalStateException("AttributeContent must be linked to either an Attribute or a Pipe");
         }
     }
-
-    private String name;
 
     // Constructors
     public AttributeContent() {}
@@ -64,6 +72,10 @@ public class AttributeContent {
         return belongingNode;
     }
 
+    public String getBelongingNodeUid() {
+        return belongingNode.getUid();
+    }
+
     public void setBelongingNode(Node belongingNode) {
         this.belongingNode = belongingNode;
     }
@@ -74,6 +86,14 @@ public class AttributeContent {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getHoldingValue() {
+        return holdingValue;
+    }
+    
+    public void setHoldingValue(String holdingValue) {
+        this.holdingValue = holdingValue;
     }
 
     public String getUid() {

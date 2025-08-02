@@ -25,7 +25,7 @@ public class Node {
     private Set<Attribute> attributes = new HashSet<>();
 
     @JsonBackReference
-    @ManyToOne
+    @ManyToOne(optional = false)
     @JoinColumn(name = "user_id")
     private User user;
 
@@ -37,7 +37,7 @@ public class Node {
     private String uid;
 
     @Column(name = "parentID")
-    private Integer parentId;
+    private String parentId;
 
     @Column(name = "numberOfPropsIn")
     private Integer numberOfPropsIn;
@@ -66,7 +66,7 @@ public class Node {
     // Constructors
     public Node() {}
 
-    public Node(Integer userId, Integer parentId, Integer numberOfPropsIn, String childDirection,
+    public Node(Integer userId, String parentId, Integer numberOfPropsIn, String childDirection,
                 String color, String state, String name, String position, Integer positionX, Integer positionY, Boolean isStartingNode) {
         this.userId = userId;
         this.parentId = parentId;
@@ -78,6 +78,13 @@ public class Node {
         this.positionX = positionX;
         this.positionY = positionY;
         this.isStartingNode = isStartingNode;
+    }
+
+    @PrePersist
+    public void prePersist() {
+        if (this.childDirection == null) {
+            this.childDirection = "vertical";
+        }
     }
 
     public Integer getId() {
@@ -101,11 +108,11 @@ public class Node {
         return user;
     }
 
-    public Integer getParentId() {
+    public String getParentId() {
         return parentId;
     }
 
-    public void setParentId(Integer parentId) {
+    public void setParentId(String parentId) {
         this.parentId = parentId;
     }
 

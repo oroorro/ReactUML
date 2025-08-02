@@ -1,21 +1,28 @@
 package com.example.demo.service;
 
 import com.example.demo.model.Attribute;
+import com.example.demo.model.Node;
 import com.example.demo.repository.AttributeRepository;
+import com.example.demo.repository.NodeRepository;
+import com.fasterxml.jackson.databind.JsonNode;
+
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Objects;
+import java.util.Optional;
 
 @Service
 public class AttributeService {
 
     private final AttributeRepository attributeRepository;
+    private final NodeRepository nodeRepository;
 
-    public AttributeService(AttributeRepository attributeRepository) {
+    public AttributeService(AttributeRepository attributeRepository, NodeRepository nodeRepository) {
         this.attributeRepository = attributeRepository;
+        this.nodeRepository = nodeRepository;
     }
 
     // Create Attribute
@@ -24,12 +31,26 @@ public class AttributeService {
         if (attribute == null || attribute.getUid() == null) {
             throw new IllegalArgumentException("Attribute or its UID cannot be null.");
         }
+        
+        // Validate that node is provided and exists
+        if (attribute.getNode() == null || attribute.getNode().getUid() == null) {
+            throw new IllegalArgumentException("Attribute must have a valid node reference with UID.");
+        }
+        
+        // Find the node in database
+            Node source = nodeRepository.findByUid(attribute.getNode().getUid())
+            .orElseThrow(() -> new EntityNotFoundException("Node not found with UID: " + attribute.getNode().getUid()));
+        
+        // Set the found node
+                attribute.setNode(source);
+            System.err.println("Fetched Node from DB: " + source.getUid());
+
         return attributeRepository.save(attribute);
     }
 
     // Edit Attribute
     @Transactional
-    public Attribute editAttribute(Attribute updatedAttribute) {
+    public boolean editAttribute(Attribute updatedAttribute, JsonNode rawNode) {
         if (updatedAttribute == null || updatedAttribute.getUid() == null) {
             throw new IllegalArgumentException("Updated attribute or UID cannot be null.");
         }
@@ -39,40 +60,55 @@ public class AttributeService {
 
         boolean modified = false;
 
-        if (!Objects.equals(existing.getName(), updatedAttribute.getName())) {
+        // Only update name if it's present in the JSON
+        if (rawNode.has("name") && !Objects.equals(existing.getName(), updatedAttribute.getName())) {
             existing.setName(updatedAttribute.getName());
             modified = true;
         }
 
-        if (!Objects.equals(existing.getMute(), updatedAttribute.getMute())) {
+        // Only update mute if it's present in the JSON
+        if (rawNode.has("mute") && !Objects.equals(existing.getMute(), updatedAttribute.getMute())) {
             existing.setMute(updatedAttribute.getMute());
             modified = true;
         }
 
-        if (!Objects.equals(existing.getTotalNumber(), updatedAttribute.getTotalNumber())) {
+        // Only update totalNumber if it's present in the JSON
+        if (rawNode.has("totalNumber") && !Objects.equals(existing.getTotalNumber(), updatedAttribute.getTotalNumber())) {
             existing.setTotalNumber(updatedAttribute.getTotalNumber());
             modified = true;
         }
 
-        if (updatedAttribute.getNode() != null &&
-            !Objects.equals(existing.getNode().getUid(), updatedAttribute.getNode().getUid())) {
-            existing.setNode(updatedAttribute.getNode());
-            modified = true;
+        // Handle node relationship
+        if (rawNode.has("node")) {
+            JsonNode nodeNode = rawNode.get("node");
+            if (nodeNode.has("uid")) {
+                String nodeUid = nodeNode.get("uid").asText();
+                if (!Objects.equals(existing.getNode().getUid(), nodeUid)) {
+                    Node newNode = nodeRepository.findByUid(nodeUid)
+                        .orElseThrow(() -> new EntityNotFoundException("Node not found with UID: " + nodeUid));
+                    existing.setNode(newNode);
+                    modified = true;
+                }
+            }
         }
 
-        return modified ? attributeRepository.save(existing) : existing;
+        if (modified) {
+            attributeRepository.save(existing);
+        }
+        return modified;
     }
 
     //  Delete Attribute
     @Transactional
-    public void deleteAttribute(String uid) {
-        if (uid == null ) {
-            throw new IllegalArgumentException("UID cannot be null");
+    public boolean deleteAttribute(String uid) {
+        if (uid == null || uid.isBlank()) return false;
+        
+        Optional<Attribute> attributeOpt = attributeRepository.findByUid(uid);
+        if (attributeOpt.isPresent()) {
+            attributeRepository.delete(attributeOpt.get());
+            return true;
         }
-
-        Attribute attribute = attributeRepository.findByUid(uid)
-                .orElseThrow(() -> new EntityNotFoundException("Attribute not found with UID: " + uid));
-        attributeRepository.delete(attribute);
+        return false;
     }
 
     public Attribute getAttribute(String uid) {

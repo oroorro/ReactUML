@@ -29,6 +29,7 @@ public class Attribute {
 
     private Boolean mute;
 
+    //shows a connection between the attribute and the attribute content
     @OneToMany(mappedBy = "attribute", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     //private List<AttributeContent> attributeContents;
     private Set<AttributeContent> attributeContents = new HashSet<>();

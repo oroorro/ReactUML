@@ -100,7 +100,7 @@ const ReactNode = ({
 
     useEffect(() => {
 
-        if (data.stateManager.id) {
+        if (data.stateManager && data.stateManager.id) {
             //console.log("data stateManager", data.stateManager.id)
             const id = data.stateManager.id;
 
@@ -302,8 +302,8 @@ const ReactNode = ({
             totalNumberPropsForMutedChild = filteredMutedReactChilds.reduce((accumulator, node) => accumulator + node.numbersOfPropsGoingIn, 0);
 
             mutedReactChildCount = filteredMutedReactChilds.length;
-            //console.log("mutedAttributeCount", mutedReactChildCount);
-            //console.log(children, "filtered unmuted:", filteredUnMutedReactChilds, "filtered muted", filteredMutedReactChilds, "filtered muting", filteredMutingReactChilds)
+            //console.log("mutedAttributeCount", mutedReactChildCount, "data Id:", data.id);
+            //console.log(children, "filtered unmuted:", filteredUnMutedReactChilds, "filtered muted", filteredMutedReactChilds, "filtered muting", filteredMutingReactChilds, "data Id:", data.id)
         }
 
         //using same logic as updateStatesInArray
@@ -514,7 +514,7 @@ const ReactNode = ({
                                                 {/**inside mutingNodes chaging current Node's children Nodes' state into 'notMute' or 'mute'*/}
 
                                                 <div className='NodePositionWrapper'
-                                                    datatype='Node'
+                                                    // datatype='Node'
                                                 >
                                                     <div
                                                         className="childNode"
@@ -572,7 +572,7 @@ const ReactNode = ({
                 }
                 {/* //filter children by it's state being mute|muting|unmuted or undefined  */}
 
-                {filteredMutingReactChilds &&
+                {filteredMutingReactChilds.length > 0 &&
                     <ReactChildrenWrapper
                         reactChildren={filteredMutingReactChilds}
                         renderChildren={renderChildren}
@@ -592,7 +592,7 @@ const ReactNode = ({
                         renderDirection={renderDirection}
                     />
                 }
-                {filteredUnMutedReactChilds &&
+                {filteredUnMutedReactChilds.length > 0 &&
                     <ReactChildrenWrapper
                         reactChildren={filteredUnMutedReactChilds}
                         renderChildren={renderChildren}
@@ -658,7 +658,7 @@ const ReactNode = ({
 
             <div style={{ display: 'flex', }}>
 
-                {attributes.map((attr: Attribute) => {
+                {attributes && attributes.map((attr: Attribute) => {
 
                     const isExpanded = expandedAttributes.includes(attr.id);
                     return (
@@ -672,7 +672,7 @@ const ReactNode = ({
 
             </div>
 
-            {renderChildren(children, 1, id, children.state, renderChildrenDirection)}
+            {children && renderChildren(children, 1, id, children.state, renderChildrenDirection)}
         </div>
     );
 };
