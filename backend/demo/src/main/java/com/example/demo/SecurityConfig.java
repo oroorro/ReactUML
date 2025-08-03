@@ -60,12 +60,11 @@ public class SecurityConfig {
                             response.setContentType("application/json");
                             response.getWriter().write("{ \"error\": \"Invalid credentials\" }");
                         })
-                        .defaultSuccessUrl("/", true)
                         .permitAll())
                 // .and()
                 .logout(logout -> logout
                         .logoutUrl("/auth/logout") // You can change the default path
-                        .logoutSuccessUrl("/login") // Redirect after logout
+                        .logoutSuccessUrl("http://localhost:5173/login") // Redirect to frontend login page
                         .invalidateHttpSession(true)
                         .deleteCookies("JSESSIONID"))
                 .sessionManagement(session -> session
