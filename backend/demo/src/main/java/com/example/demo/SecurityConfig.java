@@ -40,7 +40,7 @@ public class SecurityConfig {
                 .authenticationProvider(authenticationProvider())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/index.html", "/assets/**", "/auth/**", "/register").permitAll()
+                        .requestMatchers("/index.html", "/assets/**", "/auth/status", "/register").permitAll()
                         .requestMatchers("/test-debug/**").permitAll()
                         // .requestMatchers("/batch/**").authenticated()
                         .anyRequest().authenticated())

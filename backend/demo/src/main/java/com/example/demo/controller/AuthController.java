@@ -13,6 +13,12 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/auth")
@@ -62,5 +68,23 @@ public class AuthController {
         User user = userRepository.findByUsername(userDetails.getUsername())
             .orElseThrow(() -> new RuntimeException("User not found"));
         return new UserResponse(user.getId(), user.getUsername());
+    }
+
+    @GetMapping("/status")
+    public ResponseEntity<Map<String, Object>> getAuthStatus() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        
+        Map<String, Object> response = new HashMap<>();
+        
+        if (authentication != null && authentication.isAuthenticated() && 
+            !"anonymousUser".equals(authentication.getName())) {
+            response.put("authenticated", true);
+            response.put("user", authentication.getName());
+        } else {
+            response.put("authenticated", false);
+            response.put("user", null);
+        }
+        
+        return ResponseEntity.ok(response);
     }
 }
