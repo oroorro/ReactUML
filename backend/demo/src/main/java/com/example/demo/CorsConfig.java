@@ -14,7 +14,7 @@ public class CorsConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/auth/**")
-                        .allowedOrigins("http://coodule.com", "http://www.coodule.com")
+                        .allowedOrigins("https://coodule.com", "https://www.coodule.com")
                         .allowedMethods("GET", "POST", "PUT", "DELETE")
                         .allowCredentials(true);
             }
