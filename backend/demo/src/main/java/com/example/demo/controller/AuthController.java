@@ -87,4 +87,12 @@ public class AuthController {
         
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/unauthorized")
+    public ResponseEntity<Map<String, Object>> unauthorized() {
+        Map<String, Object> response = new HashMap<>();
+        response.put("error", "Authentication required");
+        response.put("redirect", "http://localhost:5173/login");
+        return ResponseEntity.status(401).body(response);
+    }
 }

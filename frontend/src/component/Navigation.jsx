@@ -21,7 +21,7 @@ const Navigation = () => {
             </div>
             <div className="flex items-center space-x-4">
               <Link
-                to="/login"
+                to="/home"
                 className="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium"
               >
                 Login

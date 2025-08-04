@@ -40,11 +40,12 @@ public class SecurityConfig {
                 .authenticationProvider(authenticationProvider())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/index.html", "/assets/**", "/auth/status", "/register").permitAll()
+                        .requestMatchers("/index.html", "/assets/**", "/auth/status", "/register", "/home").permitAll()
                         .requestMatchers("/test-debug/**").permitAll()
                         // .requestMatchers("/batch/**").authenticated()
                         .anyRequest().authenticated())
                 .formLogin(form -> form
+                        .loginPage("/home")
                         .loginProcessingUrl("/auth/login")
                         .successHandler((request, response, authentication) -> {
                             response.setContentType("application/json");
@@ -61,10 +62,16 @@ public class SecurityConfig {
                             response.getWriter().write("{ \"error\": \"Invalid credentials\" }");
                         })
                         .permitAll())
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.setContentType("application/json");
+                            response.getWriter().write("{ \"error\": \"Authentication required\", \"redirect\": \"http://localhost:5173/home\" }");
+                        }))
                 // .and()
                 .logout(logout -> logout
                         .logoutUrl("/auth/logout") // You can change the default path
-                        .logoutSuccessUrl("http://localhost:5173/login") // Redirect to frontend login page
+                        .logoutSuccessUrl("http://localhost:5173/home") // Redirect to frontend login page
                         .invalidateHttpSession(true)
                         .deleteCookies("JSESSIONID"))
                 .sessionManagement(session -> session
