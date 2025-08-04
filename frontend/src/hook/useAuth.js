@@ -12,10 +12,10 @@ export const useAuth = () => {
 
     const checkAuthStatus = async () => {
         try {
-            const response = await fetch('http://localhost:8080/auth/status', {
+            const response = await fetch('/auth/status', {
                 credentials: 'include',
             });
-
+            console.log("response", response);
             if (response.ok) {
                 const data = await response.json();
                 setIsAuthenticated(true);
@@ -44,7 +44,7 @@ export const useAuth = () => {
         formData.append("username", username);
         formData.append("password", password);
 
-        const response = await fetch("http://localhost:8080/auth/login", {
+        const response = await fetch("/auth/login", {
             method: "POST",
             credentials: "include",
             body: formData,
@@ -63,7 +63,7 @@ export const useAuth = () => {
 
     const logout = async () => {
         try {
-            await fetch("http://localhost:8080/auth/logout", {
+            await fetch("/auth/logout", {
                 method: "POST",
                 credentials: "include",
             });
