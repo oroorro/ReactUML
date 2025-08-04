@@ -74,7 +74,7 @@ public class SecurityConfig {
                                 response.getWriter().write("{ \"error\": \"Authentication required\", \"redirect\": \"http://localhost:5173/home\" }");
                             } else {
                                 // Redirect for browser requests
-                                response.sendRedirect("http://localhost:5173/home");
+                                response.sendRedirect("https://coodule.com/home");
                             }
                         }))
                 // .and()
