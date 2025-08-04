@@ -62,11 +62,20 @@ public class SecurityConfig {
                             response.getWriter().write("{ \"error\": \"Invalid credentials\" }");
                         })
                         .permitAll())
-                .exceptionHandling(exception -> exception
+                        .exceptionHandling(exception -> exception
                         .authenticationEntryPoint((request, response, authException) -> {
-                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                            response.setContentType("application/json");
-                            response.getWriter().write("{ \"error\": \"Authentication required\", \"redirect\": \"http://localhost:5173/home\" }");
+                            // AJAX request
+                            String requestedWith = request.getHeader("X-Requested-With");
+                            if ("XMLHttpRequest".equals(requestedWith) || 
+                                "application/json".equals(request.getHeader("Accept"))) {
+                                // Return JSON for AJAX requests
+                                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                                response.setContentType("application/json");
+                                response.getWriter().write("{ \"error\": \"Authentication required\", \"redirect\": \"http://localhost:5173/home\" }");
+                            } else {
+                                // Redirect for browser requests
+                                response.sendRedirect("http://localhost:5173/home");
+                            }
                         }))
                 // .and()
                 .logout(logout -> logout
