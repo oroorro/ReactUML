@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../hook/useAuth";
+import { useEdgesState } from "../hook/useNodesEdgesState";
 
 const Navigation = () => {
   const { isAuthenticated, user, logout } = useAuth();
@@ -9,11 +10,16 @@ const Navigation = () => {
     await logout();
   };
 
+  useEffect(() => {
+    console.log("isAuthenticated in Navigation", isAuthenticated);
+    
+  }, []);
+
   if (!isAuthenticated) {
     return (
       <nav className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
+          <div className="flex justify-between h-13">
             <div className="flex items-center">
               <Link to="/" className="text-xl font-bold text-gray-900">
                 DrawApp
@@ -50,7 +56,7 @@ const Navigation = () => {
           </div>
           <div className="flex items-center space-x-4">
             <span className="text-gray-700 text-sm">
-              Welcome, {user?.username || "User"}
+              Welcome, {user || "User"}
             </span>
             <button
               onClick={handleLogout}

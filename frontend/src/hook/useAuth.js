@@ -22,8 +22,14 @@ export const useAuth = () => {
                 console.log(" Response data:", data); 
                 console.log(" User authenticated:", data.authenticated);
                 console.log(" Username:", data.user);
-                setIsAuthenticated(true);
-                setUser(data.user);
+                
+                if(data.authenticated){
+                    setIsAuthenticated(true);
+                    setUser(data.user);
+                }else{
+                    setIsAuthenticated(false);
+                    setUser(null);
+                }
             } else if (response.status === 401) {
                 // User is not authenticated, redirect to login
                 setIsAuthenticated(false);

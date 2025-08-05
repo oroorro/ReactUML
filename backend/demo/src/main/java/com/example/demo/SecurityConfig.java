@@ -79,8 +79,8 @@ public class SecurityConfig {
                         }))
                 // .and()
                 .logout(logout -> logout
-                        .logoutUrl("/auth/logout") // You can change the default path
-                        .logoutSuccessUrl("http://localhost:5173/home") // Redirect to frontend login page
+                        .logoutUrl("/auth/logout") 
+                        .logoutSuccessUrl("https://coodule.com/home") // Redirect to frontend login page
                         .invalidateHttpSession(true)
                         .deleteCookies("JSESSIONID"))
                 .sessionManagement(session -> session
