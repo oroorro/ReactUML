@@ -18,6 +18,10 @@ export const useAuth = () => {
             console.log("response", response);
             if (response.ok) {
                 const data = await response.json();
+                
+                console.log(" Response data:", data); 
+                console.log(" User authenticated:", data.authenticated);
+                console.log(" Username:", data.user);
                 setIsAuthenticated(true);
                 setUser(data.user);
             } else if (response.status === 401) {
