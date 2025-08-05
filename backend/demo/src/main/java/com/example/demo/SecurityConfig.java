@@ -31,7 +31,6 @@ public class SecurityConfig {
     @Autowired
     private CustomUserDetailsService customUserDetailsService;
 
-
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -71,7 +70,7 @@ public class SecurityConfig {
                                 // Return JSON for AJAX requests
                                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                                 response.setContentType("application/json");
-                                response.getWriter().write("{ \"error\": \"Authentication required\", \"redirect\": \"http://localhost:5173/home\" }");
+                                response.getWriter().write("{ \"error\": \"Authentication required\", \"redirect\": \"https://coodule.com/home\" }");
                             } else {
                                 // Redirect for browser requests
                                 response.sendRedirect("https://coodule.com/home");
@@ -80,9 +79,14 @@ public class SecurityConfig {
                 // .and()
                 .logout(logout -> logout
                         .logoutUrl("/auth/logout") 
-                        .logoutSuccessUrl("https://coodule.com/home") // Redirect to frontend login page
                         .invalidateHttpSession(true)
-                        .deleteCookies("JSESSIONID"))
+                    .deleteCookies("JSESSIONID")
+                    .logoutSuccessHandler((request, response, authentication) -> {
+                        response.setStatus(HttpServletResponse.SC_OK);
+                        response.setContentType("application/json");
+                        response.getWriter().write("{ \"message\": \"Logged out successfully\" }");
+                    })
+                )
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED));
 

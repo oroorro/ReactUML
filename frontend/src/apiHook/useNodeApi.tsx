@@ -24,7 +24,7 @@ export function useNodeApi() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`http://localhost:8080/node/get/${userId}`);
+      const res = await fetch(`/node/get/${userId}`);
       if (!res.ok) throw new Error('Failed to fetch nodes');
       return await res.json();
     } catch (err: any) {
@@ -39,7 +39,7 @@ export function useNodeApi() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`http://localhost:8080/node/create/${userId}`, {
+      const res = await fetch(`/node/create/${userId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(nodeData),
@@ -58,7 +58,7 @@ export function useNodeApi() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`http://localhost:8080/node/delete/${userId}/${nodeId}`, {
+      const res = await fetch(`/node/delete/${userId}/${nodeId}`, {
         method: 'DELETE',
       });
       if (!res.ok) throw new Error('Failed to delete node');
@@ -74,7 +74,7 @@ export function useNodeApi() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`http://localhost:8080/node/edit/${nodeId}`, {
+      const res = await fetch(`/node/edit/${nodeId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updateData),

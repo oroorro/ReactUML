@@ -22,7 +22,7 @@ export const useAuth = () => {
                 console.log(" Response data:", data); 
                 console.log(" User authenticated:", data.authenticated);
                 console.log(" Username:", data.user);
-                
+
                 if(data.authenticated){
                     setIsAuthenticated(true);
                     setUser(data.user);
@@ -82,6 +82,11 @@ export const useAuth = () => {
         } finally {
             setIsAuthenticated(false);
             setUser(null);
+            if (res.ok) {
+                const data = await res.json();
+                console.log(data.message); 
+                navigate("/home"); 
+            }
         }
     };
 

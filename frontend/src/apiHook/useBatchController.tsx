@@ -99,7 +99,7 @@ export function useBatchController() {
 
     try {
       const response = await fetch(
-        `${'http://localhost:8080'}/batch`,
+        `/batch`,
         {
           method: 'POST',
           headers: {
@@ -169,7 +169,7 @@ export function useBatchController() {
 
     try {
       const response = await fetch(
-        `${'http://localhost:8080'}/batch`,
+        `/batch`,
         {
           method: 'POST',
           headers: {
@@ -218,7 +218,7 @@ export function useBatchController() {
 
     try {
       const response = await fetch(
-        `${'http://localhost:8080'}/batch`,
+        `/batch`,
         {
           method: 'POST',
           headers: {
@@ -268,7 +268,7 @@ export function useBatchController() {
 
     try {
       const response = await fetch(
-        `${'http://localhost:8080'}/batch`,
+        `/batch`,
         {
           method: 'POST',
           headers: {
@@ -318,7 +318,7 @@ export function useBatchController() {
 
     try {
       const response = await fetch(
-        `${'http://localhost:8080'}/batch`,
+        `/batch`,
         {
           method: 'POST',
           headers: {
@@ -371,7 +371,7 @@ export function useBatchController() {
 
     try {
       const response = await fetch(
-        `${'http://localhost:8080'}/batch`,
+        `/batch`,
         {
           method: 'POST',
           headers: {
@@ -425,7 +425,7 @@ export function useBatchController() {
 
     try {
       const response = await fetch(
-        `${'http://localhost:8080'}/batch`,
+        `/batch`,
         {
           method: 'POST',
           headers: {

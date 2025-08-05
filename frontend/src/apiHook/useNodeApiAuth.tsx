@@ -9,7 +9,7 @@ export function useNodeApiAuth() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch('http://localhost:8080/node/get', {
+      const res = await fetch('/node/get', {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include', // Include cookies for session authentication
@@ -33,7 +33,7 @@ export function useNodeApiAuth() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch('http://localhost:8080/node/create', {
+      const res = await fetch('/node/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include', // Include cookies for session authentication
@@ -58,7 +58,7 @@ export function useNodeApiAuth() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`http://localhost:8080/node/delete/${nodeId}`, {
+      const res = await fetch(`/node/delete/${nodeId}`, {
         method: 'DELETE',
         credentials: 'include', // Include cookies for session authentication
       });
@@ -79,7 +79,7 @@ export function useNodeApiAuth() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`http://localhost:8080/node/edit/${nodeId}`, {
+      const res = await fetch(`/node/edit/${nodeId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include', // Include cookies for session authentication
