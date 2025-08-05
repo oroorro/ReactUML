@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 export const useAuth = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
+    const navigate = useNavigate();
 
     // Check if user is authenticated on component mount
     useEffect(() => {
@@ -73,20 +75,28 @@ export const useAuth = () => {
 
     const logout = async () => {
         try {
-            await fetch("/auth/logout", {
+            const response = await fetch("/auth/logout", {
                 method: "POST",
                 credentials: "include",
             });
+            
+            if (response.ok) {
+                const data = await response.json();
+                console.log("Logout message:", data.message); 
+                setIsAuthenticated(false);
+                setUser(null);
+                navigate("/home"); 
+            } else {
+                console.error('Logout failed:', response.status);
+                setIsAuthenticated(false);
+                setUser(null);
+                
+            }
         } catch (error) {
             console.error('Logout error:', error);
-        } finally {
             setIsAuthenticated(false);
             setUser(null);
-            if (res.ok) {
-                const data = await res.json();
-                console.log(data.message); 
-                navigate("/home"); 
-            }
+            
         }
     };
 
