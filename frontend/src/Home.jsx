@@ -31,6 +31,7 @@ const Home = () => {
         // Redirect to main app after successful login
         setTimeout(() => {
           navigate("/");
+          window.location.reload();
         }, 1500);
       } else {
         const errorData = await response.json();
