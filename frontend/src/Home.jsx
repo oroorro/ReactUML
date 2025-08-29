@@ -30,8 +30,9 @@ const Home = () => {
         setMessage(`Login successful! Welcome, ${data.username}`);
         // Redirect to main app after successful login
         setTimeout(() => {
-          navigate("/");
           window.location.reload();
+          navigate("/");
+          
         }, 1500);
       } else {
         const errorData = await response.json();

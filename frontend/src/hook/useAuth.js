@@ -37,7 +37,8 @@ export const useAuth = () => {
                 setIsAuthenticated(false);
                 setUser(null);
                //redirect to login page
-               window.location.href = "/home";
+               //window.location.href = "/home";
+               console.log("User is not authenticated, redirecting to login page");
             } else {
                 setIsAuthenticated(false);
                 setUser(null);
@@ -85,7 +86,7 @@ export const useAuth = () => {
                 console.log("Logout message:", data.message); 
                 setIsAuthenticated(false);
                 setUser(null);
-                navigate("/home"); 
+                navigate("/login"); 
             } else {
                 console.error('Logout failed:', response.status);
                 setIsAuthenticated(false);

@@ -62,12 +62,15 @@ public class Node {
 
     @Column(name = "isStartingNode")
     private Boolean isStartingNode;
+
+    @Column(name = "type", length = 20)
+    private String type;
     
     // Constructors
     public Node() {}
 
     public Node(Integer userId, String parentId, Integer numberOfPropsIn, String childDirection,
-                String color, String state, String name, String position, Integer positionX, Integer positionY, Boolean isStartingNode) {
+                String color, String state, String name, String position, Integer positionX, Integer positionY, Boolean isStartingNode, String type) {
         this.userId = userId;
         this.parentId = parentId;
         this.numberOfPropsIn = numberOfPropsIn;
@@ -78,6 +81,7 @@ public class Node {
         this.positionX = positionX;
         this.positionY = positionY;
         this.isStartingNode = isStartingNode;
+        this.type = type;
     }
 
     @PrePersist
@@ -195,6 +199,14 @@ public class Node {
 
     public void setChildrenDirection(String newDirection){
         this.childDirection = newDirection;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 
 }

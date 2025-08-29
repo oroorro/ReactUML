@@ -19,6 +19,9 @@ public class NodeMapper {
         dto.title = node.getName();
         dto.color = node.getColor();
         dto.isStartingNode = node.getIsStartingNode();
+        dto.positionX = node.getPositionX();
+        dto.positionY = node.getPositionY();
+        dto.type = node.getType();
 
         // These will be filled later in the service after fetching from DB
         dto.attributes = List.of();

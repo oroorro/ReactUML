@@ -60,6 +60,67 @@ let initialNodes = [
 ]
 
 
+/**
+ * Recursively transform backend nodes into frontend nodes format
+ * @param {BackendNode[]} nodes - Array of backend nodes
+ * @returns {Array<Object>} - Array of frontend-compatible nodes
+ */
+function transformBackendToFrontend(nodes, isRoot = true) {
+  console.log("nodes", nodes);
+  return nodes.map(backendNode => {
+    console.log("backendNode", backendNode.uid, backendNode.pipes, backendNode.pipes[0]?.attributeContents?.length);
+    // shared structure (used in root.data and in children directly)
+    const transformed = {
+      id: backendNode.uid,
+      title: backendNode.title,
+      color: backendNode.color,
+      type: backendNode.type,
+      numbersOfPropsGoingIn: backendNode.pipes[0]?.attributeContents?.length ?? 0,
+      attributes: (backendNode.attributes ?? []).map(attr => ({
+        id: attr.uid,
+        nameOfAttribute: attr.nameOfAttribute,
+        totalNumberOfAttribute: attr.totalNumberOfAttribute,
+        AttributeContents: (attr.attributeContents ?? []).map(ac => ({
+          ...ac,
+          id: ac.uid || crypto.randomUUID(),
+        })),
+      })),
+      pipes: (backendNode.pipes ?? []).map(pipe => ({
+        id: pipe.uid,
+        name: pipe.name,
+        color: pipe.color,
+        numbersOfProps: pipe.numbersOfProps,
+        attributeContents: (pipe.attributeContents ?? []).map(ac => ({
+          ...ac,
+          id: ac.uid || crypto.randomUUID(),
+        })),
+      })),
+      children: transformBackendToFrontend(backendNode.children, false),
+    };
+
+    // if root → wrap inside full React Flow node
+    if (isRoot) {
+      return {
+        id: backendNode.uid,
+        position: {
+          x: backendNode.positionX ?? 0,
+          y: backendNode.positionY ?? 0,
+        },
+        type: 'ReactNode',
+        data: {
+          indexMap: null,
+          stateManager: null,
+          label: backendNode.title,
+          ...transformed,
+        },
+      };
+    }
+    // if not root, then return plain transformed child
+    console.log("transformed", transformed);
+    return transformed;
+  });
+}
+
 
 function Flow() {
 
@@ -74,6 +135,10 @@ function Flow() {
     try {
       const nodes = await getAllNodesForUser(); // No userId needed!
       console.log('Fetched nodes:', nodes);
+
+      const initialNodes = transformBackendToFrontend(nodes);
+      console.log("initialNodes", initialNodes);
+      setNodes(initialNodes);
     } catch (err) {
       console.error('Error fetching nodes:', err);
     }
@@ -89,13 +154,15 @@ function Flow() {
 
 
 
-  const handleCreateNode = async (color, nodeUid, isStartingNode, name, parentId = null) => {
+  const handleCreateNode = async (color, nodeUid, isStartingNode, name, parentId = null, positionX, positionY, type = null) => {
 
     const nodeData = {
       uid: nodeUid,
       name: name,
       isStartingNode: isStartingNode,
-      color: color
+      color: color,
+      positionX: positionX == 0 ? null : positionX,
+      positionY: positionY == 0 ? null : positionY,
     };
 
     // Only add parentId if it's provided
@@ -256,7 +323,8 @@ function Flow() {
           name: 'ghost',
           isStartingNode: false,
           parentId: foundNode.id,
-          color: ghostChild.color
+          color: ghostChild.color,
+          type: 'ghost'
         }],
         pipes: [{
           uid: ghostChild.pipes[0].id,
@@ -273,7 +341,7 @@ function Flow() {
       if (!foundNode) {
         const nodeUid = generateUniqueId();
         const color = generateRandomHexColor();
-        handleCreateNode(color, nodeUid, true, 'StartNode');
+        handleCreateNode(color, nodeUid, true, 'StartNode', null, e.clientX - 80, e.clientY - 10);
 
         addNodeToInitialNodes(
           nodes, {

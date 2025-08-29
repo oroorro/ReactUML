@@ -5,6 +5,9 @@ export interface CreateNodeDto {
   name: string;
   isStartingNode: boolean;
   parentId?: string;
+  positionX?: number;
+  positionY?: number;
+  type?: string;
   //userId: number;
 }
 

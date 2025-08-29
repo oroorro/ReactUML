@@ -5,15 +5,14 @@ import { useAuth } from "../hook/useAuth";
 import { useEdgesState } from "../hook/useNodesEdgesState";
 
 const Navigation = () => {
-  const { isAuthenticated, user, logout } = useAuth();
+  const { isAuthenticated, user, logout, checkAuthStatus } = useAuth();
 
   const handleLogout = async () => {
     await logout();
   };
 
   useEffect(() => {
-    console.log("isAuthenticated in Navigation", isAuthenticated);
-    
+    checkAuthStatus()
   }, []);
 
   if (!isAuthenticated) {
@@ -23,7 +22,7 @@ const Navigation = () => {
           <div className="flex justify-between h-13">
             <div className="flex items-center">
               <Link to="/" className="text-xl font-bold text-gray-900">
-                DrawApp
+              Coodule
               </Link>
             </div>
             <div className="flex items-center space-x-4">
@@ -52,7 +51,7 @@ const Navigation = () => {
         <div className="flex justify-between h-16">
           <div className="flex items-center">
             <Link to="/" className="text-xl font-bold text-gray-900">
-              DrawApp
+            Coodule
             </Link>
           </div>
           <div className="flex items-center space-x-4">

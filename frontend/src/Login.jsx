@@ -22,6 +22,7 @@ const Login = () => {
         setMessage(`Login successful! Welcome, ${result.data.username}`);
         // Redirect to home page after successful login
         setTimeout(() => {
+          //window.location.reload();
           navigate("/");
         }, 1500);
       } else {

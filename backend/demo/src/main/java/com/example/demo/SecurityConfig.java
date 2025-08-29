@@ -1,5 +1,7 @@
 package com.example.demo;
 
+import java.util.Arrays;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,6 +19,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.security.config.Customizer;
+import org.springframework.core.env.Environment;
 
 import com.example.demo.service.CustomUserDetailsService;
 
@@ -24,22 +27,33 @@ import jakarta.servlet.http.HttpServletResponse;
 
 //@Profile("!test")
 //@Profile("test")
-@Profile({ "default", "test" })
+@Profile({ "default", "test", "dev"})
 @Configuration
 public class SecurityConfig {
 
     @Autowired
     private CustomUserDetailsService customUserDetailsService;
 
+    @Autowired
+    private Environment env;
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        String redirectUrl;
+         // Choose redirect based on environment
+         if (Arrays.asList(env.getActiveProfiles()).contains("prod")) {
+            redirectUrl = "https://coodule.com/login";
+        } else {
+            redirectUrl = "http://localhost:8080/login"; 
+        }
+
         http
             .cors(Customizer.withDefaults())
                 .csrf().disable()
                 .authenticationProvider(authenticationProvider())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/index.html", "/assets/**", "/auth/**", "/register", "/home").permitAll()
+                        .requestMatchers("/index.html", "/assets/**", "/auth/**", "/register", "/home", "/login").permitAll()
                         .requestMatchers("/test-debug/**").permitAll()
                         // .requestMatchers("/batch/**").authenticated()
                         .anyRequest().authenticated())
@@ -70,10 +84,10 @@ public class SecurityConfig {
                                 // Return JSON for AJAX requests
                                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                                 response.setContentType("application/json");
-                                response.getWriter().write("{ \"error\": \"Authentication required\", \"redirect\": \"https://coodule.com/home\" }");
+                                response.getWriter().write("{ \"error\": \"Authentication required\", \"redirect\": \"" + redirectUrl + "\" }");
                             } else {
                                 // Redirect for browser requests
-                                response.sendRedirect("https://coodule.com/home");
+                                response.sendRedirect(redirectUrl);
                             }
                         }))
                 // .and()

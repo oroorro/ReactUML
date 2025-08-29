@@ -125,7 +125,7 @@ let initialNodes = [
       children: [
         {
           title: "NodeRenderer",
-          numbersOfPropsGoingIn: 18,
+          numbersOfPropsGoingIn: 18, //numbers of pipes going in
           color: '#ffa8d5',
           state: 'select',
           id: '1qlx7vx-107d1f',
@@ -427,7 +427,61 @@ function generateUniqueId() {
 }
 
 
+/**
+ * Recursively transform backend nodes into frontend nodes format
+ * @param {BackendNode[]} nodes - Array of backend nodes
+ * @returns {Array<Object>} - Array of frontend-compatible nodes
+ */
+function transformBackendToFrontend(nodes, isRoot = true) {
+  return nodes.map(backendNode => {
+    // shared structure (used in root.data and in children directly)
+    const transformed = {
+      id: backendNode.uid,
+      title: backendNode.title,
+      color: backendNode.color,
+      attributes: (backendNode.attributes ?? []).map(attr => ({
+        id: attr.uid,
+        nameOfAttribute: attr.nameOfAttribute,
+        totalNumberOfAttribute: attr.totalNumberOfAttribute,
+        AttributeContents: (attr.attributeContents ?? []).map(ac => ({
+          ...ac,
+          id: ac.uid || crypto.randomUUID(),
+        })),
+      })),
+      pipes: (backendNode.pipes ?? []).map(pipe => ({
+        id: pipe.uid,
+        name: pipe.name,
+        color: pipe.color,
+        numbersOfProps: pipe.numbersOfProps,
+        attributeContents: (pipe.attributeContents ?? []).map(ac => ({
+          ...ac,
+          id: ac.uid || crypto.randomUUID(),
+        })),
+      })),
+      children: transformBackendToFrontend(backendNode.children, false),
+    };
 
+    // if root → wrap inside full React Flow node
+    if (isRoot) {
+      return {
+        id: backendNode.uid,
+        position: {
+          x: backendNode.positionX ?? 0,
+          y: backendNode.positionY ?? 0,
+        },
+        type: 'ReactNode',
+        data: {
+          indexMap: null,
+          stateManager: null,
+          label: backendNode.title,
+          ...transformed,
+        },
+      };
+    }
+    // if not root, then return plain transformed child
+    return transformed;
+  });
+}
 
 function Flow() {
 
@@ -437,11 +491,15 @@ function Flow() {
   const nodeId = useRef(5);
   const { createNode, editNode, createAttribute, createPipe, loading, error } = useBatchController();
   const { getAllNodesForUser } = useNodeApiAuth();
+  // window.location.reload();
 
   const fetchNodes = async () => {
     try {
       const nodes = await getAllNodesForUser(); // No userId needed!
       console.log('Fetched nodes:', nodes);
+      const fetchedNodes = transformBackendToFrontend(nodes);
+
+      setNodes([...fetchedNodes, ...initialNodes]);
     } catch (err) {
       console.error('Error fetching nodes:', err);
     }
@@ -453,18 +511,21 @@ function Flow() {
 
   useEffect(() => {
     fetchNodes();
+    //checkAuthStatus();
   }, [])
 
 
 
 
-  const handleCreateNode = async (color, nodeUid, isStartingNode, name, parentId = null) => {
+  const handleCreateNode = async (color, nodeUid, isStartingNode, name, parentId = null, positionX, positionY) => {
 
     const nodeData = {
       uid: nodeUid,
       name: name,
       isStartingNode: isStartingNode,
-      color: color
+      color: color,
+      positionX: positionX == 0 ? null : positionX,
+      positionY: positionY == 0 ? null : positionY,
     };
 
     // Only add parentId if it's provided
@@ -609,7 +670,7 @@ function Flow() {
         type == 'Node' ? newChild : ghostChild,
       ];
       //console.log("pipe Id: ", ghostChild.id, "parentNode Id: ", id)
-      handleCreateNode(ghostChild.color, ghostChild.id, false, 'ghost', foundNode.id);
+      handleCreateNode(ghostChild.color, ghostChild.id, false, 'ghost', foundNode.id, 0, 0);
       handleCreatePipe(ghostChild.pipes[0].id, foundNode.color, id);
     }
     //creating Node and Prop
@@ -618,7 +679,7 @@ function Flow() {
       if (!foundNode) {
         const nodeUid = generateUniqueId();
         const color = generateRandomHexColor();
-        handleCreateNode(color, nodeUid, true, 'StartNode');
+        handleCreateNode(color, nodeUid, true, 'StartNode', null, e.clientX - 80, e.clientY - 10);
         // nodes.children = [
         //   ...(nodes.children || []),
         //   {
@@ -658,7 +719,7 @@ function Flow() {
         if (foundNode.children != null) {
           console.log("create a child Node within a Node ");
           foundNode.children = [...foundNode.children, newChild];
-          handleCreateNode(newChild.color, newChild.id, false, 'StartNode', foundNode.id);
+          handleCreateNode(newChild.color, newChild.id, false, 'StartNode', foundNode.id, 0, 0);
           handleCreatePipe(newChild.pipes[0].id, foundNode.color, id);
           setNodes(nodes);
         }
@@ -831,13 +892,13 @@ function Flow() {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   // Expose nodes state to window for E2E testing
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      // Expose nodes state to window for E2E testing
-      window.frontendNodes = nodes;
-      console.log("frontendNodes", window.frontendNodes);
-    }
-  }, [nodes]);
+  // useEffect(() => {
+  //   if (typeof window !== 'undefined') {
+  //     // Expose nodes state to window for E2E testing
+  //     window.frontendNodes = nodes;
+  //     //console.log("frontendNodes", window.frontendNodes);
+  //   }
+  // }, [nodes]);
   const onConnect = useCallback((params) => setEdges((eds) => addEdge(params, eds)), [setEdges]);
 
   function FlowClickHandler(event) {

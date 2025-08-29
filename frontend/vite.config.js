@@ -19,4 +19,18 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: './vitest.setup.ts', 
   },
+  server: {
+    proxy: {
+      '/auth': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/batch': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+        secure: false,
+      }
+    }
+  }
 });

@@ -232,10 +232,10 @@ const ReactChildrenWrapper = ({
                                 <div className="flex">
                                     <div
                                         datatype='pipe'
-                                        className='bg-white hover:bg-gray-300'
+                                        className='bg-white hover:bg-gray-300 propsCount'
                                         style={{ width: '18px', height: '18px', position: 'relative', left: '-10px' }}>
                                         {child.numbersOfPropsGoingIn}
-                                        
+                                      
                                     </div>
                                     {child.state == 'selectingPipe' && 
                                         <span className='bg-white hover:bg-gray-200 ml-2 px-1 rounded '
