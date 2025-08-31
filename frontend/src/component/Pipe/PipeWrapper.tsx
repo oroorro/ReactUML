@@ -87,7 +87,7 @@ const PipeWrapper = ({
                     } as React.CSSProperties & { [key: string]: any }}
                     onClick={(e) => { displayPropsData(pipe) }}
                 >
-                    {pipe.numbersOfProps}
+                    {pipe?.attributeContents?.length ?? 0}
 
                 </div>
             }

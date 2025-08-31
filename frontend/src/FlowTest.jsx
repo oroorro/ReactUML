@@ -66,9 +66,9 @@ let initialNodes = [
  * @returns {Array<Object>} - Array of frontend-compatible nodes
  */
 function transformBackendToFrontend(nodes, isRoot = true) {
-  console.log("nodes", nodes);
+  //console.log("nodes", nodes);
   return nodes.map(backendNode => {
-    console.log("backendNode", backendNode.uid, backendNode.pipes, backendNode.pipes[0]?.attributeContents?.length);
+    //console.log("backendNode", backendNode.uid, backendNode.pipes, backendNode.pipes[0]?.attributeContents?.length);
     // shared structure (used in root.data and in children directly)
     const transformed = {
       id: backendNode.uid,
@@ -116,7 +116,7 @@ function transformBackendToFrontend(nodes, isRoot = true) {
       };
     }
     // if not root, then return plain transformed child
-    console.log("transformed", transformed);
+    //console.log("transformed", transformed);
     return transformed;
   });
 }
@@ -137,7 +137,7 @@ function Flow() {
       console.log('Fetched nodes:', nodes);
 
       const initialNodes = transformBackendToFrontend(nodes);
-      console.log("initialNodes", initialNodes);
+      //console.log("initialNodes", initialNodes);
       setNodes(initialNodes);
     } catch (err) {
       console.error('Error fetching nodes:', err);
@@ -328,7 +328,7 @@ function Flow() {
         }],
         pipes: [{
           uid: ghostChild.pipes[0].id,
-          name: "Pipe Name",
+          name: "ghost pipe Name",
           color: foundNode.color,
           sourceNode: { uid: ghostChild.id },
           targetNode: null
@@ -562,7 +562,7 @@ function Flow() {
       if (typeof window !== 'undefined') {
         // Expose nodes state to window for E2E testing
         window.frontendNodes = nodes;
-        console.log("frontendNodes", window.frontendNodes);
+        //console.log("frontendNodes", window.frontendNodes);
       }
     }, [nodes]);
 

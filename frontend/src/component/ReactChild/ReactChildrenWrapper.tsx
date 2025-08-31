@@ -44,7 +44,6 @@ const ReactChildrenWrapper = ({
     return (
         <div className={ renderDirection == 'horizontal' ? 'flex nodeDirection flex-col' : 'flex nodeDirection '} data-id={parentId} datatype="Node">
             {reactChildren && reactChildren.map((child, index) => {
-
                 //set current Node's attribute to be currently saved filteredMutingAttribute, filteredUnMutedAttribute and filteredMutedAttribute
                 function updateNodeInArray() {
                     const nodes: Node[] = getNodes();
@@ -234,7 +233,7 @@ const ReactChildrenWrapper = ({
                                         datatype='pipe'
                                         className='bg-white hover:bg-gray-300 propsCount'
                                         style={{ width: '18px', height: '18px', position: 'relative', left: '-10px' }}>
-                                        {child.numbersOfPropsGoingIn}
+                                        {child.pipes[0]?.attributeContents?.length ?? 0}
                                       
                                     </div>
                                     {child.state == 'selectingPipe' && 

@@ -496,7 +496,7 @@ function Flow() {
   const fetchNodes = async () => {
     try {
       const nodes = await getAllNodesForUser(); // No userId needed!
-      console.log('Fetched nodes:', nodes);
+      //console.log('Fetched nodes:', nodes);
       const fetchedNodes = transformBackendToFrontend(nodes);
 
       setNodes([...fetchedNodes, ...initialNodes]);
