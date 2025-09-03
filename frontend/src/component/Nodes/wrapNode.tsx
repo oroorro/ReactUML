@@ -69,8 +69,15 @@ export default (NodeComponent: ComponentType<NodeProps>) => {
     const onMouseLeaveHandler = getMouseHandler(id, store.getState, onMouseLeave);
     const onContextMenuHandler = getMouseHandler(id, store.getState, onContextMenu);
     const onDoubleClickHandler = getMouseHandler(id, store.getState, onDoubleClick);
+
+    const { getNodes } = store.getState();
+    const nodes = getNodes();
+    
+
     const onSelectNodeHandler = (event: MouseEvent) => {
-      const { nodeDragThreshold } = store.getState();
+      const { nodeDragThreshold} = store.getState();
+      
+    
 
       if (isSelectable && (!selectNodesOnDrag || !isDraggable || nodeDragThreshold > 0)) {
         // this handler gets called within the drag start event when selectNodesOnDrag=true
@@ -121,6 +128,10 @@ export default (NodeComponent: ComponentType<NodeProps>) => {
           isShiftPressed: event.shiftKey,
         });
       }
+    };
+
+    const onMouseUpHandler = (event: MouseEvent) => {
+      console.log('onMouseUpHandler');
     };
 
     useEffect(() => {
@@ -175,6 +186,7 @@ export default (NodeComponent: ComponentType<NodeProps>) => {
       nodeId: id,
       isSelectable,
       selectNodesOnDrag,
+      nodes,
     });
 
     if (hidden) {
@@ -218,7 +230,7 @@ export default (NodeComponent: ComponentType<NodeProps>) => {
         onKeyDown={isFocusable ? onKeyDown : undefined}
         tabIndex={isFocusable ? 0 : undefined}
         role={isFocusable ? 'button' : undefined}
-       
+        onMouseUp={onMouseUpHandler}
         aria-label={ariaLabel}
       >
         <Provider value={id}>

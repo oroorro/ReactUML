@@ -1,0 +1,19 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+      // {
+      //   "type": "java",
+      //   "name": "DemoApplication",
+      //   "request": "launch",
+      //   "mainClass": "com.example.demo.DemoApplication",
+      //   "projectName": "demo"
+      // },
+      {
+        "type": "java",
+        "name": "Debug in Docker",
+        "request": "attach",
+        "hostName": "localhost",
+        "port": 5005
+      }
+    ]
+  }

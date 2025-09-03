@@ -85,10 +85,10 @@ public class NodeService {
         List<Pipe> pipes = pipeRepository.findBySourceNodeUid(node.getUid());
 
         //log pipes by looping through pipes
-        System.err.println("pipes found for given source node:" + node.getUid() + " are:");
-        for (Pipe pipe : pipes) {
-            System.err.println("pipe:" + pipe.getUid());
-        }
+        // System.err.println("pipes found for given source node:" + node.getUid() + " are:");
+        // for (Pipe pipe : pipes) {
+        //     System.err.println("pipe:" + pipe.getUid());
+        // }
         dto.pipes = pipes.stream().map(NodeMapper::toDto).toList();
 
         // Recursively build children
@@ -152,6 +152,8 @@ public class NodeService {
 
     @Transactional
     public Node editNode(Node updated, JsonNode rawNode) {
+        System.out.println("updated" +  updated.getUid());
+       
         if (updated == null || updated.getUid() == null) {
             throw new IllegalArgumentException("Updated node or UID cannot be null.");
         }

@@ -351,8 +351,9 @@ export function useBatchController() {
     }
   };
 
-  const editNode = async (node: EditNodeDto): Promise<BatchResponse | null> => {
-    console.log(`Editing NODE with UID: ${node.uid}`);
+  const editNode = async (node: EditNodeDto[]): Promise<BatchResponse | null> => {
+    // console.log(`Editing NODE with UID: ${node.map(node => node.uid).join(', ')}`);
+    console.log('Full EditNodeDto structure:', JSON.stringify(node, null, 2));
     setLoading(true);
     setError(null);
 
@@ -364,7 +365,7 @@ export function useBatchController() {
         attributeContents: [],
       },
       updated: {
-        nodes: [node],
+        nodes: node,
         pipes: [],
         attributes: [],
         attributeContents: [],
@@ -393,7 +394,6 @@ export function useBatchController() {
       }
 
       const result: BatchResponse = await response.json();
-      console.log("Response body: ", result);
       return result;
     } catch (err: any) {
       setError(err);

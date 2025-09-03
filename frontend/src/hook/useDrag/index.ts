@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { RefObject, MouseEvent } from 'react';
 import { drag } from 'd3-drag';
 import { select } from 'd3-selection';
@@ -18,6 +18,7 @@ import type {
   CoordinateExtent,
 } from '../../types';
 import { getNodesBounds } from '../../utils/graph';
+import { useBatchController } from '../../apiHook/useBatchController';
 
 export type UseDragData = { dx: number; dy: number };
 
@@ -29,6 +30,7 @@ type UseDragParams = {
   nodeId?: string;
   isSelectable?: boolean;
   selectNodesOnDrag?: boolean;
+  nodes?: Node[];
 };
 
 function wrapSelectionDragFunc(selectionFunc?: SelectionDragHandler) {
@@ -43,6 +45,7 @@ function useDrag({
   nodeId,
   isSelectable,
   selectNodesOnDrag,
+  nodes,
 }: UseDragParams) {
   const store = useStoreApi();
   const [dragging, setDragging] = useState<boolean>(false);
@@ -54,12 +57,53 @@ function useDrag({
   const dragEvent = useRef<MouseEvent | null>(null);
   const autoPanStarted = useRef(false);
   const dragStarted = useRef(false);
+  const { editNode } = useBatchController();
+  const nodesRef = useRef(nodes);
+  nodesRef.current = nodes;
+
 
   const getPointerPosition = useGetPointerPosition();
+
+  const editNodesPosition = () => {
+
+    let updatedNodes: { id: string, position: { x: number, y: number } }[] = [];
+    nodesRef.current?.forEach(node => {
+      updatedNodes.push({
+        id: node.id,
+        position: node.position
+      })
+    })
+
+    if (updatedNodes.length > 0) {
+      const nodeUpdates = updatedNodes.map(nodeData => ({
+        uid: nodeData.id,
+        positionX: Math.round(nodeData.position.x),
+        positionY: Math.round(nodeData.position.y)
+      }));
+
+
+      editNode(nodeUpdates).then(result => {
+        if (result) {
+          console.log('Successfully updated node positions in batch');
+        } else {
+          console.error('Failed to update node positions in batch');
+        }
+      }).catch(err => {
+        console.error('Error updating node positions in batch:', err);
+      });
+    }
+  }
 
   useEffect(() => {
     if (nodeRef?.current) {
       const selection = select(nodeRef.current);
+
+      // const editNodesPosition = () => {
+      //   console.log('nodes in useDrag editNodesPosition', JSON.stringify(nodes, null, 2));
+      // }
+
+      const { getNodes } = store.getState();
+      const nodesFromStore = getNodes();
 
       const updateNodes = ({ x, y }: XYPosition) => {
         const {
@@ -169,6 +213,9 @@ function useDrag({
         dragStarted.current = true;
         const onStart = nodeId ? onNodeDragStart : wrapSelectionDragFunc(onSelectionDragStart);
 
+        //console.log('selectNodesOnDrag', JSON.stringify(nodes, null, 2));
+
+
         if ((!selectNodesOnDrag || !isSelectable) && !multiSelectionActive && nodeId) {
           if (!nodeInternals.get(nodeId)?.selected) {
             // we need to reset selected nodes when selectNodesOnDrag=false
@@ -253,6 +300,12 @@ function useDrag({
             dragStarted.current = false;
             cancelAnimationFrame(autoPanId.current);
 
+            //console.log('dragging ended');
+            //log nodes using json 
+            // console.log('nodes after dragging ended', JSON.stringify(nodes, null, 2));
+            // console.log('nodes from store', JSON.stringify(nodesFromStore, null, 2));
+            editNodesPosition();
+
             if (dragItems.current) {
               const { updateNodePositions, nodeInternals, onNodeDragStop, onSelectionDragStop } = store.getState();
               const onStop = nodeId ? onNodeDragStop : wrapSelectionDragFunc(onSelectionDragStop);
@@ -296,6 +349,7 @@ function useDrag({
     nodeId,
     selectNodesOnDrag,
     getPointerPosition,
+    nodes,
   ]);
 
   return dragging;

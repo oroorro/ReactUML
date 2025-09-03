@@ -14,10 +14,12 @@ services:
     build: ./backend
     ports:
       - "8080:8080"
+      - "5005:5005" #Debugger port
     environment:
       - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/reactumlapp
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=${MYSQL_PW}
+      - JAVA_OPTS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
 
   mysql:
     image: mysql:8.0

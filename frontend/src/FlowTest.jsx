@@ -562,7 +562,7 @@ function Flow() {
       if (typeof window !== 'undefined') {
         // Expose nodes state to window for E2E testing
         window.frontendNodes = nodes;
-        //console.log("frontendNodes", window.frontendNodes);
+        //console.log("frontendNodes", JSON.stringify(window.frontendNodes, null, 2));
       }
     }, [nodes]);
 

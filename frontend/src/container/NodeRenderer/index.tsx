@@ -74,7 +74,8 @@ const NodeRenderer = (props: NodeRendererProps) => {
   }, []);
 
   return (
-    <div className="react-flow__nodes" style={containerStyle}>
+    <div className="react-flow__nodes" style={containerStyle}
+    >
       {nodes.map((node) => {
         let nodeType = node.type || 'default';
 
