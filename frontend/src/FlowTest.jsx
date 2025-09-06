@@ -128,7 +128,7 @@ function Flow() {
   const interactingIdRef = useRef(null);
   const [contextMenu, setContextMenu] = useState(null);
   const nodeId = useRef(5);
-  const { createNode, editNode, createAttribute, createPipe, createBatch, loading, error } = useBatchController();
+  const { createNode, editNode, createAttribute, createPipe, createBatch, deleteAttribute, deletePipe, deleteNode } = useBatchController();
   const { getAllNodesForUser } = useNodeApiAuth();
 
   const fetchNodes = async () => {
@@ -708,6 +708,28 @@ function Flow() {
       //filter out Attribute except deleting Attribute 
       const filtered = foundNode.attributes.filter((attrib) => attrib.id != ids[1]);
       foundNode.attributes = [...filtered];
+      deleteAttribute(ids[1]);
+
+    }else if (type == 'Pipe') {
+      const ids = contextMenu.nodeId.split('+');// ids[0] is nodeid and ids[1] is pipe id 
+      let foundNode = findNodeById(ids[0], testNode);
+      if (!foundNode) console.warn("Node couldn't be found")
+
+      //filter out Pipe except deleting Pipe 
+      const filtered = testNode[0].children.filter((node) => node.id != ids[0]);
+      testNode[0].children = [...filtered];
+      setNodes(testNode);
+      deletePipe(ids[1]);
+      deleteNode(ids[0]);
+    }else if (type == 'Node') {
+      const ids = contextMenu.nodeId.split('+');// ids[0] is nodeid and ids[1] is pipe id 
+      let foundNode = findNodeById(ids[0], testNode);
+      if (!foundNode) console.warn("Node couldn't be found")
+
+      //filter out Node except deleting Node 
+      const filtered = testNode.filter((node) => node.id != ids[0]);
+      setNodes(filtered);
+      
     }
 
     //update the nodes 
@@ -785,6 +807,10 @@ function Flow() {
   }
 
 
+  const handleDeleteObjects = (type) => {
+    console.log("handleDeleteObjects", type);
+  }
+
   return (
     <div className='Flow' style={{ width: "100vw", height: "100vh" }}
       // onClick={(e) => FlowClickHandler(e)}
@@ -806,7 +832,7 @@ function Flow() {
         >
 
           {!contextMenu.detail && <button className='create_button' onClick={() => moveToSubMenu("create")}>Create</button>}
-          {!contextMenu.detail && <button >Delete</button>}
+          {!contextMenu.detail && <button onClick={() => deleteElement('Node')}>Delete</button>}
           {!contextMenu.detail && <button onClick={() => copyNode()}>Copy</button>}
           {!contextMenu.detail && <button onClick={() => moveToSubMenu("mute-2nd")}> Mute </button>}
           {!contextMenu.detail && <button onClick={() => moveToSubMenu("renderDirection")}> Display </button>}
@@ -854,7 +880,7 @@ function Flow() {
           style={{
             backgroundColor: 'aliceblue',
             width: '50px',
-            height: '50px',
+            
             position: 'absolute',
             left: `${contextMenu.left}px`,
             top: `${contextMenu.top}px`,
@@ -865,6 +891,7 @@ function Flow() {
         >
           {!contextMenu.detail && <button datatype="contextMenu" className='pipe_mute_button' onClick={() => moveToSubMenu("mute-2nd-pipe")}>Mute</button>}
           {!contextMenu.detail && <button datatype="contextMenu" className='pipe_add_button' onClick={() => elementStateHandler('pipe', 'editing')} >add</button>}
+          {!contextMenu.detail && <button datatype="contextMenu" className='pipe_delete_button' onClick={() => deleteElement('Pipe')}>Delete</button>}
 
           {contextMenu.detail == 'mute-2nd-pipe' &&
             <div className='flex flex-col' datatype="contextMenu">

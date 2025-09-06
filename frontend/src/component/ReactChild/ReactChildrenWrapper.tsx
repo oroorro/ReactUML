@@ -232,7 +232,9 @@ const ReactChildrenWrapper = ({
                                     <div
                                         datatype='pipe'
                                         className='bg-white hover:bg-gray-300 propsCount'
-                                        style={{ width: '18px', height: '18px', position: 'relative', left: '-10px' }}>
+                                        style={{ width: '18px', height: '18px', position: 'relative', left: '-10px' }}
+                                        data-id={child.id + '+' + child.pipes[0]?.id}
+                                        >
                                         {child.pipes[0]?.attributeContents?.length ?? 0}
                                       
                                     </div>

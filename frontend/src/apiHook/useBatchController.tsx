@@ -351,6 +351,160 @@ export function useBatchController() {
     }
   };
 
+  const deleteAttribute = async (uid: string): Promise<BatchResponse | null> => {
+    console.log(`Deleting ATTRIBUTE with UID: ${uid}`);
+    setLoading(true);
+    setError(null);
+
+    const payload: BatchRequestPayload = {
+      created: {
+        nodes: [],
+        pipes: [],
+        attributes: [],
+        attributeContents: [],
+      },
+      updated: null,
+      deleted: {
+        attributeUids: [uid],
+      },
+    };
+
+    try {
+      const response = await fetch(
+        `/batch`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+          body: JSON.stringify(payload),
+        }
+      );
+
+      if (!response.ok) {
+        const message = await response.text();
+        throw new Error(`HTTP ${response.status}: ${message}`);
+      } else {
+        console.log("Response object: ", response);
+      }
+
+      const result: BatchResponse = await response.json();
+      console.log("Response body: ", result);
+      return result;
+    } catch (err: any) {
+      setError(err);
+      console.error('Delete attribute error:', err);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const deletePipe = async (uid: string): Promise<BatchResponse | null> => {
+    console.log(`Deleting PIPE with UID: ${uid}`);
+    setLoading(true);
+    setError(null);
+
+    const payload: BatchRequestPayload = {
+      created: {
+        nodes: [],
+        pipes: [],
+        attributes: [],
+        attributeContents: [],
+      },
+      updated: null,
+      deleted: {
+        pipeUids: [uid],
+      },
+    };
+
+    try {
+      const response = await fetch(
+        `/batch`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+          body: JSON.stringify(payload),
+        }
+      );
+
+      if (!response.ok) {
+        const message = await response.text();
+        throw new Error(`HTTP ${response.status}: ${message}`);
+      } else {
+        console.log("Response object: ", response);
+      }
+
+      const result: BatchResponse = await response.json();
+      console.log("Response body: ", result);
+      return result;
+    } catch (err: any) {
+      setError(err);
+      console.error('Delete pipe error:', err);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const deleteNode = async (uid: string): Promise<BatchResponse | null> => {
+    console.log(`Deleting NODE with UID: ${uid}`);
+    setLoading(true);
+    setError(null);
+
+    const payload: BatchRequestPayload = {
+      created: {
+        nodes: [],
+        pipes: [],
+        attributes: [],
+        attributeContents: [],
+      },
+      updated: null,
+      deleted: {
+        nodeUids: [uid],
+      },
+    };
+
+    try {
+      const response = await fetch(
+        `/batch`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+          body: JSON.stringify(payload),
+        }
+      );
+
+      if (!response.ok) {
+        const message = await response.text();
+        throw new Error(`HTTP ${response.status}: ${message}`);
+      } else {
+        console.log("Response object: ", response);
+      }
+
+      const result: BatchResponse = await response.json();
+      console.log("Response body: ", result);
+      return result;
+    } catch (err: any) {
+      setError(err);
+      console.error('Delete node error:', err);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
+
+
+  
   const editNode = async (node: EditNodeDto[]): Promise<BatchResponse | null> => {
     // console.log(`Editing NODE with UID: ${node.map(node => node.uid).join(', ')}`);
     console.log('Full EditNodeDto structure:', JSON.stringify(node, null, 2));
@@ -465,5 +619,5 @@ export function useBatchController() {
     }
   };
 
-  return { createNode, createAttribute, createPipe, createContentAttribute, deleteContentAttribute, editNode, createBatch, loading, error };
+  return { createNode, createAttribute, createPipe, createContentAttribute, deleteContentAttribute, deleteAttribute, deletePipe, deleteNode, editNode, createBatch, loading, error };
 }
